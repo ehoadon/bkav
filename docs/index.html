@@ -120,7 +120,11 @@
   document.getElementById('adminBtn').onclick = () => loginContainer.style.display = 'flex';
 }
 
-    function backToMain(){logout();}
+function backToMain() {
+  dashboard.style.display = 'none';
+  mainContent.style.display = 'block';
+}
+
 
     // Load stats via CountAPI
     async function fetchCount(key){ try{const r=await fetch(`https://api.countapi.xyz/get/demo/${key}`);return (await r.json()).value;}catch{return 0;} }
