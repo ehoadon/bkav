@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
-  <!-- Google Analytics (example) -->
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L0R6NS2JXM"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-L0R6NS2JXM');
-</script>
+  <title>Trang Tổng Hợp Dự Án &amp; Admin Dashboard</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0R6NS2JXM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}  
+    gtag('js', new Date());  
+    gtag('config', 'G-L0R6NS2JXM');
+  </script>
   <style>
     :root { --primary-color:#007bff; --bg-color:#f5f5f5; --card-bg:#fff; --text-color:#333; --card-shadow:rgba(0,0,0,0.1);} 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -32,7 +30,6 @@
     .card-content a,.card-content button{align-self:flex-start;text-decoration:none;background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:4px;border:none;cursor:pointer}
     .card-content a:hover,.card-content button:hover{background:#0056b3}
     footer{text-align:center;padding:15px 0;background:#fff;border-top:1px solid #ddd;font-size:.9em;color:#666}
-    /* Login Overlay hidden by default */
     #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:1000}
     .login-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px var(--card-shadow);width:300px;text-align:center}
     .login-card h2{color:var(--primary-color);margin-bottom:15px}
@@ -40,12 +37,10 @@
     .login-card button{width:100%;padding:10px;margin-top:10px;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer}
     .login-card button:hover{background:#0056b3}
     .login-card .error{color:red;font-size:.9em;margin-top:5px}
-    /* Dashboard hidden until login */
     #dashboard{display:none}
   </style>
 </head>
 <body>
-  <!-- Login Overlay -->
   <div id="login-container">
     <div class="login-card">
       <h2>Đăng nhập Admin</h2>
@@ -56,7 +51,6 @@
     </div>
   </div>
 
-  <!-- Main Content (public) -->
   <div id="main-content">
     <header>
       <h1>Trang Tổng Hợp Dự Án</h1>
@@ -125,7 +119,6 @@
     </footer>
   </div>
 
-  <!-- Admin Dashboard -->
   <section id="dashboard">
     <header>
       <h1>Admin Dashboard</h1>
@@ -155,12 +148,7 @@
     const errorDiv = document.getElementById('loginError');
     const adminBtn = document.getElementById('adminBtn');
 
-    // Show login when clicking admin
-    adminBtn.onclick = () => {
-      loginContainer.style.display = 'flex';
-    };
-
-    // On login
+    adminBtn.onclick = () => { loginContainer.style.display = 'flex'; };
     document.getElementById('loginBtn').onclick = () => {
       const u = document.getElementById('username').value.trim();
       const p = document.getElementById('password').value;
@@ -168,22 +156,11 @@
         loginContainer.style.display = 'none';
         mainContent.style.display = 'none';
         dashboard.style.display = 'block';
-      } else {
-        errorDiv.textContent = 'Sai tên hoặc mật khẩu.';
-      }
+      } else { errorDiv.textContent = 'Sai tên hoặc mật khẩu.'; }
     };
-
-    function logout() {
-      dashboard.style.display = 'none';
-      mainContent.style.display = 'block';
-    }
-    function backToMain() {
-      dashboard.style.display = 'none';
-      mainContent.style.display = 'block';
-    }
-
-    // Load GA metrics sample function
-    // You can fetch via GA Data API if needed
+    function logout(){ dashboard.style.display = 'none'; mainContent.style.display = 'block'; }
+    function backToMain(){ logout(); }
+    // GA visit count placeholder
     document.getElementById('visitCount').innerText = '...';
   </script>
 </body>
