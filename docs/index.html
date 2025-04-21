@@ -91,6 +91,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
+    let isLoggedIn = false;
     // Credentials
     const credentials={admin:'admin'};
     const loginContainer=document.getElementById('login-container');
@@ -101,28 +102,30 @@
     document.getElementById('loginBtn').onclick=()=>{
       const u=document.getElementById('username').value,
             p=document.getElementById('password').value;
-      if (credentials[u] === p) {
-  saveLogin(u);
-  updateGreeting(u);
+if (credentials[u] === p) {
+  isLoggedIn = true;
   loginContainer.style.display = 'none';
   mainContent.style.display = 'none';
   dashboard.style.display = 'block';
+  updateLoginStatus();
   loadStats();
 }
 
+
       else loginError.textContent='Sai tên hoặc mật khẩu.';
     };
-    function logout() {
-  sessionStorage.clear();
+function logout() {
+  isLoggedIn = false;
   dashboard.style.display = 'none';
   mainContent.style.display = 'block';
-  userArea.innerHTML = `<button id="adminBtn">Đăng nhập</button>`;
-  document.getElementById('adminBtn').onclick = () => loginContainer.style.display = 'flex';
+  updateLoginStatus();
 }
+
 
 function backToMain() {
   dashboard.style.display = 'none';
   mainContent.style.display = 'block';
+  updateLoginStatus(); // cập nhật lại nút đăng nhập
 }
 
 
@@ -164,6 +167,20 @@ window.addEventListener('DOMContentLoaded', () => {
     updateGreeting(username);
   }
 });
+    function updateLoginStatus() {
+  const btn = document.getElementById('adminBtn');
+  if (isLoggedIn) {
+    btn.innerHTML = '<strong>👋 Chào mừng Admin</strong>';
+    btn.onclick = () => {
+      mainContent.style.display = 'none';
+      dashboard.style.display = 'block';
+    };
+  } else {
+    btn.innerText = 'Đăng nhập';
+    btn.onclick = () => loginContainer.style.display = 'flex';
+  }
+}
+
 
   </script>
 </body>
