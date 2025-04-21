@@ -3,36 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
+  <title>Trang Tổng Hợp Dự Án &amp; Admin Dashboard</title>
   <style>
-    :root { --primary-color:#007bff; --bg-color:#f5f5f5; --card-bg:#fff; --text-color:#333; --card-shadow:rgba(0,0,0,0.1);} 
+    :root {--primary-color:#0066cc;--secondary-color:#005bb5;--bg-color:#f0f4f8;--card-bg:#fff;--text-color:#222;--shadow:rgba(0,0,0,0.1);} 
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);min-height:100vh;}
-    header{background:var(--primary-color);color:#fff;padding:20px;text-align:center}
-    header h1{font-size:2em;margin-bottom:5px}
-    header p{opacity:.9}
-    nav,#dashboard{max-width:1200px;margin:20px auto;padding:0 20px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;padding:0 20px 40px}
-    .card{background:var(--card-bg);border-radius:8px;box-shadow:0 2px 8px var(--card-shadow);display:flex;flex-direction:column;transition:transform .2s}
-    .card:hover{transform:translateY(-5px)}
-    .card img{width:100%;height:150px;object-fit:cover}
-    .card-content{padding:15px;flex:1;display:flex;flex-direction:column}
-    .card-content h3{color:var(--primary-color);margin-bottom:10px}
-    .card-content p{flex:1;margin-bottom:15px}
-    .card-content a,.card-content button{align-self:flex-start;text-decoration:none;background:var(--primary-color);color:#fff;padding:8px 12px;border-radius:4px;border:none;cursor:pointer}
-    .card-content a:hover,.card-content button:hover{background:#0056b3}
-    footer{text-align:center;padding:15px 0;background:#fff;border-top:1px solid #ddd;font-size:.9em;color:#666}
-    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:1000}
-    .login-card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 2px 8px var(--card-shadow);width:300px;text-align:center}
-    .login-card h2{color:var(--primary-color);margin-bottom:15px}
-    .login-card input{width:100%;padding:8px;margin:8px 0;border:1px solid #ccc;border-radius:4px}
-    .login-card button{width:100%;padding:10px;margin-top:10px;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer}
-    .login-card button:hover{background:#0056b3}
-    .login-card .error{color:red;font-size:.9em;margin-top:5px}
-    #dashboard{display:none}
-    table{width:100%;border-collapse:collapse;margin-top:20px}
-    th,td{border:1px solid #ddd;padding:8px;text-align:center}
-    th{background:var(--primary-color);color:#fff}
+    header{background:var(--primary-color);color:#fff;padding:1.5rem 1rem;position:relative;text-align:center;}
+    header h1{font-size:1.8rem;margin-bottom:0.2rem}
+    header p{opacity:0.85;font-size:1rem}
+    #adminBtn{position:absolute;top:1rem;right:1rem;background:var(--secondary-color);border:none;padding:0.5rem 1rem;border-radius:4px;color:#fff;cursor:pointer;transition:0.2s;}
+    #adminBtn:hover{background:#004999}
+    .container{max-width:1200px;margin:2rem auto;padding:0 1rem}
+    .grid{display:grid;grid-gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+    .card{background:var(--card-bg);border-radius:8px;box-shadow:0 2px 6px var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform 0.2s}
+    .card:hover{transform:translateY(-4px)}
+    .card img{width:100%;height:140px;object-fit:cover}
+    .card-content{padding:1rem;flex:1;display:flex;flex-direction:column}
+    .card-content h3{margin-bottom:0.75rem;color:var(--primary-color);font-size:1.1rem}
+    .card-content p{flex:1;font-size:0.95rem;margin-bottom:1rem}
+    .card-content a{align-self:flex-start;text-decoration:none;background:var(--primary-color);color:#fff;padding:0.5rem 1rem;border-radius:4px;transition:0.2s}
+    .card-content a:hover{background:var(--secondary-color)}
+    footer{text-align:center;padding:1rem 0;background:#fff;border-top:1px solid #ddd;font-size:0.9rem;color:#555;margin-top:2rem}
+    /* Dashboard styles */
+    #dashboard{display:none;padding:2rem 0}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow);text-align:center}
+    .stat-card h4{font-size:1rem;color:var(--primary-color);margin-bottom:0.5rem}
+    .stat-card p{font-size:1.6rem;font-weight:bold}
+    .chart-container{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow)}
+    /* Login overlay */
+    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:999}
+    .login-card{background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px var(--shadow);width:320px;text-align:center}
+    .login-card h2{color:var(--primary-color);margin-bottom:1rem;font-size:1.25rem}
+    .login-card input{width:100%;padding:0.5rem;margin-bottom:0.75rem;border:1px solid #ccc;border-radius:4px}
+    .login-card button{width:100%;padding:0.5rem;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer;transition:0.2s}
+    .login-card button:hover{background:var(--secondary-color)}
+    .login-card .error{color:red;font-size:0.85rem;margin-top:0.5rem}
   </style>
 </head>
 <body>
@@ -47,55 +53,72 @@
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div id="main-content">
-    <header>
-      <h1>Trang Tổng Hợp Dự Án</h1>
-      <p>Chào mừng đã đến với giao diện tổng hợp chức năng</p>
-      <div style="position:absolute;top:20px;right:20px;">
-        <button id="adminBtn">Admin</button>
-      </div>
-    </header>
+  <!-- Public Content -->
+  <header>
+    <h1>Trang Tổng Hợp Dự Án</h1>
+    <p>Nơi tập trung các công cụ &amp; tính năng</p>
+    <button id="adminBtn">Admin</button>
+  </header>
+
+  <div id="main-content" class="container">
     <nav class="grid">
-      <div class="card"><img src="images/encrypt-tool.png" alt><div class="card-content"><h3>Công Cụ Mã Hóa/Giải Mã</h3><p>Hỗ trợ JSON, XML, BEPOS với AES, Base64, Zip, Escape...</p><a href="./En-Comp.V3.html">Xem chi tiết</a></div></div>
-      <div class="card"><img src="images/task-stats.png" alt><div class="card-content"><h3>Thống Kê Công Việc</h3><p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao...</p><a href="./TyLeXuLy.html">Xem chi tiết</a></div></div>
-      <div class="card"><img src="images/notes-manager.png" alt><div class="card-content"><h3>Quản Lý Ghi Chú</h3><p>Thêm, hoàn thành, xóa ghi chú; import/export JSON.</p><a href="./Note.html">Xem chi tiết</a></div></div>
-      <div class="card"><img src="images/ticks-converter.png" alt><div class="card-content"><h3>Chuyển Đổi DateTime & Ticks</h3><p>Chuyển đổi nhanh giữa DateTime và ticks chuẩn .NET.</p><a href="./datetimetoticks_V2.html">Xem chi tiết</a></div></div>
-      <div class="card"><img src="images/xml-merge.png" alt><div class="card-content"><h3>Gộp file XML</h3><p>Gộp file XML</p><a href="./GopFileXML.html">Xem chi tiết</a></div></div>
-      <div class="card"><img src="images/invoice.png" alt><div class="card-content"><h3>Tạo hóa đơn xuất XML</h3><p>Giao diện tạo hóa đơn</p><a href="./CreateInvoice_UpdateV2.html">Xem chi tiết</a></div></div>
+      <!-- Example cards -->
+      <div class="card"><img src="images/encrypt-tool.png"><div class="card-content"><h3>Mã Hóa/Giải Mã</h3><p>Hỗ trợ JSON, XML, BEPOS với AES &amp; Base64</p><a href="./En-Comp.V3.html">Chi tiết</a></div></div>
+      <div class="card"><img src="images/task-stats.png"><div class="card-content"><h3>Thống Kê Công Việc</h3><p>Nhập số liệu, thống kê, tìm kiếm nâng cao</p><a href="./TyLeXuLy.html">Chi tiết</a></div></div>
+      <div class="card"><img src="images/notes-manager.png"><div class="card-content"><h3>Quản Lý Ghi Chú</h3><p>Thêm, hoàn thành, xóa; import/export JSON</p><a href="./Note.html">Chi tiết</a></div></div>
+      <div class="card"><img src="images/ticks-converter.png"><div class="card-content"><h3>DateTime &amp; Ticks</h3><p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p><a href="./datetimetoticks_V2.html">Chi tiết</a></div></div>
+      <div class="card"><img src="images/xml-merge.png"><div class="card-content"><h3>Gộp file XML</h3><p>Gộp nhiều file XML thành 1</p><a href="./GopFileXML.html">Chi tiết</a></div></div>
+      <div class="card"><img src="images/invoice.png"><div class="card-content"><h3>Tạo Hóa Đơn XML</h3><p>Giao diện tạo hóa đơn xuất XML</p><a href="./CreateInvoice_UpdateV2.html">Chi tiết</a></div></div>
     </nav>
-    <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
   </div>
 
   <!-- Admin Dashboard -->
-  <section id="dashboard">
-    <header><h1>Admin Dashboard</h1><p>Thống kê và quản lý</p></header>
-    <nav style="text-align:center;margin:20px 0;"><button onclick="logout()">Đăng xuất</button><button onclick="backToMain()" style="margin-left:10px;">Về Trang Chính</button></nav>
-    <div>
-      <p><strong>Lượt truy cập:</strong> <span id="visitCount">...</span></p>
-      <p><strong>Trang phổ biến:</strong></p>
-      <table><tr><th>Page</th><th>Views</th></tr><tr><td>/index.html</td><td id="cntIndex">...</td></tr><tr><td>/En-Comp.V3.html</td><td id="cntEncrypt">...</td></tr></table>
+  <div id="dashboard" class="container">
+    <nav style="text-align:right;margin-bottom:1rem;"><button onclick="backToMain()">→ Về trang chính</button> <button onclick="logout()">Đăng xuất</button></nav>
+    <div class="stats-grid">
+      <div class="stat-card"><h4>Tổng truy cập</h4><p id="cntTotal">...</p></div>
+      <div class="stat-card"><h4>Trang mã hóa</h4><p id="cntEncrypt">...</p></div>
+      <div class="stat-card"><h4>Trang thống kê</h4><p id="cntStats">...</p></div>
     </div>
-  </section>
+    <div class="chart-container">
+      <canvas id="pageChart" height="100"></canvas>
+    </div>
+  </div>
 
+  <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // Demo static counter via CountAPI
-    function getCount(key, elId) {
-      fetch(`https://api.countapi.xyz/get/demo/${key}`)
-        .then(res=>res.json())
-        .then(data=> document.getElementById(elId).innerText = data.value)
-        .catch(()=> document.getElementById(elId).innerText = '0');
-    }
-    document.getElementById('adminBtn').onclick = ()=> document.getElementById('login-container').style.display='flex';
-    document.getElementById('loginBtn').onclick = ()=>{
-      const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value;
-      if(u==='admin'&&p==='admin'){ document.getElementById('login-container').style.display='none';document.getElementById('main-content').style.display='none';document.getElementById('dashboard').style.display='block'; getCount('index','cntIndex'); getCount('encrypt','cntEncrypt'); }
-      else document.getElementById('loginError').innerText='Sai tên hoặc mật khẩu.';
+    // Credentials
+    const credentials={admin:'admin'};
+    const loginContainer=document.getElementById('login-container');
+    const mainContent=document.getElementById('main-content');
+    const dashboard=document.getElementById('dashboard');
+    const loginError=document.getElementById('loginError');
+    document.getElementById('adminBtn').onclick=()=>loginContainer.style.display='flex';
+    document.getElementById('loginBtn').onclick=()=>{
+      const u=document.getElementById('username').value,
+            p=document.getElementById('password').value;
+      if(credentials[u]===p){ loginContainer.style.display='none'; mainContent.style.display='none'; dashboard.style.display='block'; loadStats(); }
+      else loginError.textContent='Sai tên hoặc mật khẩu.';
     };
-    function logout(){document.getElementById('dashboard').style.display='none';document.getElementById('main-content').style.display='block';}
+    function logout(){dashboard.style.display='none'; mainContent.style.display='block';}
     function backToMain(){logout();}
-    // Initialize CountAPI keys if not exists (optional)
-    ['index','encrypt'].forEach(key=> fetch(`https://api.countapi.xyz/create?namespace=demo&key=${key}&value=0&enable=true`));
+
+    // Load stats via CountAPI
+    async function fetchCount(key){ try{const r=await fetch(`https://api.countapi.xyz/get/demo/${key}`);return (await r.json()).value;}catch{return 0;} }
+    async function loadStats(){
+      const total=await fetchCount('index');
+      const enc=await fetchCount('encrypt');
+      const stats=await fetchCount('stats');
+      document.getElementById('cntTotal').innerText=total;
+      document.getElementById('cntEncrypt').innerText=enc;
+      document.getElementById('cntStats').innerText=stats;
+      // Chart
+      new Chart(document.getElementById('pageChart'),{type:'bar',data:{labels:['Homepage','Encrypt','Stats'],datasets:[{label:'Views',data:[total,enc,stats]}]},options:{scales:{y:{beginAtZero:true}}}});
+    }
+    // Initialize CountAPI keys
+    ['index','encrypt','stats'].forEach(k=>fetch(`https://api.countapi.xyz/create?namespace=demo&key=${k}&value=0&enable=true`));
   </script>
 </body>
 </html>
