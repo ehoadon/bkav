@@ -112,7 +112,14 @@
 
       else loginError.textContent='Sai tên hoặc mật khẩu.';
     };
-    function logout(){dashboard.style.display='none'; mainContent.style.display='block';}
+    function logout() {
+  sessionStorage.clear();
+  dashboard.style.display = 'none';
+  mainContent.style.display = 'block';
+  userArea.innerHTML = `<button id="adminBtn">Đăng nhập</button>`;
+  document.getElementById('adminBtn').onclick = () => loginContainer.style.display = 'flex';
+}
+
     function backToMain(){logout();}
 
     // Load stats via CountAPI
