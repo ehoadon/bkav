@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Xuất Hóa Đơn - Phần mềm kế toán</title>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --accent-color: #e74c3c;
+      --text-color: #2c3e50;
+      --background-color: #f4f4f4;
+      --card-bg: #ffffff;
+      --border-color: #dfe4ea;
+      --header-gradient: linear-gradient(135deg, #2c3e50, #34495e);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+    .header {
+      background: var(--header-gradient);
+      padding: 30px;
+      text-align: center;
+      color: #fff;
+      font-size: 2em;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-bottom: 30px;
+      font-size: 1.8em;
+      text-align: center;
+      color: var(--primary-color);
+    }
+    fieldset {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      background: #fafafa;
+    }
+    fieldset legend {
+      padding: 0 10px;
+      font-size: 1.2em;
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+    .top-section {
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .column {
+      flex: 1;
+      min-width: 300px;
+    }
+    .form-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      width: 220px;
+      font-weight: 500;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 8px rgba(44, 62, 80, 0.2);
+    }
+    .btn {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 500;
+      transition: background-color 0.3s;
+      margin-top: 15px;
+    }
+    .btn:hover {
+      background: #1a242f;
+    }
+    .goods-table-container {
+      margin-top: 30px;
+      max-height: 350px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+    .goods-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .goods-table thead {
+      background: var(--background-color);
+    }
+    .goods-table th,
+    .goods-table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+    .goods-table th {
+      font-weight: 600;
+      background: #f1f1f1;
+    }
+    /* Định nghĩa chiều rộng cột */
+    .col-itemName { width: 20%; }
+    .col-unitName { width: 12%; }
+    .col-qty { width: 8%; }
+    .col-price { width: 12%; }
+    .col-amount { width: 18%; }
+    .col-taxRateID { width: 10%; }
+    .col-taxAmount { width: 10%; }
+    .col-discount { width: 8%; }
+    .col-action { width: 10%; }
+    .goods-table input[type="text"],
+    .goods-table input[type="number"] {
+      width: 60%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .goods-table input[type="text"]:focus,
+    .goods-table input[type="number"]:focus {
+      width: 100%;
+      border-color: var(--primary-color);
+    }
+    .totals {
+      margin-top: 20px;
+      text-align: right;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+    .totals div {
+      margin-bottom: 8px;
+    }
+    .hidden { display: none; }
+    .error-message {
+      color: var(--accent-color);
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+    /* Style cho các trường UserDefine */
+    .userDefineField, .userDefineDetailsField {
+      margin-bottom: 8px;
+    }
+    @media (max-width: 768px) {
+      .top-section {
+        flex-direction: column;
+      }
+      .form-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-group label {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Phần Mềm Kế Toán</div>
+  <div class="container">
+    <h1>Xuất Hóa Đơn</h1>
+    <form id="invoiceForm">
+      <!-- Phần trên: 2 cột -->
+      <div class="top-section">
+        <!-- Cột trái: Thông Tin Hóa Đơn -->
+        <div class="column">
+          <fieldset>
+            <legend>Thông Tin Hóa Đơn</legend>
+            <!-- invoiceTypeID: 1 = Hóa đơn GTGT, 2 = Hóa đơn bán hàng, 5 = PXK kiêm VC nội bộ -->
+            <div class="form-group">
+              <label for="invoiceTypeID">Loại Hóa Đơn:</label>
+              <select id="invoiceTypeID">
+                <option value="1">Hóa đơn GTGT</option>
+                <option value="2">Hóa đơn bán hàng</option>
+                <option value="5">PXK kiêm VC nội bộ</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="invoiceDate">Ngày Hóa Đơn:</label>
+              <input type="date" id="invoiceDate" value="">
+            </div>
+            <!-- Ẩn SellerTaxCode -->
+            <input type="hidden" id="sellerTaxCode" value="8620453903">
+            <div class="form-group">
+              <label for="currencyID">Loại Tiền:</label>
+              <select id="currencyID">
+                <option value="VND">VND</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="CNY">CNY</option>
+                <option value="JPY">JPY</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="exchangeRate">Tỷ Giá:</label>
+              <input type="number" id="exchangeRate" value="1">
+            </div>
+            <div class="form-group">
+              <label for="invoiceAction">Nghiệp vụ:</label>
+              <select id="invoiceAction">
+                <option value="1">Tạo hóa đơn mới</option>
+                <option value="2">Tạo hóa đơn thay thế</option>
+                <option value="3">Tạo hóa đơn điều chỉnh</option>
+                <option value="4">Hủy hóa đơn</option>
+                <option value="7">Cập nhật thông tin hóa đơn</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="inputInvoiceForm">Mẫu số:</label>
+              <input type="text" id="inputInvoiceForm" value="1">
+            </div>
+            <div class="form-group">
+              <label for="invoiceSerial">Ký hiệu:</label>
+              <input type="text" id="invoiceSerial" value="C25TCB">
+            </div>
+            <div class="form-group">
+              <label for="invoiceNo">Số hóa đơn:</label>
+              <input type="text" id="invoiceNo" value="">
+            </div>
+            <div class="form-group">
+              <label for="invoiceStatusID">Trạng thái:</label>
+              <input type="text" id="invoiceStatusID" value="1">
+            </div>
+            <input type="hidden" id="originalInvoiceIdentify" value="">
+          </fieldset>
+        </div>
+        <!-- Cột phải: Thông Tin Người Mua -->
+        <div class="column">
+          <fieldset>
+            <legend>Thông Tin Người Mua</legend>
+            <div class="form-group">
+              <label for="buyerName">Tên Người Mua:</label>
+              <input type="text" id="buyerName" value="KH lẻ">
+            </div>
+            <div class="form-group">
+              <label for="buyerTaxCode">Mã Số Thuế:</label>
+              <input type="text" id="buyerTaxCode" value="">
+            </div>
+            <div class="form-group">
+              <label for="buyerUnitName">Tên Đơn Vị:</label>
+              <input type="text" id="buyerUnitName" value="">
+            </div>
+            <div class="form-group">
+              <label for="buyerAddress">Địa Chỉ:</label>
+              <input type="text" id="buyerAddress" value="">
+            </div>
+            <div class="form-group">
+              <label for="buyerBankAccount">Số Tài Khoản:</label>
+              <input type="text" id="buyerBankAccount" value="">
+            </div>
+            <div class="form-group">
+              <label for="payMethodID">Hình Thức Thanh Toán:</label>
+              <select id="payMethodID">
+                <option value="1">Tiền mặt</option>
+                <option value="2">Chuyển khoản</option>
+                <option value="3">Tiền mặt + Chuyển khoản</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="receiveTypeID">Hình Thức Nhận Hóa Đơn:</label>
+              <select id="receiveTypeID">
+                <option value="1">Email</option>
+                <option value="2">SMS</option>
+                <option value="3">Email & SMS</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="note">Ghi Chú:</label>
+              <input type="text" id="note" value="">
+            </div>
+            <div class="form-group">
+              <label for="billCode">Bill code:</label>
+              <input type="text" id="billCode" value="">
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <!-- Fieldset cho nhập liệu tùy chỉnh UserDefine -->
+      <fieldset>
+        <legend>Thông Tin Bổ Sung (UserDefine)</legend>
+        <div id="userDefineContainer">
+          <!-- Các trường tùy chỉnh sẽ được thêm vào đây -->
+        </div>
+        <button type="button" class="btn" onclick="addUserDefineField()">+ Thêm trường UserDefine</button>
+      </fieldset>
+
+      <!-- Fieldset cho nhập liệu tùy chỉnh UserDefineDetails -->
+      <fieldset>
+        <legend>Thông Tin Bổ Sung Chi Tiết (UserDefineDetails)</legend>
+        <div id="userDefineDetailsContainer">
+          <!-- Các trường tùy chỉnh sẽ được thêm vào đây -->
+        </div>
+        <button type="button" class="btn" onclick="addUserDefineDetailsField()">+ Thêm trường UserDefineDetails</button>
+      </fieldset>
+
+      <!-- Phần Bảng Hàng Hóa -->
+      <fieldset>
+        <legend>Thông Tin Hàng Hóa</legend>
+        <button type="button" class="btn" onclick="addGoodsRow()">+ Thêm Mặt Hàng</button>
+        <div class="goods-table-container">
+          <table class="goods-table">
+            <thead>
+              <tr>
+                <th class="col-itemName">Tên Mặt Hàng</th>
+                <th class="col-unitName">Đơn Vị Tính</th>
+                <th class="col-qty">Số lượng</th>
+                <th class="col-price">Đơn Giá</th>
+                <th class="col-amount">Thành Tiền</th>
+                <th class="col-taxRateID">Thuế Suất</th>
+                <th class="col-taxAmount">Tiền Thuế</th>
+                <th class="col-discount">Giảm giá</th>
+                <th class="col-action">Chức năng</th>
+              </tr>
+            </thead>
+            <tbody id="goodsRows">
+              <!-- Dòng hàng hóa sẽ được thêm ở đây -->
+            </tbody>
+          </table>
+        </div>
+        <div class="totals">
+          <div>Tổng tiền hàng: <span id="totalPreTax">0</span></div>
+          <div>Tiền thuế: <span id="totalTax">0</span></div>
+          <div>Tổng thanh toán: <span id="totalAfterTax">0</span></div>
+        </div>
+      </fieldset>
+
+      <!-- Phần File Đính Kèm (Ẩn mặc định) -->
+      <fieldset>
+        <legend>File Đính Kèm</legend>
+        <div class="form-group">
+          <label for="toggleFileAttachment">Đính kèm file?</label>
+          <input type="checkbox" id="toggleFileAttachment">
+        </div>
+        <div id="fileAttachmentSection" class="hidden">
+          <div class="form-group">
+            <label for="fileName">FileName:</label>
+            <input type="text" id="fileName" value="">
+          </div>
+          <div class="form-group">
+            <label for="fileExtension">FileExtension:</label>
+            <input type="text" id="fileExtension" value="">
+          </div>
+          <div class="form-group">
+            <label for="fileContent">FileContent:</label>
+            <textarea id="fileContent" rows="4"></textarea>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Ẩn PartnerInvoiceID -->
+      <input type="hidden" id="partnerInvoiceID" value="0">
+      <button type="button" class="btn" onclick="exportInvoice()">Xuất Hóa Đơn</button>
+    </form>
+  </div>
+
+  <!-- Template cho một dòng hàng hóa -->
+  <template id="goodsRowTemplate">
+    <tr class="goods-row">
+      <td>
+        <input type="text" class="itemName" placeholder="Tên mặt hàng">
+      </td>
+      <td>
+        <input type="text" class="unitName" placeholder="Đơn vị tính">
+      </td>
+      <td>
+        <input type="number" class="qty" placeholder="SL" value="">
+      </td>
+      <td>
+        <input type="number" class="price" placeholder="Đơn giá" value="">
+      </td>
+      <td>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <input type="number" class="amount" placeholder="Thành tiền" value="">
+          <label style="font-size: 0.85em; margin-top: 5px;">
+            <input type="checkbox" class="autoAmount" checked> Tự tính
+          </label>
+        </div>
+      </td>
+      <td>
+        <select class="taxRateID">
+          <option value="1">0%</option>
+          <option value="2">5%</option>
+          <option value="3">10%</option>
+          <option value="4">KCT</option>
+          <option value="5">KKKNT</option>
+          <option value="6">5.26%</option>
+          <option value="9">8%</option>
+        </select>
+        <input type="number" class="taxRate" value="0" hidden>
+      </td>
+      <td>
+        <input type="number" class="taxAmount" placeholder="Thuế" value="0" readonly>
+      </td>
+      <td>
+        <!-- Khi tick giảm giá, checkbox sẽ trả về true -->
+        <input type="checkbox" class="isDiscount">
+      </td>
+      <td>
+        <button type="button" class="btn" onclick="removeGoodsRow(this)">Xóa</button>
+      </td>
+    </tr>
+  </template>
+
+  <script>
+    // Mapping định nghĩa cho invoiceTypeID
+    const invoiceTypeMapping = {
+      "1": "Hóa đơn GTGT",
+      "2": "Hóa đơn bán hàng",
+      "5": "PXK kiêm VC nội bộ"
+    };
+
+    // Mapping cho thuế suất
+    const taxRateMapping = {
+      "1": 0,
+      "2": 5,
+      "3": 10,
+      "4": 0,
+      "5": 0,
+      "6": 5.26,
+      "9": 8
+    };
+
+    function addGoodsRow() {
+      const tpl = document.getElementById('goodsRowTemplate');
+      const clone = tpl.content.cloneNode(true);
+      document.getElementById('goodsRows').appendChild(clone);
+      updateTotals();
+    }
+
+    function removeGoodsRow(btn) {
+      const row = btn.closest('.goods-row');
+      row.remove();
+      updateTotals();
+    }
+
+    // Lắng nghe sự thay đổi cho thuế suất và checkbox giảm giá
+    document.addEventListener('change', e => {
+      if (e.target.classList.contains('taxRateID')) {
+        const row = e.target.closest('.goods-row');
+        row.querySelector('.taxRate').value = taxRateMapping[e.target.value] || 0;
+        calculateRow(row);
+      }
+      // Khi tick checkbox giảm giá, gọi lại hàm tính toán để set thành tiền về 0
+      if (e.target.classList.contains('isDiscount')) {
+        const row = e.target.closest('.goods-row');
+        calculateRow(row);
+      }
+    });
+
+    document.getElementById('goodsRows').addEventListener('input', e => {
+      const row = e.target.closest('.goods-row');
+      if (row) calculateRow(row);
+    });
+
+    function calculateRow(row) {
+      const qty = parseFloat(row.querySelector('.qty').value) || 0;
+      const price = parseFloat(row.querySelector('.price').value) || 0;
+      const auto = row.querySelector('.autoAmount').checked;
+      const isDiscount = row.querySelector('.isDiscount').checked;
+      const amountInput = row.querySelector('.amount');
+
+      let base = qty * price;
+      if (auto) {
+        // Nếu tick giảm giá, tự động set thành tiền = 0
+        amountInput.value = isDiscount ? 0 : base.toFixed(2);
+      }
+      let finalAmount = parseFloat(amountInput.value) || 0;
+      if (isDiscount) {
+        finalAmount = 0;
+        amountInput.value = 0;
+      }
+
+      const taxRate = parseFloat(row.querySelector('.taxRate').value) || 0;
+      const taxRateID = row.querySelector('.taxRateID').value;
+      let taxAmount = 0;
+      if (taxRateID !== "4" && taxRateID !== "5") {
+        taxAmount = Math.abs(finalAmount) * (taxRate / 100);
+      }
+      row.querySelector('.taxAmount').value = taxAmount.toFixed(2);
+      updateTotals();
+    }
+
+    function updateTotals() {
+      let totalPreTax = 0;
+      let totalTax = 0;
+      document.querySelectorAll('.goods-row').forEach(row => {
+        const amt = Math.abs(parseFloat(row.querySelector('.amount').value) || 0);
+        const tax = Math.abs(parseFloat(row.querySelector('.taxAmount').value) || 0);
+        totalPreTax += amt;
+        totalTax += tax;
+      });
+      const totalAfterTax = totalPreTax + totalTax;
+      document.getElementById('totalPreTax').textContent = totalPreTax.toFixed(2);
+      document.getElementById('totalTax').textContent = totalTax.toFixed(2);
+      document.getElementById('totalAfterTax').textContent = totalAfterTax.toFixed(2);
+    }
+
+    document.getElementById('toggleFileAttachment').addEventListener('change', function() {
+      const sec = document.getElementById('fileAttachmentSection');
+      sec.classList.toggle('hidden', !this.checked);
+    });
+
+    ///////////////// PHẦN THÊM TRƯỜNG TÙY CHỈNH ///////////////////
+    function addUserDefineField() {
+      const container = document.getElementById('userDefineContainer');
+      const div = document.createElement('div');
+      div.className = "userDefineField";
+      div.innerHTML = '<input type="text" placeholder="Tên trường" class="ud-key" style="margin-right: 5px;">: <input type="text" placeholder="Giá trị" class="ud-value" style="margin-right: 5px;"> <button type="button" onclick="removeField(this)" class="btn">Xóa</button>';
+      container.appendChild(div);
+    }
+
+    function addUserDefineDetailsField() {
+      const container = document.getElementById('userDefineDetailsContainer');
+      const div = document.createElement('div');
+      div.className = "userDefineDetailsField";
+      div.innerHTML = '<input type="text" placeholder="Tên trường" class="ud-key" style="margin-right: 5px;">: <input type="text" placeholder="Giá trị" class="ud-value" style="margin-right: 5px;"> <button type="button" onclick="removeField(this)" class="btn">Xóa</button>';
+      container.appendChild(div);
+    }
+
+    function removeField(btn) {
+      btn.parentNode.remove();
+    }
+
+    function getCustomJSON(containerId) {
+      const container = document.getElementById(containerId);
+      const keys = container.querySelectorAll('.ud-key');
+      const values = container.querySelectorAll('.ud-value');
+      const obj = {};
+      keys.forEach((keyInput, index) => {
+        const key = keyInput.value.trim();
+        const value = values[index].value.trim();
+        if(key) {
+          obj[key] = value;
+        }
+      });
+      return JSON.stringify(obj);
+    }
+
+    ///////////////// PHẦN VALIDATE HÓA ĐƠN ///////////////////
+    function displayError(inputId, message) {
+      let errorElement = document.getElementById("error-" + inputId);
+      if (!errorElement) {
+        const inputElement = document.getElementById(inputId);
+        errorElement = document.createElement("div");
+        errorElement.id = "error-" + inputId;
+        errorElement.className = "error-message";
+        inputElement.parentNode.insertBefore(errorElement, inputElement.nextSibling);
+      }
+      errorElement.textContent = message;
+    }
+    function clearError(inputId) {
+      let errorElement = document.getElementById("error-" + inputId);
+      if (errorElement) {
+        errorElement.textContent = "";
+      }
+    }
+    function displayErrorElement(inputElement, message) {
+      let errorElement = inputElement.nextElementSibling;
+      if (!errorElement || !errorElement.classList.contains("error-message")) {
+        errorElement = document.createElement("div");
+        errorElement.className = "error-message";
+        inputElement.parentNode.insertBefore(errorElement, inputElement.nextSibling);
+      }
+      errorElement.textContent = message;
+    }
+    function clearErrorElement(inputElement) {
+      let errorElement = inputElement.nextElementSibling;
+      if (errorElement && errorElement.classList.contains("error-message")) {
+        errorElement.textContent = "";
+      }
+    }
+    function validateInvoice() {
+      let valid = true;
+      const invoiceFields = [
+        { id: "invoiceTypeID", name: "Loại Hóa Đơn" },
+        { id: "invoiceDate", name: "Ngày Hóa Đơn" },
+        { id: "currencyID", name: "Loại Tiền" },
+        { id: "exchangeRate", name: "Tỷ Giá" },
+        { id: "invoiceAction", name: "Nghiệp vụ" },
+        { id: "inputInvoiceForm", name: "Mẫu số" },
+        { id: "invoiceSerial", name: "Ký hiệu" },
+        { id: "invoiceNo", name: "Số hóa đơn" },
+        { id: "invoiceStatusID", name: "Trạng thái" }
+      ];
+      invoiceFields.forEach(field => {
+        clearError(field.id);
+        const value = document.getElementById(field.id).value.trim();
+        if (!value) {
+          displayError(field.id, "Vui lòng nhập trường này.");
+          valid = false;
+        }
+      });
+      clearError("buyerName");
+      clearError("buyerTaxCode");
+      const buyerName = document.getElementById("buyerName").value.trim();
+      const buyerTaxCode = document.getElementById("buyerTaxCode").value.trim();
+      if (!buyerName && !buyerTaxCode) {
+        displayError("buyerName", "Vui lòng nhập tên người mua hoặc Mã số thuế.");
+        displayError("buyerTaxCode", "Vui lòng nhập tên người mua hoặc Mã số thuế.");
+        valid = false;
+      }
+      if (buyerTaxCode) {
+        clearError("buyerUnitName");
+        clearError("buyerAddress");
+        const buyerUnitName = document.getElementById("buyerUnitName").value.trim();
+        const buyerAddress = document.getElementById("buyerAddress").value.trim();
+        if (!buyerUnitName) {
+          displayError("buyerUnitName", "Vui lòng nhập Tên Đơn Vị.");
+          valid = false;
+        }
+        if (!buyerAddress) {
+          displayError("buyerAddress", "Vui lòng nhập Địa chỉ.");
+          valid = false;
+        }
+      }
+      const paymentFields = [
+        { id: "payMethodID", name: "Hình Thức Thanh Toán" },
+        { id: "receiveTypeID", name: "Hình Thức Nhận Hóa Đơn" }
+      ];
+      paymentFields.forEach(field => {
+        clearError(field.id);
+        const value = document.getElementById(field.id).value.trim();
+        if (!value) {
+          displayError(field.id, "Vui lòng nhập trường này.");
+          valid = false;
+        }
+      });
+      const goodsRows = document.querySelectorAll('.goods-row');
+      if (goodsRows.length === 0) {
+        alert("Vui lòng thêm ít nhất một mặt hàng.");
+        valid = false;
+      } else {
+        goodsRows.forEach((row) => {
+          const itemNameEl = row.querySelector('.itemName');
+          const qtyEl = row.querySelector('.qty');
+          const priceEl = row.querySelector('.price');
+          const amountEl = row.querySelector('.amount');
+          const taxAmountEl = row.querySelector('.taxAmount');
+          clearErrorElement(itemNameEl);
+          clearErrorElement(qtyEl);
+          clearErrorElement(priceEl);
+          clearErrorElement(amountEl);
+          clearErrorElement(taxAmountEl);
+          if (!itemNameEl.value.trim()) {
+            displayErrorElement(itemNameEl, "Nhập tên mặt hàng.");
+            valid = false;
+          }
+          if (!qtyEl.value.trim()) {
+            displayErrorElement(qtyEl, "Nhập số lượng.");
+            valid = false;
+          }
+          if (!priceEl.value.trim()) {
+            displayErrorElement(priceEl, "Nhập đơn giá.");
+            valid = false;
+          }
+          if (!amountEl.value.trim()) {
+            displayErrorElement(amountEl, "Nhập thành tiền.");
+            valid = false;
+          }
+          if (!taxAmountEl.value.trim()) {
+            displayErrorElement(taxAmountEl, "Nhập thuế tiền.");
+            valid = false;
+          }
+        });
+      }
+      return valid;
+    }
+    function exportInvoice() {
+      if (!validateInvoice()) {
+        return;
+      }
+      const invoiceTypeID = document.getElementById("invoiceTypeID").value;
+      const invoiceDate = document.getElementById("invoiceDate").value;
+      const sellerTaxCode = document.getElementById("sellerTaxCode").value;
+      const payMethodID = document.getElementById("payMethodID").value;
+      const receiveTypeID = document.getElementById("receiveTypeID").value;
+      const note = document.getElementById("note").value;
+      const billCode = document.getElementById("billCode").value;
+      const currencyID = document.getElementById("currencyID").value;
+      const exchangeRate = document.getElementById("exchangeRate").value;
+      const invoiceAction = document.getElementById("invoiceAction").value;
+      const invoiceForm = document.getElementById("inputInvoiceForm").value;
+      const invoiceSerial = document.getElementById("invoiceSerial").value;
+      const invoiceNo = document.getElementById("invoiceNo").value;
+      const invoiceStatusID = document.getElementById("invoiceStatusID").value;
+      // Lấy dữ liệu UserDefine (JSON)
+      const userDefine = getCustomJSON("userDefineContainer");
+      const originalInvoiceIdentify = document.getElementById("originalInvoiceIdentify").value;
+      const buyerName = document.getElementById("buyerName").value;
+      const buyerTaxCode = document.getElementById("buyerTaxCode").value;
+      const buyerUnitName = document.getElementById("buyerUnitName").value;
+      const buyerAddress = document.getElementById("buyerAddress").value;
+      const buyerBankAccount = document.getElementById("buyerBankAccount").value;
+      const goodsRows = document.querySelectorAll('.goods-row');
+      let goodsXML = '';
+      // Lấy dữ liệu UserDefineDetails (JSON) dùng cho mỗi mặt hàng
+      const userDefineDetails = getCustomJSON("userDefineDetailsContainer");
+      goodsRows.forEach(row => {
+        const itemName = row.querySelector('.itemName').value;
+        const unitName = row.querySelector('.unitName').value;
+        const qty = row.querySelector('.qty').value;
+        const price = row.querySelector('.price').value;
+        const amount = Math.abs(parseFloat(row.querySelector('.amount').value) || 0).toFixed(2);
+        const taxRateID = row.querySelector('.taxRateID').value;
+        const taxRate = row.querySelector('.taxRate').value;
+        const taxAmount = Math.abs(parseFloat(row.querySelector('.taxAmount').value) || 0).toFixed(2);
+        const isDiscount = row.querySelector('.isDiscount').checked;
+        goodsXML += '      <InvoiceDetailsWS>\n';
+        goodsXML += '        <ItemName>' + itemName + '</ItemName>\n';
+        goodsXML += '        <UnitName>' + unitName + '</UnitName>\n';
+        goodsXML += '        <Qty>' + qty + '</Qty>\n';
+        goodsXML += '        <Price>' + price + '</Price>\n';
+        goodsXML += '        <Amount>' + amount + '</Amount>\n';
+        goodsXML += '        <TaxRateID>' + taxRateID + '</TaxRateID>\n';
+        goodsXML += '        <TaxRate>' + taxRate + '</TaxRate>\n';
+        goodsXML += '        <TaxAmount>' + taxAmount + '</TaxAmount>\n';
+        goodsXML += '        <IsDiscount>' + isDiscount + '</IsDiscount>\n';
+        // Gắn dữ liệu UserDefineDetails (JSON) cho mặt hàng
+        goodsXML += '        <UserDefineDetails>' + userDefineDetails + '</UserDefineDetails>\n';
+        goodsXML += '        <ItemTypeID>0</ItemTypeID>\n';
+        goodsXML += '      </InvoiceDetailsWS>\n';
+      });
+      let fileXML = '';
+      if (document.getElementById("toggleFileAttachment").checked) {
+        const fileName = document.getElementById("fileName").value;
+        const fileExtension = document.getElementById("fileExtension").value;
+        const fileContent = document.getElementById("fileContent").value;
+        fileXML += '    <ListInvoiceAttachFileWS>\n';
+        fileXML += '      <InvoiceAttachFileWS>\n';
+        fileXML += '        <FileName>' + fileName + '</FileName>\n';
+        fileXML += '        <FileExtension>' + fileExtension + '</FileExtension>\n';
+        fileXML += '        <FileContent>' + fileContent + '</FileContent>\n';
+        fileXML += '      </InvoiceAttachFileWS>\n';
+        fileXML += '    </ListInvoiceAttachFileWS>\n';
+      } else {
+        fileXML += '    <ListInvoiceAttachFileWS>\n';
+        fileXML += '      <InvoiceAttachFileWS>\n';
+        fileXML += '        <FileName></FileName>\n';
+        fileXML += '        <FileExtension></FileExtension>\n';
+        fileXML += '        <FileContent></FileContent>\n';
+        fileXML += '      </InvoiceAttachFileWS>\n';
+        fileXML += '    </ListInvoiceAttachFileWS>\n';
+      }
+      const partnerInvoiceID = document.getElementById("partnerInvoiceID").value;
+      const partnerInvoiceStringID = "VNF" + Date.now();
+      let xmlContent = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+      xmlContent += '<ArrayOfInvoiceDataWS>\n';
+      xmlContent += '  <InvoiceDataWS>\n';
+      xmlContent += '    <Invoice>\n';
+      xmlContent += '      <InvoiceTypeID>' + invoiceTypeID + '</InvoiceTypeID>\n';
+      // Thêm tag InvoiceTypeName với định nghĩa tương ứng
+      xmlContent += '      <InvoiceTypeName>' + invoiceTypeMapping[invoiceTypeID] + '</InvoiceTypeName>\n';
+      xmlContent += '      <InvoiceDate>' + invoiceDate + '</InvoiceDate>\n';
+      xmlContent += '      <SellerTaxCode>' + sellerTaxCode + '</SellerTaxCode>\n';
+      xmlContent += '      <BuyerName>' + buyerName + '</BuyerName>\n';
+      xmlContent += '      <BuyerTaxCode>' + buyerTaxCode + '</BuyerTaxCode>\n';
+      xmlContent += '      <BuyerUnitName>' + buyerUnitName + '</BuyerUnitName>\n';
+      xmlContent += '      <BuyerAddress>' + buyerAddress + '</BuyerAddress>\n';
+      xmlContent += '      <BuyerBankAccount>' + buyerBankAccount + '</BuyerBankAccount>\n';
+      xmlContent += '      <PayMethodID>' + payMethodID + '</PayMethodID>\n';
+      xmlContent += '      <ReceiveTypeID>' + receiveTypeID + '</ReceiveTypeID>\n';
+      xmlContent += '      <ReceiverEmail></ReceiverEmail>\n';
+      xmlContent += '      <ReceiverMobile></ReceiverMobile>\n';
+      xmlContent += '      <ReceiverAddress></ReceiverAddress>\n';
+      xmlContent += '      <ReceiverName></ReceiverName>\n';
+      xmlContent += '      <Note>' + note + '</Note>\n';
+      xmlContent += '      <BillCode>' + billCode + '</BillCode>\n';
+      xmlContent += '      <CurrencyID>' + currencyID + '</CurrencyID>\n';
+      xmlContent += '      <ExchangeRate>' + exchangeRate + '</ExchangeRate>\n';
+      xmlContent += '      <InvoiceAction>' + invoiceAction + '</InvoiceAction>\n';
+      xmlContent += '      <InvoiceForm>' + invoiceForm + '</InvoiceForm>\n';
+      xmlContent += '      <InvoiceSerial>' + invoiceSerial + '</InvoiceSerial>\n';
+      xmlContent += '      <InvoiceNo>' + invoiceNo + '</InvoiceNo>\n';
+      xmlContent += '      <InvoiceStatusID>' + invoiceStatusID + '</InvoiceStatusID>\n';
+      xmlContent += '      <UserDefine>' + userDefine + '</UserDefine>\n';
+      xmlContent += '      <OriginalInvoiceIdentify>' + originalInvoiceIdentify + '</OriginalInvoiceIdentify>\n';
+      xmlContent += '    </Invoice>\n';
+      xmlContent += '    <ListInvoiceDetailsWS>\n';
+      xmlContent += goodsXML;
+      xmlContent += '    </ListInvoiceDetailsWS>\n';
+      xmlContent += fileXML;
+      xmlContent += '    <PartnerInvoiceID>' + partnerInvoiceID + '</PartnerInvoiceID>\n';
+      xmlContent += '    <PartnerInvoiceStringID>' + partnerInvoiceStringID + '</PartnerInvoiceStringID>\n';
+      xmlContent += '  </InvoiceDataWS>\n';
+      xmlContent += '</ArrayOfInvoiceDataWS>\n';
+
+      const blob = new Blob([xmlContent], { type: 'application/xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'invoice_' + partnerInvoiceStringID + '.xml';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý công việc</title>
+ <!--    <style type="text/css">
+        /* Reset mặc định */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 700px;
+}
+
+h1 {
+    text-align: center;
+    color: #388e3c;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.action-buttons button {
+    background-color: #388e3c;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    flex: 1;
+}
+
+.action-buttons button:hover {
+    background-color: #2e7d32;
+    transform: translateY(-2px);
+}
+
+.note-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#noteInput {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+#noteInput:focus {
+    border-color: #388e3c;
+    outline: none;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #388e3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #2e7d32;
+    transform: translateY(-2px);
+}
+
+.notes-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 350px;
+    transition: transform 0.3s ease;
+}
+
+ul:hover {
+    transform: scale(1.02);
+}
+
+ul::-webkit-scrollbar {
+    width: 8px;
+}
+
+ul::-webkit-scrollbar-thumb {
+    background-color: #388e3c;
+    border-radius: 4px;
+}
+
+ul::-webkit-scrollbar-track {
+    background-color: #e0e0e0;
+}
+
+ul h3 {
+    background-color: #388e3c;
+    color: white;
+    margin: 0;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 8px 8px 0 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s ease-in-out;
+}
+
+li:last-child {
+    border-bottom: none;
+}
+
+li:hover {
+    background-color: #f1f1f1;
+}
+
+.note-text {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.completed {
+    text-decoration: line-through;
+    color: gray;
+}
+
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #388e3c;
+}
+ul {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 350px;
+    position: relative;
+}
+
+ul h3 {
+    position: sticky;
+    top: 0;
+    background-color: #388e3c;
+    color: white;
+    margin: 0;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 8px 8px 0 0;
+    z-index: 1;
+}
+
+    </style> -->
+
+    <style type="text/css">
+        /* Reset mặc định */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 700px;
+}
+
+/* Tiêu đề chính */
+h1 {
+    text-align: center;
+    color: #388e3c;
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
+
+/* Các nút hành động */
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.action-buttons button {
+    background-color: #388e3c;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    flex: 1;
+}
+
+.action-buttons button:hover {
+    background-color: #2e7d32;
+    transform: translateY(-2px);
+}
+
+/* Nhập ghi chú */
+.note-input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#noteInput {
+    flex: 1;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+#noteInput:focus {
+    border-color: #388e3c;
+    outline: none;
+}
+
+/* Các nút thêm ghi chú */
+button {
+    padding: 10px 20px;
+    background-color: #388e3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #2e7d32;
+    transform: translateY(-2px);
+}
+
+/* Phần danh sách ghi chú */
+.notes-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Danh sách ghi chú */
+/*ul {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 350px;
+    position: relative;
+    transition: transform 0.3s ease;
+}*/
+ul {
+    list-style: none;
+    padding: 0;
+    flex: 1;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 350px;
+    position: relative; /* Đảm bảo ul có position relative */
+}
+
+ul:hover {
+    transform: scale(1.02);
+}
+
+ul::-webkit-scrollbar {
+    width: 8px;
+}
+
+ul::-webkit-scrollbar-thumb {
+    background-color: #388e3c;
+    border-radius: 4px;
+}
+
+ul::-webkit-scrollbar-track {
+    background-color: #e0e0e0;
+}
+
+/*ul h3 {
+    position: sticky;
+    top: 0;
+    background-color: #388e3c;
+    color: white;
+    margin: 0;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 8px 8px 0 0;
+    z-index: 1;
+}*/
+
+ul h3 {
+    position: sticky;
+    top: 0;
+    background-color: #388e3c;
+    color: white;
+    margin: 0;
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 8px 8px 0 0;
+    z-index: 2; /* Tăng z-index để đảm bảo tiêu đề không bị che khuất */
+}
+/* Các mục ghi chú trong danh sách */
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.3s ease-in-out;
+}
+
+li:last-child {
+    border-bottom: none;
+}
+
+li:hover {
+    background-color: #f1f1f1;
+}
+
+.note-text {
+    flex: 1;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+/* Định dạng cho ghi chú hoàn thành */
+.completed {
+    text-decoration: line-through;
+    color: gray;
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #388e3c;
+}
+
+/* Nút xóa */
+.delete-button {
+    padding: 5px 10px;
+    background-color: transparent;
+    color: red;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.delete-button:hover {
+    color: darkred;
+}
+#fileInput {
+    display: none;
+}
+        /* Hướng dẫn sử dụng */
+        footer {
+            margin-top: 30px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+            padding: 15px;
+            font-size: 0.95em;
+            color: #333;
+            text-align: left;
+        }
+        footer h3 { margin-bottom: 10px; color: #388e3c; }
+        footer ul { list-style: disc inside; padding-left: 20px; margin: 0; }
+        footer em { color: #555; }
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quản lý công việc</h1>
+        <div class="action-buttons">
+            <button onclick="loadNotes()">Tải lại dữ liệu</button>
+            <button onclick="document.getElementById('fileInput').click()">Tải từ file JSON</button>
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadFromFile(event)">
+            <button onclick="clearAllNotes()">Xóa tất cả dữ liệu</button>
+            <button onclick="exportData()">Xuất dữ liệu</button>
+        </div>
+        <div class="note-input">
+            <input type="text" id="noteInput" placeholder="Nhập công việc thực hiện...">
+            <button onclick="addNote()">Thêm</button>
+        </div>
+        <div class="notes-section">
+            <ul id="inProgressList">
+                <h3>Đang xử lý</h3>
+            </ul>
+            <ul id="completedList">
+                <h3>Đã hoàn thành</h3>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Tải ghi chú từ Local Storage khi nhấn "Tải lại dữ liệu" hoặc khi mở trang
+        function loadNotes() {
+            document.getElementById('inProgressList').innerHTML = '<h3>Đang xử lý</h3>';
+            document.getElementById('completedList').innerHTML = '<h3>Đã hoàn thành</h3>';
+
+            const storedNotes = JSON.parse(localStorage.getItem('notes')) || { inProgress: [], completed: [] };
+
+            storedNotes.inProgress.filter(note => note).forEach(note => addNoteElement(note, false));
+            storedNotes.completed.filter(note => note).forEach(note => addNoteElement(note, true));
+        }
+
+        // Lưu ghi chú vào Local Storage
+        function saveNotes() {
+            const inProgress = Array.from(document.getElementById('inProgressList').children)
+                .map(item => item.querySelector('.note-text')?.textContent)
+                .filter(note => note); // Loại bỏ giá trị null hoặc rỗng
+            const completed = Array.from(document.getElementById('completedList').children)
+                .map(item => item.querySelector('.note-text')?.textContent)
+                .filter(note => note); // Loại bỏ giá trị null hoặc rỗng
+
+            localStorage.setItem('notes', JSON.stringify({ inProgress, completed }));
+        }
+
+        // Thêm ghi chú mới
+        function addNote() {
+            const noteInput = document.getElementById('noteInput');
+            const note = noteInput.value.trim();
+            if (note === '') return alert('Vui lòng nhập nội dung ghi chú!');
+            addNoteElement(note, false);
+            noteInput.value = '';
+            saveNotes();
+        }
+            document.getElementById('noteInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            addNote();
+        }
+    });
+
+        // Thêm ghi chú vào giao diện
+        // function addNoteElement(text, completed) {
+        //     const li = document.createElement('li');
+        //     const checkbox = document.createElement('input');
+        //     checkbox.type = 'checkbox';
+        //     checkbox.checked = completed;
+
+        //     const span = document.createElement('span');
+        //     span.textContent = text;
+        //     span.className = 'note-text';
+        //     if (completed) span.classList.add('completed');
+
+        //     checkbox.addEventListener('change', () => {
+        //         (checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList'))
+        //             .appendChild(li);
+        //         span.classList.toggle('completed');
+        //         saveNotes();
+        //     });
+
+        //     li.appendChild(checkbox);
+        //     li.appendChild(span);
+        //     document.getElementById(completed ? 'completedList' : 'inProgressList').appendChild(li);
+        // }
+//             function addNoteElement(text, completed) {
+//     const li = document.createElement('li');
+//     const checkbox = document.createElement('input');
+//     checkbox.type = 'checkbox';
+//     checkbox.checked = completed;
+
+//     const span = document.createElement('span');
+//     span.textContent = text;
+//     span.className = 'note-text';
+//     if (completed) span.classList.add('completed');
+
+//     checkbox.addEventListener('change', () => {
+//         const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
+
+//         // Nếu công việc được hoàn thành, thêm vào đầu danh sách "Đã hoàn thành"
+//         if (checkbox.checked) {
+//             span.classList.add('completed');
+//             targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
+//         } else {
+//             span.classList.remove('completed');
+//             targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+//         }
+
+//         saveNotes();
+//     });
+
+//     li.appendChild(checkbox);
+//     li.appendChild(span);
+
+//     // Khi thêm mới, các ghi chú hoàn thành sẽ thêm vào đầu, các ghi chú đang xử lý thêm vào cuối
+//     const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
+//     if (completed) {
+//         targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
+//     } else {
+//         targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+//     }
+// }
+
+function addNoteElement(text, completed) {
+    const li = document.createElement('li');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = completed;
+
+    const span = document.createElement('span');
+    span.textContent = text;
+    span.className = 'note-text';
+    if (completed) span.classList.add('completed');
+
+    // Thêm nút xóa
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'X';
+    deleteButton.className = 'delete-button';
+    deleteButton.style.color = 'red';
+    deleteButton.style.fontWeight = 'bold';
+    deleteButton.style.cursor = 'pointer';
+    deleteButton.style.border = 'none';
+    deleteButton.style.background = 'transparent';
+
+    // Sự kiện xóa ghi chú
+    deleteButton.addEventListener('click', () => {
+        li.remove(); // Xóa phần tử khỏi giao diện
+        saveNotes(); // Cập nhật Local Storage
+    });
+
+    // Sự kiện chuyển trạng thái (checkbox)
+    checkbox.addEventListener('change', () => {
+        const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
+
+        if (checkbox.checked) {
+            span.classList.add('completed');
+            targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
+        } else {
+            span.classList.remove('completed');
+            targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+        }
+
+        saveNotes();
+    });
+
+    // Gắn các phần tử vào li
+    li.appendChild(checkbox);
+    li.appendChild(span);
+    li.appendChild(deleteButton);
+
+    // Khi thêm mới, các ghi chú hoàn thành sẽ thêm vào đầu, các ghi chú đang xử lý thêm vào cuối
+    const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
+    if (completed) {
+        targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
+    } else {
+        targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+    }
+}
+
+
+// function addNoteElement(text, completed) {
+//     const li = document.createElement('li');
+//     const checkbox = document.createElement('input');
+//     checkbox.type = 'checkbox';
+//     checkbox.checked = completed;
+
+//     const span = document.createElement('span');
+//     span.textContent = text;
+//     span.className = 'note-text';
+//     if (completed) span.classList.add('completed');
+
+//     // Thêm nút xóa
+//     const deleteButton = document.createElement('button');
+//     deleteButton.textContent = 'X';
+//     deleteButton.className = 'delete-button';
+//     deleteButton.style.color = 'red';
+//     deleteButton.style.fontWeight = 'bold';
+//     deleteButton.style.cursor = 'pointer';
+//     deleteButton.style.border = 'none';
+//     deleteButton.style.background = 'transparent';
+
+//     // Sự kiện xóa ghi chú
+//     deleteButton.addEventListener('click', () => {
+//         li.remove(); // Xóa phần tử khỏi giao diện
+//         saveNotes(); // Cập nhật Local Storage
+//     });
+
+//     // Sự kiện chuyển trạng thái (checkbox)
+//     checkbox.addEventListener('change', () => {
+//         const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
+
+//         if (checkbox.checked) {
+//             span.classList.add('completed');
+//             // Thêm ghi chú vào đầu danh sách "Đã hoàn thành" hoặc cuối "Đang xử lý"
+//             targetList.insertBefore(li, targetList.firstChild);  // Thêm vào đầu danh sách
+//             const firstItem = targetList.querySelector('li:not(h3)');
+// if (firstItem) {
+//     targetList.insertBefore(li, firstItem);
+// } else {
+//     targetList.appendChild(li);
+// }
+
+//         } else {
+//             span.classList.remove('completed');
+//             targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+//         }
+
+//         saveNotes();
+//     });
+
+//     // Gắn các phần tử vào li
+//     li.appendChild(checkbox);
+//     li.appendChild(span);
+//     li.appendChild(deleteButton);
+
+//     // Chọn danh sách đích (hoàn thành hoặc đang xử lý)
+//     const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
+//     if (completed) {
+//         targetList.insertBefore(li, targetList.firstChild); // Chèn vào đầu danh sách "Đã hoàn thành"
+//     } else {
+//         targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+//     }
+// }
+
+// Hàm xử lý khi người dùng chọn file
+function loadFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const jsonData = JSON.parse(e.target.result);
+
+            // Kiểm tra cấu trúc dữ liệu
+            if (!jsonData.inProgress || !jsonData.completed) {
+                return alert('Dữ liệu không hợp lệ! Vui lòng chọn file JSON đúng định dạng.');
+            }
+
+            // Cập nhật giao diện
+            document.getElementById('inProgressList').innerHTML = '<h3>Đang xử lý</h3>';
+            document.getElementById('completedList').innerHTML = '<h3>Đã hoàn thành</h3>';
+
+            jsonData.inProgress.forEach(note => addNoteElement(note, false));
+            jsonData.completed.forEach(note => addNoteElement(note, true));
+
+            // Lưu vào Local Storage
+            localStorage.setItem('notes', JSON.stringify(jsonData));
+            alert('Dữ liệu đã được tải thành công!');
+        } catch (error) {
+            alert('Lỗi khi xử lý file JSON: ' + error.message);
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+
+        // Xóa tất cả ghi chú
+        function clearAllNotes() {
+            if (confirm('Bạn có chắc chắn muốn xóa tất cả ghi chú?')) {
+                localStorage.removeItem('notes');
+                loadNotes();
+            }
+        }
+
+        // Xuất dữ liệu ra file JSON
+        function exportData() {
+            // Lấy dữ liệu từ Local Storage
+            const storedNotes = localStorage.getItem('notes');
+            if (!storedNotes) {
+                alert('Không có dữ liệu để xuất!');
+                return;
+            }
+
+            // Lấy thời gian hiện tại
+            const now = new Date();
+            const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+
+            // Tạo tên file dựa trên thời gian
+            const fileName = `notes_${timestamp}.json`;
+
+            // Tạo một file blob từ dữ liệu
+            const blob = new Blob([storedNotes], { type: 'application/json' });
+
+            // Tạo liên kết tải xuống
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName; // Tên file sẽ được tải về
+            link.click();
+
+            // Giải phóng tài nguyên
+            URL.revokeObjectURL(link.href);
+        }
+        // Tải ghi chú khi trang được load
+        window.onload = loadNotes;
+    </script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản Lý Phần Mềm Kế Toán</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+      body {
+          font-family: 'Arial', sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
+          box-sizing: border-box;
+      }
+      h1 {
+          text-align: center;
+          color: #4CAF50;
+          margin-bottom: 20px;
+      }
+      .search-box {
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+      }
+      .search-box label {
+          font-weight: bold;
+      }
+      .search-box input {
+          padding: 8px;
+          font-size: 14px;
+          width: 250px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+          transition: border-color 0.3s ease;
+      }
+      .search-box input:focus {
+          border-color: #4CAF50;
+      }
+      #add-entry, #save-entry, #cancel-entry {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px 20px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+      }
+      #add-entry:hover, #save-entry:hover, #cancel-entry:hover {
+          background-color: #45a049;
+      }
+      #import-excel {
+          padding: 10px 20px;
+          cursor: pointer;
+          border: none;
+          background-color: #2196F3;
+          color: white;
+          border-radius: 5px;
+      }
+      #import-excel:hover {
+          background-color: #0b7dda;
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+          border-radius: 5px;
+          overflow: hidden;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      th, td {
+          padding: 12px 15px;
+          text-align: left;
+          border-bottom: 1px solid #ddd;
+      }
+      th {
+          background-color: #4CAF50;
+          color: white;
+      }
+      th {
+          white-space: nowrap;
+        }
+      td {
+          background-color: #fff;
+          color: #333;
+          font-size: 14px;
+      }
+      tr:hover td {
+          background-color: #f1f1f1;
+      }
+      .hidden {
+          display: none;
+      }
+      .form-container {
+          max-width: 500px;
+          margin: 0 auto;
+          background-color: #fff;
+          padding: 20px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+          border-radius: 5px;
+      }
+      .form-container label {
+          display: block;
+          margin-top: 10px;
+          font-weight: bold;
+      }
+      .form-container input {
+          width: 100%;
+          padding: 8px;
+          margin-top: 5px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+      }
+      .form-buttons {
+          margin-top: 20px;
+          display: flex;
+          justify-content: space-between;
+      }
+  </style>
+</head>
+<body>
+  <h1>Quản Lý Phần Mềm Kế Toán</h1>
+
+  <!-- Giao diện tìm kiếm và import Excel -->
+  <div id="main-view">
+    <div class="search-box">
+      <label for="search">Tìm kiếm:</label>
+      <input type="text" id="search" placeholder="Nhập ít nhất 2 ký tự để tìm kiếm ...">
+    </div>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <button id="add-entry">Thêm mới</button>
+      <input type="file" id="import-excel" accept=".xlsx" style="margin-left: 10px;">
+    </div>
+    <table id="software-table" class="hidden">
+      <thead>
+        <tr>
+          <th>Phần mềm</th>
+          <th>Phương án</th>
+          <th>Mode</th>
+          <th>Box quản lý</th>
+          <th>Nền tảng</th>
+          <th>Ngày cập nhật</th>
+          <th>Ghi chú</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Các hàng dữ liệu sẽ được thêm vào đây -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Giao diện form nhập liệu -->
+  <div id="form-view" class="hidden">
+    <div class="form-container">
+      <h2>Thêm Mới Phần Mềm</h2>
+      <label for="software-name">Phần mềm:</label>
+      <input type="text" id="software-name" placeholder="Nhập tên phần mềm">
+      
+      <label for="integration">Phương án:</label>
+      <input type="text" id="integration" placeholder="Nhập phương án">
+      
+      <label for="mode">Mode:</label>
+      <input type="text" id="mode" placeholder="Nhập mode">
+      
+      <label for="box">Box quản lý:</label>
+      <input type="text" id="box" placeholder="Nhập box quản lý">
+      
+      <label for="platform">Nền tảng:</label>
+      <input type="text" id="platform" placeholder="Nhập nền tảng">
+      
+      <label for="update-date">Ngày cập nhật:</label>
+      <input type="date" id="update-date">
+      
+      <label for="notes">Ghi chú:</label>
+      <input type="text" id="notes" placeholder="Nhập ghi chú">
+      
+      <div class="form-buttons">
+        <button id="save-entry">Lưu</button>
+        <button id="cancel-entry">Quay lại</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const searchInput = document.getElementById('search');
+    const table = document.getElementById('software-table');
+    const tableBody = table.querySelector('tbody');
+    const localStorageKey = 'accountingSoftware';
+
+    const mainView = document.getElementById('main-view');
+    const formView = document.getElementById('form-view');
+
+    // Khôi phục dữ liệu từ Local Storage
+    const loadData = () => {
+      return JSON.parse(localStorage.getItem(localStorageKey)) || [];
+    };
+
+    const saveData = (data) => {
+      localStorage.setItem(localStorageKey, JSON.stringify(data));
+    };
+
+    const renderTable = (data) => {
+      tableBody.innerHTML = '';
+      if (data.length === 0) {
+          table.classList.add('hidden');
+          return;
+      }
+      data.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+              <td>${item.name}</td>
+              <td>${item.integration}</td>
+              <td>${item.mode}</td>
+              <td>${item.box}</td>
+              <td>${item.platform}</td>
+              <td>${item.updateDate || 'Chưa cập nhật'}</td>
+              <td>${item.notes}</td>
+          `;
+          tableBody.appendChild(row);
+      });
+      table.classList.remove('hidden');
+    };
+
+    // Kiểm tra trùng dữ liệu dựa trên tên phần mềm (không phân biệt chữ hoa chữ thường)
+    const isDuplicate = (newName, data) => {
+      return data.some(item => item.name.trim().toLowerCase() === newName.trim().toLowerCase());
+    };
+
+    // Hiển thị giao diện form nhập liệu
+    const showForm = () => {
+      mainView.classList.add('hidden');
+      formView.classList.remove('hidden');
+      // Xoá dữ liệu cũ trong form
+      document.getElementById('software-name').value = '';
+      document.getElementById('integration').value = '';
+      document.getElementById('mode').value = '';
+      document.getElementById('box').value = '';
+      document.getElementById('platform').value = '';
+      document.getElementById('update-date').value = '';
+      document.getElementById('notes').value = '';
+    };
+
+    // Quay lại giao diện chính
+    const hideForm = () => {
+      formView.classList.add('hidden');
+      mainView.classList.remove('hidden');
+    };
+
+    // Lưu dữ liệu từ form
+    const saveEntry = () => {
+      const newEntry = {
+          name: document.getElementById('software-name').value.trim(),
+          integration: document.getElementById('integration').value.trim(),
+          mode: document.getElementById('mode').value.trim(),
+          box: document.getElementById('box').value.trim(),
+          platform: document.getElementById('platform').value.trim(),
+          updateDate: document.getElementById('update-date').value.trim(),
+          notes: document.getElementById('notes').value.trim()
+      };
+
+      if (!newEntry.name) {
+          alert('Vui lòng nhập tên phần mềm!');
+          return;
+      }
+
+      const data = loadData();
+      if (isDuplicate(newEntry.name, data)) {
+          alert('Dữ liệu đã tồn tại, không cần update lại!');
+          return;
+      }
+
+      data.push(newEntry);
+      saveData(data);
+      renderTable(data);
+      hideForm();
+    };
+
+    // Tìm kiếm và lọc danh sách theo tên phần mềm
+    const searchTable = () => {
+      const query = searchInput.value.toLowerCase().trim();
+      const data = loadData();
+
+      // Nếu nhập key 'all' thì hiển thị toàn bộ danh sách
+      if (query === 'all') {
+          renderTable(data);
+          return;
+      }
+
+      if (query.length < 2) {
+          table.classList.add('hidden');
+          return;
+      }
+
+      const filteredData = data.filter(item => item.name.toLowerCase().includes(query));
+      filteredData.length === 0 ? table.classList.add('hidden') : renderTable(filteredData);
+    };
+
+    // Xử lý import từ Excel
+    const handleExcelImport = (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+          const dataBuffer = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(dataBuffer, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const importedData = XLSX.utils.sheet_to_json(worksheet);
+        const processedData = importedData.map(row => ({
+            name: row['Phần mềm'] || '',
+            integration: row['Phương án'] || '',
+            mode: row['Mode'] === 0 ? 0 : (row['Mode'] || ''),  // Sửa lại để giữ giá trị 0
+            box: row['Box quản lý'] || '',
+            platform: row['Nền tảng'] || '',
+            updateDate: row['Ngày cập nhật'] || '',
+            notes: row['Ghi chú'] || ''
+        }));
+          let currentData = loadData();
+          let duplicateCount = 0;
+          processedData.forEach(entry => {
+              if (entry.name && !isDuplicate(entry.name, currentData)) {
+                  currentData.push(entry);
+              } else {
+                  duplicateCount++;
+              }
+          });
+          if (duplicateCount > 0) {
+              alert(`Có ${duplicateCount} dòng dữ liệu đã tồn tại và bị bỏ qua.`);
+          }
+          saveData(currentData);
+          renderTable(currentData);
+      };
+      reader.readAsArrayBuffer(file);
+    };
+
+    // Các sự kiện
+    document.getElementById('add-entry').addEventListener('click', showForm);
+    document.getElementById('cancel-entry').addEventListener('click', hideForm);
+    document.getElementById('save-entry').addEventListener('click', saveEntry);
+    searchInput.addEventListener('input', searchTable);
+    document.getElementById('import-excel').addEventListener('change', handleExcelImport);
+    document.addEventListener('DOMContentLoaded', () => {
+      table.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>

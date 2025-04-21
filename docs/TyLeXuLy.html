@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê Dữ liệu</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { 
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+    /* Giao diện ban đầu */
+    #defaultInterface { 
+      display: flex;  
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: stretch;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    .input-section, .chart-section { 
+      flex: 1;
+      min-width: 300px;
+    }
+    .input-section h3, .chart-section h3 { 
+      color: #333;
+    }
+    table { 
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td { 
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th { 
+      background: #f8f8f8;
+    }
+    input[type="text"], input[type="month"] { 
+      padding: 5px; 
+      border: 1px solid #ccc; 
+      border-radius: 5px; 
+      text-align: center;
+    }
+    button { 
+      padding: 10px 15px;
+      border: none;
+      background: red;
+      color: white;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    button:hover { 
+      background: darkred;
+    }
+    canvas { 
+      max-width: 100%;
+      background: white;
+    }
+    /* Các nút chức năng */
+    #copyData, .filter-button, .search-button { 
+      margin-top: 10px;
+      padding: 10px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    #copyData:hover, .filter-button:hover, .search-button:hover, .search:hover{ 
+      background: #27ae60;
+    }
+    #output-container { 
+      text-align: center;
+      margin-top: 10px;
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #bdc3c7;
+      display: none;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 0.85em;
+    }
+    #output { 
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .copied-message { 
+      color: green;
+      font-weight: bold;
+      margin-top: 5px;
+      display: none;
+    }
+    /* Thông báo ghi nhận kết quả */
+    #recordMessage {
+      color: green;
+      font-weight: bold;
+      margin-top: 5px;
+      display: none;
+    }
+    #totalEntries, #dailyEntries { 
+      font-weight: bold;
+      margin-top: 10px;
+      color: #2c3e50;
+    }
+    #lastUpdated { 
+      font-size: 14px;
+      color: #555;
+      margin-top: 10px;
+    }
+    /* Giao diện tìm kiếm – ẩn mặc định */
+    #searchInterface { 
+      display: none;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    #searchInterface div { 
+      margin-bottom: 10px;
+    }
+    #noDataMessage { 
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+      display: none;
+    }
+    .search{
+      background: #2ecc71;
+    }
+    /* Dropdown lọc theo Tháng-Năm */
+    #filterContainer {
+      margin-top: 10px;
+    }
+    #filterMonth {
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: center;
+    }
+    /* Modal xác nhận mật khẩu */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto; 
+      padding: 20px;
+      border: 1px solid #888;
+      width: 300px; 
+      text-align: center;
+      border-radius: 5px;
+    }
+    /* Loading Overlay */
+    #loadingOverlay {
+      display: none;
+      position: fixed;
+      z-index: 200;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.8);
+      justify-content: center;
+      align-items: center;
+    }
+    .spinner {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #3498db;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+        footer {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 15px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0px 0px 8px rgba(0,0,0,0.1);
+      text-align: left;
+      color: #333;
+    }
+    footer h3 {
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    footer ul {
+      list-style: disc inside;
+      margin: 0;
+      padding-left: 20px;
+    }
+    footer em {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h2>Thống kê Dữ liệu</h2>
+  <!-- Giao diện ban đầu -->
+  <div id="defaultInterface">
+    <div class="input-section">
+      <h3>Nhập dữ liệu</h3>
+      <table>
+        <tr>
+          <th>Nội dung</th>
+          <th>Giá trị</th>
+        </tr>
+        <tbody id="inputs"></tbody>
+      </table>
+      <div id="totalEntries">Tổng số lần nhập: 0</div>
+      <!-- Hiển thị số kết quả trong ngày -->
+      <div id="dailyEntries">Tổng số kết quả hôm nay: 0</div>
+      <!-- Hiển thị "Lần cập nhật cuối" -->
+      <div id="lastUpdated">Lần cập nhật cuối: Chưa có</div>
+      
+      <!-- Dropdown lọc theo Tháng-Năm và nút Lọc -->
+      <div id="filterContainer">
+        <select id="filterMonth">
+          <option value="">--Chọn Tháng-Năm--</option>
+        </select>
+        <button class="filter-button" onclick="filterDataByMonth()">Lọc</button>
+      </div>
+      
+      <!-- Nút Clear Cache thay vì gọi trực tiếp clearData() sẽ gọi showPasswordModal() -->
+      <button onclick="showPasswordModal()">Clear Cache</button>
+      <button id="copyData" onclick="copyValues()">Copy Giá trị</button>
+      <!-- Nút chuyển sang giao diện tìm kiếm nâng cao -->
+      <button class="search" onclick="showSearchInterface()">Tìm kiếm nâng cao</button>
+      <!-- <button class="logout" onclick="logout()">Đăng xuất</button> -->
+      <div class="copied-message" id="copiedMessage">Đã copy thành công!</div>
+      <div class="copied-message" id="summaryMessage" style="display: none;">Đã thống kê kết quả thành công!</div>
+      <!-- Thông báo ghi nhận kết quả -->
+      <div class="copied-message" id="recordMessage" style="display: none;">Ghi nhận kết quả thành công!</div>
+    </div>
+    <div class="chart-section">
+      <canvas id="barChart"></canvas>
+      <div id="output-container">
+        <h3>Kết quả</h3>
+        <div id="output"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Giao diện tìm kiếm theo khoảng thời gian -->
+  <div id="searchInterface">
+    <h3>Tìm kiếm theo khoảng thời gian</h3>
+    <div>
+      <label for="fromMonth">Từ tháng:</label>
+      <input type="month" id="fromMonth">
+      <label for="toMonth">Đến tháng:</label>
+      <input type="month" id="toMonth">
+    </div>
+    <div>
+      <button class="search-button" onclick="searchData()">Tìm kiếm</button>
+      <button class="search-button" onclick="backToDefault()">Quay lại</button>
+      <!-- Nút copy kết quả tìm kiếm -->
+      <button class="search-button" onclick="copySearchResults()">Copy Kết quả</button>
+      <div class="copied-message" id="copiedMessageSearch" style="display:none;">Đã copy kết quả tìm kiếm!</div>
+    </div>
+    <div id="noDataMessage">Không tìm thấy dữ liệu tương ứng!</div>
+    <div id="searchResultContainer" style="display: none;">
+      <h3>Kết quả tìm kiếm</h3>
+      <div id="searchResult"></div>
+    </div>
+  </div>
+  
+  <!-- Modal xác nhận mật khẩu -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <h3>Xác nhận mật khẩu</h3>
+      <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" />
+      <div style="margin-top: 10px;">
+        <button onclick="confirmClearCache()">Xác nhận</button>
+        <button onclick="hidePasswordModal()">Hủy</button>
+      </div>
+      <div id="passwordCorrect" style="color: seagreen; display: none; margin-top: 10px;">Xác nhận thành công</div>
+      <div id="passwordError" style="color: red; display: none; margin-top: 10px;">Mật khẩu không đúng!</div>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+  </div>
+    <!-- Footer hướng dẫn sử dụng -->
+  <footer>
+    <h3>📘 Hướng dẫn sử dụng công cụ</h3>
+    <ul>
+      <li>Nhập giá trị vào các ô tương ứng với danh mục: <strong>Truyền nhận</strong>, <strong>TVAN</strong>, <strong>IVAN</strong>, v.v.</li>
+      <li>Nhấn <strong>Enter</strong> để ghi nhận giá trị, tự động cập nhật biểu đồ và bảng thống kê.</li>
+      <li>Xem <em>Tổng số lần nhập</em> và <em>Tổng số kết quả hôm nay</em> ở bên dưới danh sách.</li>
+      <li>Sử dụng dropdown <strong>Chọn Tháng-Năm</strong> rồi nhấn <strong>Lọc</strong> để xem dữ liệu theo tháng.</li>
+      <li>Nhấn <strong>Copy Giá trị</strong> để sao chép tỉ lệ phần trăm các mục đã nhập.</li>
+      <li>Chuyển sang <strong>Tìm kiếm nâng cao</strong> để tổng hợp và xem kết quả trong khoảng thời gian cụ thể.</li>
+      <li>Nhấn <strong>Clear Cache</strong> để xóa dữ liệu tháng hiện tại (có yêu cầu mật khẩu).</li>
+      <li>Kết quả tìm kiếm và sao chép hỗ trợ ghi nhận &nbsp;giá trị &amp; tỉ lệ phần trăm tự động.</li>
+    </ul>
+    <p><em>Ghi chú:</em> Toàn bộ dữ liệu được lưu cục bộ trong <code>localStorage</code>, không gửi lên server. Đảm bảo sử dụng cùng trình duyệt để truy xuất dữ liệu.</p>
+  </footer>
+  
+  <script>
+    // Các biến và hàm toàn cục
+    const categories = ["Truyền nhận", "TVAN", "IVAN", "eCT", "eHD", "CKS", "AIBooks", "eContract", "eQLHĐ"];
+    let data = {};
+    let dailyData = {};
+    let lastUpdated = "Chưa có";
+    const defaultMonth = (new Date()).getFullYear() + "-" + ("0" + ((new Date()).getMonth() + 1)).slice(-2);
+    
+    categories.forEach(cat => {
+      data[cat] = 0;
+      dailyData[cat] = 0;
+    });
+    
+    // -------------------------
+    // Các hàm tiện ích
+    // -------------------------
+    function getCurrentMonthKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      return `data-${year}-${month}`;
+    }
+    function getLastUpdatedKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      return `lastUpdated-${year}-${month}`;
+    }
+    function getCurrentDayKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = ("0" + (now.getMonth() + 1)).slice(-2);
+      const day = ("0" + now.getDate()).slice(-2);
+      return `dailyData-${year}-${month}-${day}`;
+    }
+    function clearOldDailyData() {
+      const todayKey = getCurrentDayKey();
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key.startsWith("dailyData-") && key !== todayKey) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+    clearOldDailyData();
+    
+    // -------------------------
+    // Tạo form nhập liệu
+    // -------------------------
+    function createInputFields() {
+      const container = document.getElementById("inputs");
+      container.innerHTML = categories.map(cat => 
+        `<tr>
+           <td>${cat}</td>
+           <td><input type='text' id='${cat}' onkeydown='handleKeyPress(event, "${cat}")'></td>
+         </tr>`
+      ).join("\n");
+    }
+    
+    // -------------------------
+    // Cập nhật biểu đồ (Chart)
+    // -------------------------
+    function updateChart() {
+      if (window.chart) {
+        window.chart.data.datasets[0].data = categories.map(cat => data[cat]);
+        window.chart.update();
+      }
+      updateTotalEntries();
+    }
+    
+    // -------------------------
+    // Load dữ liệu của tháng cụ thể
+    // -------------------------
+    function loadDataForMonth(monthStr) {
+      const parts = monthStr.split("-");
+      const year = parts[0];
+      const month = parseInt(parts[1], 10);
+      const key = `data-${year}-${month}`;
+      let stored = localStorage.getItem(key);
+      try {
+        data = stored ? JSON.parse(stored) : {};
+      } catch(e) {
+        console.error("Lỗi khi parse dữ liệu cho key " + key, e);
+        data = {};
+      }
+      const lastKey = `lastUpdated-${year}-${month}`;
+      lastUpdated = localStorage.getItem(lastKey) || "Chưa có";
+      document.getElementById("lastUpdated").innerText = `Lần cập nhật cuối: ${lastUpdated}`;
+      categories.forEach(cat => { if (!(cat in data)) data[cat] = 0; });
+      updateChart();
+      updateTotalEntries();
+      createInputFields();
+      summarizeValues();
+    }
+    
+    // -------------------------
+    // Load dữ liệu trong ngày
+    // -------------------------
+    function loadDailyData() {
+      const key = getCurrentDayKey();
+      let stored = localStorage.getItem(key);
+      try {
+        dailyData = stored ? JSON.parse(stored) : {};
+      } catch(e) {
+        console.error("Lỗi khi parse dữ liệu cho key " + key, e);
+        dailyData = {};
+      }
+      categories.forEach(cat => { if (!(cat in dailyData)) dailyData[cat] = 0; });
+      updateDailyEntries();
+    }
+    
+    // -------------------------
+    // Cập nhật tổng số lần nhập theo tháng
+    // -------------------------
+    function updateTotalEntries() {
+      let total = Object.values(data).reduce((acc, val) => acc + val, 0);
+      document.getElementById("totalEntries").innerText = `Tổng số lần nhập: ${total}`;
+    }
+    
+    // -------------------------
+    // Cập nhật tổng số kết quả trong ngày
+    // -------------------------
+    function updateDailyEntries() {
+      let dailyTotal = Object.values(dailyData).reduce((acc, val) => acc + val, 0);
+      document.getElementById("dailyEntries").innerText = `Tổng số kết quả hôm nay: ${dailyTotal}`;
+    }
+    
+    // -------------------------
+    // Lưu dữ liệu vào Local Storage (theo tháng)
+    // -------------------------
+    function saveData() {
+      const key = getCurrentMonthKey();
+      localStorage.setItem(key, JSON.stringify(data));
+      updateLastUpdated();
+      updateTotalEntries();
+    }
+    
+    // -------------------------
+    // Lưu dữ liệu trong ngày vào Local Storage
+    // -------------------------
+    function saveDailyData() {
+      const key = getCurrentDayKey();
+      localStorage.setItem(key, JSON.stringify(dailyData));
+      updateDailyEntries();
+    }
+    
+    // -------------------------
+    // Xóa dữ liệu (được gọi khi xác nhận mật khẩu thành công)
+    // -------------------------
+    function clearData() {
+      const key = getCurrentMonthKey();
+      const lastKey = getLastUpdatedKey();
+      const dailyKey = getCurrentDayKey();
+      localStorage.removeItem(key);
+      localStorage.removeItem(lastKey);
+      localStorage.removeItem(dailyKey); // Xóa dữ liệu theo ngày
+      
+      // Reset lại các biến dữ liệu
+      data = {};
+      categories.forEach(cat => data[cat] = 0);
+      dailyData = {};
+      categories.forEach(cat => dailyData[cat] = 0);
+      
+      // Xóa dữ liệu trong các ô input
+      document.querySelectorAll("input[type='text']").forEach(input => input.value = "");
+      
+      // Cập nhật lại giao diện
+      document.getElementById("lastUpdated").innerText = "Lần cập nhật cuối: Chưa có";
+      updateChart();
+      updateTotalEntries();
+      updateDailyEntries();
+      summarizeValues();
+    }
+    
+    // -------------------------
+    // Modal xác nhận mật khẩu
+    // -------------------------
+    function showPasswordModal() {
+      document.getElementById('passwordModal').style.display = 'block';
+    }
+    function hidePasswordModal() {
+      document.getElementById('passwordModal').style.display = 'none';
+      document.getElementById('passwordInput').value = '';
+      // Ẩn thông báo sau khi đóng modal
+      document.getElementById('passwordCorrect').style.display = 'none';
+      document.getElementById('passwordError').style.display = 'none';
+    }
+    // Hiển thị overlay loading
+    function showLoadingOverlay() {
+      document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+    function hideLoadingOverlay() {
+      document.getElementById('loadingOverlay').style.display = 'none';
+    }
+    // Khi mật khẩu đúng sẽ hiển thị "Xác nhận thành công", sau đó form loading, rồi xóa cache
+    function confirmClearCache() {
+      const correctPassword = "admin"; // thay đổi mật khẩu nếu cần
+      const inputPassword = document.getElementById('passwordInput').value;
+      if (inputPassword === correctPassword) {
+        // Hiển thị thông báo xác nhận thành công
+        document.getElementById('passwordCorrect').style.display = 'block';
+        document.getElementById('passwordError').style.display = 'none';
+        // Sau 1 giây, chuyển sang loading overlay
+        setTimeout(function() {
+          hidePasswordModal(); // ẩn modal xác nhận mật khẩu
+          showLoadingOverlay(); // hiển thị loading
+          // Sau 2 giây loading, gọi hàm clearData()
+          setTimeout(function() {
+            hideLoadingOverlay();
+            clearData();
+          }, 1000);
+        }, 1000);
+      } else {
+        document.getElementById('passwordError').style.display = 'block';
+      }
+    }
+    
+    // -------------------------
+    // Hàm thống kê kết quả tự động (hiển thị bảng kết quả)
+    // -------------------------
+    function summarizeValues() {
+      let total = Object.values(data).reduce((acc, val) => acc + val, 0);
+      if (total === 0) {
+        document.getElementById("output").innerHTML = "<p>Chưa có dữ liệu</p>";
+        document.getElementById("output-container").style.display = "block";
+        return;
+      }
+      let sortedData = Object.entries(data)
+        .map(([key, value]) => [key, value, (value / total * 100)])
+        .sort((a, b) => b[2] - a[2]);
+      sortedData.forEach(item => item[2] = Math.round(item[2] * 100) / 100);
+      let totalPercentage = sortedData.reduce((acc, item) => acc + item[2], 0);
+      let diff = 100 - totalPercentage;
+      if (sortedData.length > 0) {
+        sortedData[0][2] += diff;
+      }
+      let outputHTML = sortedData.map((item, index) =>
+        `<tr>
+           <td>${index + 1}</td>
+           <td>${item[0]}</td>
+           <td>${item[1]}</td>
+           <td>${item[2].toFixed(2)}%</td>
+         </tr>`
+      ).join("");
+      document.getElementById("output").innerHTML = `
+        <table>
+          <tr>
+            <th>Rank</th>
+            <th>Nội dung</th>
+            <th>Giá trị</th>
+            <th>Tỷ lệ (%)</th>
+          </tr>
+          ${outputHTML}
+        </table>
+      `;
+      document.getElementById("output-container").style.display = "block";
+    }
+    
+    // -------------------------
+    // Xử lý khi nhấn Enter trong ô nhập liệu
+    // -------------------------
+    function handleKeyPress(event, category) {
+      if (event.key === "Enter") {
+        const value = parseInt(event.target.value);
+        if (!isNaN(value) && value > 0) {
+          data[category] += value;
+          dailyData[category] += value;
+          event.target.value = "";
+          saveData();
+          saveDailyData();
+          updateChart();
+          summarizeValues();
+          document.getElementById("recordMessage").style.display = "block";
+          setTimeout(() => {
+            document.getElementById("recordMessage").style.display = "none";
+          }, 2000);
+        } else {
+          alert("Vui lòng nhập một số nguyên dương hợp lệ.");
+          event.target.value = "";
+        }
+      }
+    }
+    
+    // -------------------------
+    // Cập nhật thời gian cập nhật cuối
+    // -------------------------
+    function updateLastUpdated() {
+      const nowStr = new Date().toLocaleString("vi-VN");
+      document.getElementById("lastUpdated").innerText = `Lần cập nhật cuối: ${nowStr}`;
+      localStorage.setItem(getLastUpdatedKey(), nowStr);
+    }
+    
+    // -------------------------
+    // Hàm copy dữ liệu (giữ nguyên)
+    // -------------------------
+    function copyValues() {
+      let total = Object.values(data).reduce((sum, value) => sum + value, 0);
+      if (total === 0) {
+        alert("Chưa có dữ liệu để sao chép.");
+        return;
+      }
+      let dataWithPercentages = Object.entries(data).map(([key, value]) => {
+        let percentage = (value / total) * 100;
+        return { key, value, percentage };
+      });
+      dataWithPercentages.forEach(item => {
+        item.percentage = Math.round(item.percentage * 100) / 100;
+      });
+      let totalPercentage = dataWithPercentages.reduce((sum, item) => sum + item.percentage, 0);
+      let diff = Math.round((100 - totalPercentage) * 100) / 100;
+      let maxItem = dataWithPercentages.reduce((max, item) => item.value > max.value ? item : max, dataWithPercentages[0]);
+      maxItem.percentage += diff;
+      let textToCopy = dataWithPercentages.map((item, index) =>
+        `${index + 1}. ${item.key}: ${item.percentage.toFixed(2)}%`
+      ).join("\n");
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        document.getElementById("copiedMessage").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("copiedMessage").style.display = "none";
+        }, 2000);
+      }).catch(err => {
+        alert("Lỗi sao chép dữ liệu. Hãy thử lại.");
+        console.error(err);
+      });
+    }
+    
+    // -------------------------
+    // Hàm tính kết quả tổng hợp cho tìm kiếm (giữ nguyên)
+    // -------------------------
+    function calculateAggregatedResults(aggregatedData) {
+      let total = Object.values(aggregatedData).reduce((acc, val) => acc + val, 0);
+      let sortedData = Object.entries(aggregatedData)
+        .map(([key, value]) => [key, value, (value / total * 100)])
+        .sort((a, b) => b[2] - a[2]);
+      sortedData.forEach(item => {
+        item[2] = Math.round(item[2] * 100) / 100;
+      });
+      let totalPercentage = sortedData.reduce((acc, item) => acc + item[2], 0);
+      let diff = Math.round((100 - totalPercentage) * 100) / 100;
+      if (sortedData.length > 0) {
+        sortedData[0][2] += diff;
+      }
+      return sortedData;
+    }
+    
+    function copySearchResults() {
+      if (!window.searchAggregatedData) {
+        alert("Không có dữ liệu để sao chép!");
+        return;
+      }
+      const aggregatedData = window.searchAggregatedData;
+      let total = Object.values(aggregatedData).reduce((sum, value) => sum + value, 0);
+      if (total === 0) {
+        alert("Chưa có dữ liệu để sao chép.");
+        return;
+      }
+      let dataWithPercentages = Object.entries(aggregatedData).map(([key, value]) => {
+        let percentage = (value / total) * 100;
+        return { key, value, percentage };
+      });
+      dataWithPercentages.forEach(item => {
+        item.percentage = Math.round(item.percentage * 100) / 100;
+      });
+      let totalPercentage = dataWithPercentages.reduce((sum, item) => sum + item.percentage, 0);
+      let diff = Math.round((100 - totalPercentage) * 100) / 100;
+      let maxItem = dataWithPercentages.reduce((max, item) => {
+        return item.value > max.value ? item : max;
+      }, dataWithPercentages[0]);
+      maxItem.percentage += diff;
+      let textToCopy = dataWithPercentages.map((item, index) =>
+        `${index + 1}. ${item.key}: ${item.percentage.toFixed(2)}%`
+      ).join("\n");
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        document.getElementById("copiedMessageSearch").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("copiedMessageSearch").style.display = "none";
+        }, 2000);
+      }).catch(err => {
+        alert("Lỗi sao chép dữ liệu. Hãy thử lại.");
+        console.error(err);
+      });
+    }
+    
+    // -------------------------
+    // Chuyển đổi giao diện tìm kiếm
+    // -------------------------
+    function showSearchInterface() {
+      document.getElementById("defaultInterface").style.display = "none";
+      document.getElementById("searchInterface").style.display = "block";
+      document.getElementById("searchResultContainer").style.display = "none";
+      document.getElementById("noDataMessage").style.display = "none";
+    }
+    function backToDefault() {
+      document.getElementById("searchInterface").style.display = "none";
+      document.getElementById("defaultInterface").style.display = "flex";
+    }
+    
+    // -------------------------
+    // Lấy danh sách key theo khoảng thời gian (format: "data-YYYY-M")
+    // -------------------------
+    function getMonthsInRange(from, to) {
+      let result = [];
+      let [startYear, startMonth] = from.split("-").map(Number);
+      let [endYear, endMonth] = to.split("-").map(Number);
+      let currentYear = startYear;
+      let currentMonth = startMonth;
+      while (currentYear < endYear || (currentYear === endYear && currentMonth <= endMonth)) {
+        result.push(`data-${currentYear}-${currentMonth}`);
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+      }
+      return result;
+    }
+    
+    function searchData() {
+      const fromMonth = document.getElementById("fromMonth").value;
+      const toMonth = document.getElementById("toMonth").value;
+      if (!fromMonth || !toMonth) {
+        alert("Vui lòng chọn khoảng thời gian.");
+        return;
+      }
+      const keys = getMonthsInRange(fromMonth, toMonth);
+      let aggregatedData = {};
+      categories.forEach(cat => aggregatedData[cat] = 0);
+      let found = false;
+      keys.forEach(key => {
+        let stored = localStorage.getItem(key);
+        if (stored) {
+          try {
+            let monthData = JSON.parse(stored);
+            categories.forEach(cat => {
+              if (monthData[cat]) {
+                aggregatedData[cat] += Number(monthData[cat]);
+              }
+            });
+            found = true;
+          } catch(e) {
+            console.error("Lỗi parse dữ liệu cho key " + key, e);
+          }
+        }
+      });
+      if (!found) {
+        document.getElementById("noDataMessage").style.display = "block";
+        document.getElementById("searchResultContainer").style.display = "none";
+        return;
+      }
+      let total = Object.values(aggregatedData).reduce((acc, val) => acc + val, 0);
+      if (total === 0) {
+        document.getElementById("noDataMessage").style.display = "block";
+        document.getElementById("searchResultContainer").style.display = "none";
+        return;
+      }
+      window.searchAggregatedData = aggregatedData;
+      let sortedData = calculateAggregatedResults(aggregatedData);
+      let outputHTML = sortedData.map((item, index) =>
+        `<tr>
+           <td>${index + 1}</td>
+           <td>${item[0]}</td>
+           <td>${item[1]}</td>
+           <td>${item[2].toFixed(2)}%</td>
+         </tr>`
+      ).join("");
+      let html = `<table>
+        <tr>
+          <th>Rank</th>
+          <th>Nội dung</th>
+          <th>Giá trị</th>
+          <th>Tỷ lệ (%)</th>
+        </tr>
+        ${outputHTML}
+      </table>`;
+      document.getElementById("searchResult").innerHTML = html;
+      document.getElementById("searchResultContainer").style.display = "block";
+      document.getElementById("noDataMessage").style.display = "none";
+    }
+    
+    // -------------------------
+    // Hàm lọc theo Tháng-Năm (mới)
+    // -------------------------
+    function filterDataByMonth() {
+      const select = document.getElementById("filterMonth");
+      const monthStr = select.value;
+      if (monthStr) {
+        loadDataForMonth(monthStr);
+      } else {
+        loadDataForMonth(defaultMonth);
+      }
+    }
+    
+    // -------------------------
+    // Khởi tạo giao diện và Chart
+    // -------------------------
+    createInputFields();
+    const ctx = document.getElementById("barChart").getContext("2d");
+    if (window.chart) {
+      window.chart.destroy();
+    }
+    window.chart = new Chart(ctx, {
+      type: "bar",
+      data: { 
+        labels: categories, 
+        datasets: [{ 
+          label: "Số lần nhập", 
+          data: categories.map(cat => data[cat]), 
+          backgroundColor: "#3498db", 
+          borderColor: "#2980b9", 
+          borderWidth: 1 
+        }] 
+      },
+      options: { 
+        responsive: true, 
+        scales: { y: { beginAtZero: true } } 
+      }
+    });
+    
+    updateChart();
+    loadDataForMonth(defaultMonth);
+    loadDailyData();
+    summarizeValues();
+    // Điền các option lọc theo Tháng-Năm dựa trên localStorage
+    function populateFilterOptions() {
+      const select = document.getElementById("filterMonth");
+      select.innerHTML = '<option value="">--Chọn Tháng-Năm--</option>';
+      const optionsSet = new Set();
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("data-")) {
+          const parts = key.split("-");
+          if (parts.length === 3) {
+            const year = parts[1];
+            const month = parts[2];
+            const monthFormatted = ("0" + month).slice(-2);
+            const optionValue = year + "-" + monthFormatted;
+            optionsSet.add(optionValue);
+          }
+        }
+      }
+      const optionsArray = Array.from(optionsSet).sort();
+      optionsArray.forEach(optionValue => {
+        const option = document.createElement("option");
+        option.value = optionValue;
+        option.text = optionValue;
+        select.appendChild(option);
+      });
+    }
+    populateFilterOptions();
+  </script>
+</body>
+</html>

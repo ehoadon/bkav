@@ -1,0 +1,407 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý CmdType</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow-x: hidden;
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #343a40;
+    margin-bottom: 20px;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.copy-btn {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 16px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.copy-btn:hover {
+    background-color: #218838;
+}
+
+.copy-btn:focus {
+    outline: none;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa các phần tử trong form */
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 20px;
+}
+
+.form input, .form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #495057;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form input:focus, .form textarea:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.form button {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: #ffffff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    max-width: 600px; /* Đảm bảo nút không rộng quá */
+    margin-top: 10px;
+}
+
+.form button:hover {
+    background-color: #0056b3;
+}
+
+.search input {
+    padding: 12px 15px;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #495057;
+    background-color: #ffffff;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.search input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.cmdtypes-list {
+    display: none;
+    margin-top: 20px;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 900px;
+}
+
+.cmdtype-item {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+    width: 100%;
+}
+.cmdtype-item pre {
+    margin-top: 20px; /* Thêm khoảng cách giữa các phần tử <pre> */
+}
+
+.json-container pre {
+    margin-bottom: 20px; /* Khoảng cách dưới phần tử JSON */
+}
+
+.cmdtype-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cmdtype-item strong {
+    display: block;
+    font-size: 16px;
+    color: #343a40;
+    margin-bottom: 8px;
+}
+
+.cmdtype-item pre {
+    background: #e9ecef;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 300px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.results-container {
+    margin-top: 20px;
+    display: none;
+    width: 100%;
+    max-width: 900px;
+}
+
+.results-container pre {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    color: #495057;
+    overflow-y: auto;
+    max-height: 300px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1, h2 {
+        font-size: 24px;
+    }
+
+    .form input, .form textarea, .search input {
+        max-width: 100%;
+    }
+
+    .form button {
+        width: 100%; /* Đảm bảo nút "Thêm mới" chiếm hết chiều rộng màn hình */
+    }
+}
+.cmdtypes-list {
+    display: none;
+    margin-top: 20px;
+    overflow-y: auto; /* Thêm thanh cuộn dọc */
+    width: 100%;
+    max-width: 900px;
+    max-height: 400px; /* Giới hạn chiều cao tối đa */
+    border: 1px solid #dee2e6; /* Đường viền để phân tách rõ */
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff; /* Màu nền để dễ nhìn */
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quản lý CmdType</h1>
+
+        <!-- Form Thêm Mới CmdType -->
+        <div class="form" id="formAddCmdType">
+            <input type="text" id="cmdtypeName" placeholder="CmdType">
+            <textarea id="cmdtypeFunc" placeholder="Chức năng"></textarea>
+            <div style="display: flex; align-items: center;">
+                <textarea id="cmdtypeJson" placeholder="Dữ liệu mẫu"></textarea>
+            </div>
+            <textarea id="cmdtypeResult" placeholder="Kết quả trả về"></textarea>
+            <button onclick="addCmdType()">Thêm mới</button>
+            <button onclick="exportData()">Kết xuất dữ liệu</button>
+            <button onclick="importData()">Tải dữ liệu từ JSON</button>
+            <input type="file" id="fileInput" accept="application/json" style="display: none;" onchange="loadFromFile(event)">
+        </div>
+
+        <!-- Tìm kiếm -->
+        <div class="search">
+            <label for="searchInput">Tìm kiếm:</label>
+            <input type="text" id="searchInput" placeholder="Tìm kiếm CmdType hoặc chức năng" oninput="searchCmdType()" onkeydown="checkEnter(event)">
+        </div>
+
+        <!-- Danh sách CmdType -->
+        <div class="cmdtypes-list" id="cmdtypesList">
+            <!-- Các CmdType sẽ được hiển thị ở đây -->
+        </div>
+    </div>
+
+      <script>
+        let cmdTypes = JSON.parse(localStorage.getItem('cmdTypes')) || [];
+
+        function displayCmdTypes(filteredCmdTypes) {
+            const listContainer = document.getElementById('cmdtypesList');
+            listContainer.innerHTML = '';
+
+            if (filteredCmdTypes.length === 0) {
+                listContainer.style.display = 'none';
+            } else {
+                listContainer.style.display = 'block';
+                filteredCmdTypes.forEach(cmd => {
+                    const cmdDiv = document.createElement('div');
+                    cmdDiv.classList.add('cmdtype-item');
+                    cmdDiv.innerHTML = `
+                        <div class="cmdtype-item">
+                            <p><b>CmdType:</b> ${cmd.name}</p>
+                            <p><b>Chức năng:</b> ${cmd.func}</p>
+                            <div class="json-container">
+                                <button class="copy-btn" onclick="copyJson('${encodeURIComponent(cmd.json)}')">Sao chép</button>
+                                <pre><b>Format JSON:<b> \n${highlightJson(cmd.json)}</pre>
+                            </div>
+                            <pre><b>Kết quả trả về:<b> \n${highlightJson(cmd.result)}</pre>
+                        </div>
+                    `;
+                    listContainer.appendChild(cmdDiv);
+                });
+            }
+        }
+
+        function copyJson(encodedJsonString) {
+            const jsonString = decodeURIComponent(encodedJsonString);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                alert('Đã sao chép JSON vào clipboard!');
+            }).catch(err => {
+                alert('Lỗi sao chép: ' + err);
+            });
+        }
+
+        function highlightJson(jsonString) {
+            try {
+                const parsedJson = JSON.parse(jsonString);
+                const jsonStr = JSON.stringify(parsedJson, null, 2);
+                return jsonStr.replace(/"([^"\n]+)":/g, '<span style="color: #007bff;">"$1":</span>');
+            } catch (e) {
+                return jsonString;
+            }
+        }
+
+        function addCmdType() {
+            const name = document.getElementById('cmdtypeName').value.trim();
+            const func = document.getElementById('cmdtypeFunc').value.trim();
+            const json = document.getElementById('cmdtypeJson').value.trim();
+            const result = document.getElementById('cmdtypeResult').value.trim();
+
+            if (!name || !func || !json || !result) {
+                alert('Vui lòng điền đầy đủ thông tin');
+                return;
+            }
+
+            const newCmd = { name, func, json, result };
+            cmdTypes.push(newCmd);
+            localStorage.setItem('cmdTypes', JSON.stringify(cmdTypes));
+
+            document.getElementById('cmdtypeName').value = '';
+            document.getElementById('cmdtypeFunc').value = '';
+            document.getElementById('cmdtypeJson').value = '';
+            document.getElementById('cmdtypeResult').value = '';
+
+            searchCmdType();
+        }
+
+        function searchCmdType() {
+            const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
+            const formAddCmdType = document.getElementById('formAddCmdType');
+            const cmdtypesList = document.getElementById('cmdtypesList');
+
+            if (searchValue) {
+                formAddCmdType.style.display = 'none';
+            } else {
+                formAddCmdType.style.display = 'block';
+            }
+
+            if (!searchValue) {
+                cmdtypesList.style.display = 'none';
+                return;
+            }
+
+            const filteredCmdTypes = cmdTypes.filter(cmd => {
+                return cmd.name.toLowerCase().includes(searchValue) || cmd.func.toLowerCase().includes(searchValue);
+            });
+
+            displayCmdTypes(filteredCmdTypes);
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter' && document.getElementById('searchInput').value.trim() === "") {
+                location.reload();
+            }
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(cmdTypes, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cmdtypes.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.click();
+        }
+
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (Array.isArray(data)) {
+                            cmdTypes = data;
+                            localStorage.setItem('cmdTypes', JSON.stringify(cmdTypes));
+                            searchCmdType();
+                        } else {
+                            alert('Dữ liệu không hợp lệ!');
+                        }
+                    } catch (err) {
+                        alert('Lỗi khi đọc tệp: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        window.onload = () => {
+            searchCmdType();
+        };
+    </script>
+</body>
+</html>

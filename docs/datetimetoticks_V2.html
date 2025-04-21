@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển đổi DateTime ↔ Ticks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1E1E2E;
+            color: white;
+            flex-direction: column;
+            padding: 40px 20px;
+        }
+        .container {
+            background: #29293F;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+        input {
+            background: #3A3A5A;
+            color: white;
+        }
+        button {
+            background: #FF6B6B;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #FF4C4C;
+        }
+        footer {
+            margin-top: 2rem;
+            background-color: #29293F;
+            padding: 15px 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+        footer h3 {
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chuyển đổi DateTime ↔ Ticks</h2>
+        <input type="datetime-local" id="datetimeInput" step="1">
+        <button onclick="convertToTicks()">Chuyển thành Ticks</button>
+        <input type="text" id="ticksInput" placeholder="Nhập ticks">
+        <button onclick="convertToDatetime()">Chuyển thành DateTime</button>
+        <h3 id="result"></h3>
+    </div>
+
+    <footer>
+        <h3>📘 Hướng dẫn sử dụng công cụ</h3>
+        <ul>
+            <li>👉 Nhập ngày giờ theo định dạng <strong>DateTime</strong> vào ô đầu tiên (có hỗ trợ chọn thời gian) rồi bấm <strong>“Chuyển thành Ticks”</strong> để lấy giá trị ticks tương ứng.</li>
+            <li>👉 Ngược lại, bạn có thể nhập một giá trị <strong>ticks</strong> (số 64-bit) vào ô phía dưới rồi bấm <strong>“Chuyển thành DateTime”</strong> để xem lại thời gian theo giờ địa phương.</li>
+            <li>⏱️ Kết quả hiển thị sẽ tự động cân nhắc múi giờ hệ thống để giúp bạn chuyển đổi chính xác theo giờ địa phương.</li>
+            <li>📌 Cách tính ticks: 1 tick = 100 nanoseconds kể từ 00:00:00 ngày 1/1/0001 (theo chuẩn .NET).</li>
+        </ul>
+        <p><em>Lưu ý:</em> Giá trị ticks thường dùng trong hệ thống .NET hoặc khi thao tác với thời gian dạng nhị phân/chuỗi.</p>
+    </footer>
+
+<script>
+    function convertToTicks() {
+        let datetime = document.getElementById("datetimeInput").value;
+        if (!datetime) return;
+        let date = new Date(datetime);
+        date.setMilliseconds(0); // Loại bỏ phần millisecond nếu cần
+        let offsetTicks = date.getTimezoneOffset() * 600000000;
+        let ticks = (date.getTime() * 10000) + 621355968000000000 - offsetTicks;
+        document.getElementById("result").innerText = "Ticks: " + ticks;
+    }
+
+    function convertToDatetime() {
+        let ticks = document.getElementById("ticksInput").value;
+        if (!ticks || isNaN(ticks)) return;
+        let offsetTicks = (new Date()).getTimezoneOffset() * 600000000;
+        let milliseconds = ((ticks - 621355968000000000) + offsetTicks) / 10000;
+        let date = new Date(milliseconds);
+        document.getElementById("result").innerText = "DateTime: " + date.toLocaleString();
+    }
+</script>
+</body>
+</html>

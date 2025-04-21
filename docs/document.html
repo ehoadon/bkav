@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Liệu Dự Án</title>
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .form-container, .import-export-container {
+            padding: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            resize: none;
+        }
+
+        .button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            background: #0056b3;
+        }
+
+        .search-container {
+            padding: 20px;
+            background: #f4f4f9;
+        }
+
+        .search-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .search-results {
+            display: none;
+            padding: 20px;
+        }
+
+        .search-results h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .project {
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-details {
+            flex: 1;
+        }
+
+        .project-details a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .project-details a:hover {
+            text-decoration: underline;
+        }
+        .project-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.button-delete {
+    background: #f44336; /* Màu đỏ cho nút Xóa */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.project-button:hover {
+    background: #e53935;
+}
+
+.button-edit {
+    background: #4caf50; /* Màu xanh lá cho nút Sửa */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.button-edit:hover {
+    background: #388e3c;
+}
+
+.project-button:disabled {
+    background: #ddd;
+    cursor: not-allowed;
+}
+.small-error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Quản Lý Tài Liệu Dự Án</h1>
+        </div>
+        <div class="form-container" id="form-container">
+            <div class="form-group">
+                <label for="project-name">Tên Dự Án</label>
+                <input type="text" id="project-name" placeholder="Nhập tên dự án">
+            </div>
+        <div class="form-group">
+            <label for="project-link">Link Dự Án</label>
+            <input type="text" id="project-link" placeholder="Nhập link Google Docs" oninput="validateLink()">
+            <small id="link-error" style="color: red; display: none;">Link không hợp lệ! Vui lòng kiểm tra lại.</small>
+        </div>
+
+            <div class="form-group">
+                <label for="project-notes">Ghi Chú (tùy chọn)</label>
+                <textarea id="project-notes" placeholder="Nhập ghi chú"></textarea>
+            </div>
+            <button class="button" onclick="addProject()">Thêm Dự Án</button>
+        </div>
+        <div class="import-export-container">
+            <button class="button" onclick="importData()">Tải Dữ Liệu</button>
+            <button class="button" onclick="exportData()">Kết Xuất Dữ Liệu</button>
+            <input type="file" id="file-input" style="display: none;" accept=".json">
+        </div>
+        <div class="search-container">
+            <input type="text" id="search-query" placeholder="Tìm kiếm dự án..." oninput="searchProjects()">
+        </div>
+        <div class="search-results" id="search-results">
+            <h2>Kết Quả Tìm Kiếm</h2>
+            <div id="project-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let editIndex = -1;
+        const projects = JSON.parse(localStorage.getItem('projects')) || [];
+
+        function addProject() {
+            const name = document.getElementById('project-name').value.trim();
+            const link = document.getElementById('project-link').value.trim();
+            const notes = document.getElementById('project-notes').value.trim();
+
+            if (!name || !link) {
+                alert('Tên dự án và link không được để trống!');
+                return;
+            }
+
+            const isDuplicate = projects.some(project => project.name.toLowerCase() === name.toLowerCase() && editIndex === -1);
+            if (isDuplicate) {
+                alert('Tên dự án đã tồn tại! Vui lòng chọn tên khác.');
+                return;
+            }
+
+            const project = { id: Date.now(), name, link, notes };
+
+            if (editIndex === -1) {
+                projects.push(project);
+                alert('Dự án đã được thêm!');
+            } else {
+                const indexToUpdate = projects.findIndex(p => p.id === editIndex);
+                projects[indexToUpdate] = project;
+                editIndex = -1;
+                alert('Dự án đã được cập nhật!');
+                document.querySelector('.button').textContent = 'Thêm Dự Án';
+            }
+
+            localStorage.setItem('projects', JSON.stringify(projects));
+
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-link').value = '';
+            document.getElementById('project-notes').value = '';
+
+            displayProjects();
+        }
+                function validateLink() {
+            const linkInput = document.getElementById('project-link');
+            const linkError = document.getElementById('link-error');
+
+           const linkRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+
+            if (linkRegex.test(linkInput.value.trim())) {
+                linkError.style.display = 'none';
+                return true;
+            } else {
+                linkError.style.display = 'block';
+                return false;
+            }
+        }
+
+        function searchProjects() {
+            const query = document.getElementById('search-query').value.toLowerCase();
+            const searchResults = document.getElementById('search-results');
+            const projectContainer = document.getElementById('project-container');
+
+            projectContainer.innerHTML = '';
+
+            if (query.length >= 2) {
+                const filteredProjects = projects.filter(project =>
+                    project.name.toLowerCase().includes(query) ||
+                    (project.notes && project.notes.toLowerCase().includes(query))
+                );
+
+                filteredProjects.forEach(project => {
+                    const projectDiv = document.createElement('div');
+                    projectDiv.className = 'project';
+                    projectDiv.innerHTML = `
+                        <div class="project-details">
+                            <strong>${project.name}</strong><br>
+                            <a href="${project.link}" target="_blank">Mở tài liệu</a><br>
+                            <small>${project.notes || 'Không có ghi chú'}</small>
+                        </div>
+                        <div class="buttons">
+                            <button class="button-edit" onclick="editProject(${project.id})">Sửa</button>
+                            <button class="button-delete" onclick="deleteProject(${project.id})">Xóa</button>
+                        </div>
+                    `;
+                    projectContainer.appendChild(projectDiv);
+                });
+
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.style.display = 'none';
+            }
+        }
+
+        function editProject(id) {
+            const project = projects.find(p => p.id === id);
+            if (!project) return;
+            document.getElementById('project-name').value = project.name;
+            document.getElementById('project-link').value = project.link;
+            document.getElementById('project-notes').value = project.notes;
+
+            editIndex = id;
+            document.querySelector('.button').textContent = 'Cập Nhật';
+            window.scrollTo(0, 0);
+        }
+
+        function deleteProject(id) {
+            if (confirm('Bạn có chắc muốn xóa dự án này?')) {
+                const indexToDelete = projects.findIndex(p => p.id === id);
+                if (indexToDelete !== -1) {
+                    projects.splice(indexToDelete, 1);
+                    localStorage.setItem('projects', JSON.stringify(projects));
+                    searchProjects();
+                }
+            }
+        }
+
+        function displayProjects() {
+            const projectContainer = document.getElementById('project-container');
+            projectContainer.innerHTML = '';
+
+            projects.forEach(project => {
+                const projectDiv = document.createElement('div');
+                projectDiv.className = 'project';
+                projectDiv.innerHTML = `
+                    <div class="project-details">
+                        <strong>${project.name}</strong><br>
+                        <a href="${project.link}" target="_blank">Mở tài liệu</a><br>
+                        <small>${project.notes || 'Không có ghi chú'}</small>
+                    </div>
+                    <div class="buttons">
+                        <button class="button-edit" onclick="editProject(${project.id})">Sửa</button>
+                        <button class="button-delete" onclick="deleteProject(${project.id})">Xóa</button>
+                    </div>
+                `;
+                projectContainer.appendChild(projectDiv);
+            });
+        }
+
+            function importData() {
+                const fileInput = document.getElementById('file-input');
+                fileInput.click();
+                fileInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file && file.type === 'application/json') {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const data = JSON.parse(e.target.result);
+                            if (Array.isArray(data)) {
+                                // Gán id duy nhất cho các dự án nếu không có id
+                                data.forEach(project => {
+                                    if (!project.id) {
+                                        project.id = Date.now() + Math.random();
+                                    }
+                                });
+
+                                localStorage.setItem('projects', JSON.stringify(data));
+                                projects.length = 0;
+                                projects.push(...data);
+                                displayProjects();
+                            } else {
+                                alert('Dữ liệu không hợp lệ.');
+                            }
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        alert('Vui lòng chọn một tệp JSON.');
+                    }
+                });
+            }
+
+
+        function exportData() {
+            const dataStr = JSON.stringify(projects);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'projects.json';
+            link.click();
+        }
+
+        window.onload = displayProjects;
+    </script>
+</body>
+</html>

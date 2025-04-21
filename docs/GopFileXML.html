@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gộp File Nâng Cao</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 30px; padding: 20px; background: #f0f0f0; }
+    .container { background: white; border-radius: 10px; padding: 20px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input[type="file"], select { margin-bottom: 20px; }
+    .filters { margin-bottom: 20px; }
+    .filters label { margin-right: 15px; }
+    button { padding: 10px 20px; border: none; border-radius: 6px; background: #28a745; color: white; cursor: pointer; font-size: 16px; }
+    button:hover { background: #218838; }
+    #status { margin-top: 15px; color: #155724; }
+    #summary { margin-top: 10px; color: #333; }
+    .note { margin-top: 40px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; color: #856404; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Gộp & Chuẩn hóa File</h2>
+    <input type="file" id="fileInput" multiple accept=".xml,.txt" />
+    <div class="filters" id="dateFilters"></div>
+    <label for="formatSelect"><strong>Chọn định dạng tải xuống:</strong></label>
+    <select id="formatSelect">
+      <option value="xml">.xml</option>
+      <option value="txt">.txt</option>
+    </select>
+    <div id="summary"></div>
+    <button onclick="mergeFiles()">Gộp và Tải Xuống</button>
+    <p id="status"></p>
+
+    <div class="note">
+      <h4>Ghi chú chức năng:</h4>
+      <ul>
+        <li>Hỗ trợ chọn nhiều file XML/TXT và gộp thành 1 hoặc nhiều file.</li>
+        <li>Tự động loại bỏ khai báo XML: <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code>.</li>
+        <li>Dọn sạch khoảng trắng trong nội dung thẻ XML: mỗi khoảng trắng chỉ còn 1 space.</li>
+        <li>Nếu file chứa nhiều <code>&lt;ArrayOfInvoiceDataWS&gt;</code>, chỉ lấy nội dung <code>&lt;InvoiceDataWS&gt;</code> từ file thứ 2 trở đi.</li>
+        <li>Sắp xếp file theo <code>InvoiceDate</code> (dạng: 2025-04-14T05:06:54).</li>
+        <li>Tick chọn InvoiceDate để chỉ tải các file có ngày được chọn.</li>
+        <li>Nếu không chọn ngày, toàn bộ file sẽ được gộp vào 1 lần tải.</li>
+        <li>Nếu số file vượt quá 100, hệ thống tự chia thành nhiều file tải xuống.</li>
+        <li>Nếu có file chứa InvoiceDate = 2025-04-14, sẽ tách thành file riêng.</li>
+        <li>Cho phép chọn định dạng tải xuống là .xml hoặc .txt.</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    let fileDataArrGlobal = [];
+    document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+    function handleFileSelect() {
+      const files = Array.from(document.getElementById('fileInput').files);
+      const filtersDiv = document.getElementById('dateFilters');
+      const summaryDiv = document.getElementById('summary');
+      filtersDiv.innerHTML = '';
+      summaryDiv.textContent = '';
+      fileDataArrGlobal = [];
+      if (!files.length) return;
+
+      const readers = files.map(file => new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const raw = e.target.result.replace(/\s+/g, ' ').trim();
+          const match = raw.match(/<InvoiceDate>([^<]+)<\/InvoiceDate>/);
+          const invoiceDate = match ? match[1].split('T')[0] : null;
+          fileDataArrGlobal.push({ file, text: raw, invoiceDate });
+          resolve();
+        };
+        reader.onerror = () => resolve();
+        reader.readAsText(file);
+      }));
+
+      Promise.all(readers).then(() => {
+        const dates = Array.from(new Set(
+          fileDataArrGlobal.map(d => d.invoiceDate).filter(d => d)
+        )).sort();
+        if (dates.length) {
+          filtersDiv.innerHTML = '<strong>Chọn ngày InvoiceDate:</strong><br>' +
+            dates.map(d => `<label><input type="checkbox" value="${d}" onchange="updateSummary()"> ${d}</label>`).join('');
+        }
+        updateSummary();
+      });
+    }
+
+    function updateSummary() {
+      const total = fileDataArrGlobal.length;
+      const checked = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
+      const specialCount = checked.length
+        ? fileDataArrGlobal.filter(d => checked.includes(d.invoiceDate)).length
+        : 0;
+      const remaining = total - specialCount;
+      const batches = checked.length ? Math.ceil(remaining / 100) : 1;
+      document.getElementById('summary').textContent =
+        `Tổng file: ${total}` +
+        (checked.length ? `; Đã chọn ngày: ${specialCount}` : '') +
+        `; Còn lại: ${remaining}; Số lượt tải: ${batches}${checked.length ? '' : ' (tất cả)'}`;
+    }
+
+    function mergeFiles() {
+      if (!fileDataArrGlobal.length) {
+        document.getElementById('status').textContent = 'Chưa có file để gộp.';
+        return;
+      }
+      document.getElementById('status').textContent = '';
+
+      const selectedFormat = document.getElementById('formatSelect').value;
+      const extension = selectedFormat === 'xml' ? 'xml' : 'txt';
+
+      let wrapperOpen = '';
+      const parser = new DOMParser();
+      const serializer = new XMLSerializer();
+
+      const withDate = fileDataArrGlobal.filter(d => d.invoiceDate)
+        .sort((a, b) => new Date(a.invoiceDate) - new Date(b.invoiceDate));
+      const withoutDate = fileDataArrGlobal.filter(d => !d.invoiceDate);
+      const sortedArr = [...withDate, ...withoutDate];
+
+      const checkedDates = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
+      const specialArr = checkedDates.length
+        ? sortedArr.filter(d => checkedDates.includes(d.invoiceDate))
+        : [];
+      const remainingArr = checkedDates.length
+        ? sortedArr.filter(d => !checkedDates.includes(d.invoiceDate))
+        : sortedArr;
+
+      let countFiles = 0;
+      function processAndDownload(batch, suffix) {
+        let mergedChild = [];
+        let otherContents = [];
+        batch.forEach(fd => {
+          const rawClean = fd.text.replace(/<\?xml[\s\S]*?\?>/g, '').trim();
+          const doc = parser.parseFromString(rawClean, 'application/xml');
+          const arrNode = doc.getElementsByTagName('ArrayOfInvoiceDataWS');
+          if (arrNode.length) {
+            if (!wrapperOpen) {
+              const op = rawClean.match(/<ArrayOfInvoiceDataWS[^>]*>/);
+              wrapperOpen = op ? op[0] : '<ArrayOfInvoiceDataWS>';
+            }
+            Array.from(doc.getElementsByTagName('InvoiceDataWS')).forEach(n => {
+              let str = serializer.serializeToString(n);
+              str = str.replace(/>\s*(.*?)\s*</g, (m, t) => `>${t.replace(/\s+/g,' ')}<`);
+              mergedChild.push(str);
+            });
+          } else {
+            otherContents.push(rawClean);
+          }
+        });
+        let out = '';
+        if (mergedChild.length) out = wrapperOpen + '\n' + mergedChild.join('\n') + '\n</ArrayOfInvoiceDataWS>';
+        if (otherContents.length) out += (out ? '\n\n' : '') + otherContents.join('\n\n');
+        const blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `merged${suffix}.${extension}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      if (!checkedDates.length) {
+        processAndDownload(sortedArr, '_all');
+        countFiles = 1;
+      } else {
+        if (specialArr.length) { processAndDownload(specialArr, '_special'); countFiles++; }
+        for (let i = 0; i < remainingArr.length; i += 100) {
+          processAndDownload(remainingArr.slice(i, i + 100), `_part${countFiles + 1}`);
+          countFiles++;
+        }
+      }
+      document.getElementById('status').textContent = `Hoàn tất: đã tạo ${countFiles} file gộp.`;
+    }
+  </script>
+</body>
+</html>
