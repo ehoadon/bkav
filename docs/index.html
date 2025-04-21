@@ -57,7 +57,9 @@
   <header>
     <h1>Trang Tổng Hợp Dự Án</h1>
     <p>Nơi tập trung các công cụ &amp; tính năng</p>
-    <button id="adminBtn">Đăng nhập</button>
+    <div id="userArea">
+  <button id="adminBtn">Đăng nhập</button>
+</div>
   </header>
 
   <div id="main-content" class="container">
@@ -99,7 +101,15 @@
     document.getElementById('loginBtn').onclick=()=>{
       const u=document.getElementById('username').value,
             p=document.getElementById('password').value;
-      if(credentials[u]===p){ loginContainer.style.display='none'; mainContent.style.display='none'; dashboard.style.display='block'; loadStats(); }
+      if (credentials[u] === p) {
+  saveLogin(u);
+  updateGreeting(u);
+  loginContainer.style.display = 'none';
+  mainContent.style.display = 'none';
+  dashboard.style.display = 'block';
+  loadStats();
+}
+
       else loginError.textContent='Sai tên hoặc mật khẩu.';
     };
     function logout(){dashboard.style.display='none'; mainContent.style.display='block';}
@@ -119,6 +129,31 @@
     }
     // Initialize CountAPI keys
     ['index','encrypt','stats'].forEach(k=>fetch(`https://api.countapi.xyz/create?namespace=demo&key=${k}&value=0&enable=true`));
+    const userArea = document.getElementById('userArea');
+
+// Lưu trạng thái đăng nhập
+function saveLogin(user) {
+  sessionStorage.setItem('authenticated', 'true');
+  sessionStorage.setItem('username', user);
+}
+
+// Hiển thị lời chào
+function updateGreeting(user) {
+  userArea.innerHTML = `👋 Chào mừng <strong>${user}</strong>`;
+}
+
+// Kiểm tra nếu user đã đăng nhập trước đó
+window.addEventListener('DOMContentLoaded', () => {
+  const isAuth = sessionStorage.getItem('authenticated') === 'true';
+  const username = sessionStorage.getItem('username');
+  if (isAuth && username) {
+    mainContent.style.display = 'block';
+    loginContainer.style.display = 'none';
+    dashboard.style.display = 'none';
+    updateGreeting(username);
+  }
+});
+
   </script>
 </body>
 </html>
