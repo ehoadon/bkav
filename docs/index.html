@@ -3,15 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Tổng Hợp Dự Án &amp; Admin Dashboard</title>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L0R6NS2JXM"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}  
-    gtag('js', new Date());  
-    gtag('config', 'G-L0R6NS2JXM');
-  </script>
+  <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
   <style>
     :root { --primary-color:#007bff; --bg-color:#f5f5f5; --card-bg:#fff; --text-color:#333; --card-shadow:rgba(0,0,0,0.1);} 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -38,9 +30,13 @@
     .login-card button:hover{background:#0056b3}
     .login-card .error{color:red;font-size:.9em;margin-top:5px}
     #dashboard{display:none}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:center}
+    th{background:var(--primary-color);color:#fff}
   </style>
 </head>
 <body>
+  <!-- Login Overlay -->
   <div id="login-container">
     <div class="login-card">
       <h2>Đăng nhập Admin</h2>
@@ -51,117 +47,55 @@
     </div>
   </div>
 
+  <!-- Main Content -->
   <div id="main-content">
     <header>
       <h1>Trang Tổng Hợp Dự Án</h1>
-      <p>Truy cập mọi công cụ mà không cần đăng nhập</p>
+      <p>Chào mừng đã đến với giao diện tổng hợp chức năng</p>
+      <div style="position:absolute;top:20px;right:20px;">
+        <button id="adminBtn">Admin</button>
+      </div>
     </header>
     <nav class="grid">
-      <div class="card">
-        <img src="images/encrypt-tool.png" alt="Encrypt & Decrypt Tool">
-        <div class="card-content">
-          <h3>Công Cụ Mã Hóa/Giải Mã</h3>
-          <p>Hỗ trợ JSON, XML, BEPOS với AES, Base64, Zip, Escape...</p>
-          <a href="./En-Comp.V3.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/task-stats.png" alt="Task Statistics">
-        <div class="card-content">
-          <h3>Thống Kê Công Việc</h3>
-          <p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao...</p>
-          <a href="./TyLeXuLy.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/notes-manager.png" alt="Notes Manager">
-        <div class="card-content">
-          <h3>Quản Lý Ghi Chú</h3>
-          <p>Thêm, hoàn thành, xóa ghi chú; import/export JSON.</p>
-          <a href="./Note.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/ticks-converter.png" alt="DateTime ↔ Ticks Converter">
-        <div class="card-content">
-          <h3>Chuyển Đổi DateTime &amp; Ticks</h3>
-          <p>Chuyển đổi nhanh giữa DateTime và ticks chuẩn .NET.</p>
-          <a href="./datetimetoticks_V2.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/xml-merge.png" alt="Gộp file XML">
-        <div class="card-content">
-          <h3>Gộp file XML</h3>
-          <p>Gộp file XML</p>
-          <a href="./GopFileXML.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/invoice.png" alt="Tạo hóa đơn">
-        <div class="card-content">
-          <h3>Tạo hóa đơn xuất XML</h3>
-          <p>Giao diện tạo hóa đơn</p>
-          <a href="./CreateInvoice_UpdateV2.html">Xem chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/admin-dashboard.png" alt="Admin Dashboard">
-        <div class="card-content">
-          <h3>Admin Dashboard</h3>
-          <p>Quản lý và thống kê trang web</p>
-          <button id="adminBtn">Đến Dashboard</button>
-        </div>
-      </div>
+      <div class="card"><img src="images/encrypt-tool.png" alt><div class="card-content"><h3>Công Cụ Mã Hóa/Giải Mã</h3><p>Hỗ trợ JSON, XML, BEPOS với AES, Base64, Zip, Escape...</p><a href="./En-Comp.V3.html">Xem chi tiết</a></div></div>
+      <div class="card"><img src="images/task-stats.png" alt><div class="card-content"><h3>Thống Kê Công Việc</h3><p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao...</p><a href="./TyLeXuLy.html">Xem chi tiết</a></div></div>
+      <div class="card"><img src="images/notes-manager.png" alt><div class="card-content"><h3>Quản Lý Ghi Chú</h3><p>Thêm, hoàn thành, xóa ghi chú; import/export JSON.</p><a href="./Note.html">Xem chi tiết</a></div></div>
+      <div class="card"><img src="images/ticks-converter.png" alt><div class="card-content"><h3>Chuyển Đổi DateTime & Ticks</h3><p>Chuyển đổi nhanh giữa DateTime và ticks chuẩn .NET.</p><a href="./datetimetoticks_V2.html">Xem chi tiết</a></div></div>
+      <div class="card"><img src="images/xml-merge.png" alt><div class="card-content"><h3>Gộp file XML</h3><p>Gộp file XML</p><a href="./GopFileXML.html">Xem chi tiết</a></div></div>
+      <div class="card"><img src="images/invoice.png" alt><div class="card-content"><h3>Tạo hóa đơn xuất XML</h3><p>Giao diện tạo hóa đơn</p><a href="./CreateInvoice_UpdateV2.html">Xem chi tiết</a></div></div>
     </nav>
-    <footer>
-      &copy; 2025 ThangHDb. All rights reserved.
-    </footer>
+    <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
   </div>
 
+  <!-- Admin Dashboard -->
   <section id="dashboard">
-    <header>
-      <h1>Admin Dashboard</h1>
-      <p>Thống kê và quản lý</p>
-    </header>
-    <nav style="text-align:center;margin:20px 0;">
-      <button onclick="logout()">Đăng xuất</button>
-      <button onclick="backToMain()" style="margin-left:10px;">Về Trang Chính</button>
-    </nav>
+    <header><h1>Admin Dashboard</h1><p>Thống kê và quản lý</p></header>
+    <nav style="text-align:center;margin:20px 0;"><button onclick="logout()">Đăng xuất</button><button onclick="backToMain()" style="margin-left:10px;">Về Trang Chính</button></nav>
     <div>
-      <p><strong>Lượt truy cập (ước tính GA):</strong> <span id="visitCount">...</span></p>
+      <p><strong>Lượt truy cập:</strong> <span id="visitCount">...</span></p>
       <p><strong>Trang phổ biến:</strong></p>
-      <table>
-        <tr><th>Page</th><th>Views</th></tr>
-        <tr><td>/index.html</td><td>...</td></tr>
-        <tr><td>/En-Comp.V3.html</td><td>...</td></tr>
-      </table>
+      <table><tr><th>Page</th><th>Views</th></tr><tr><td>/index.html</td><td id="cntIndex">...</td></tr><tr><td>/En-Comp.V3.html</td><td id="cntEncrypt">...</td></tr></table>
     </div>
   </section>
 
   <script>
-    // Admin credentials
-    const credentials = { admin: 'admin' };
-    const loginContainer = document.getElementById('login-container');
-    const mainContent = document.getElementById('main-content');
-    const dashboard = document.getElementById('dashboard');
-    const errorDiv = document.getElementById('loginError');
-    const adminBtn = document.getElementById('adminBtn');
-
-    adminBtn.onclick = () => { loginContainer.style.display = 'flex'; };
-    document.getElementById('loginBtn').onclick = () => {
-      const u = document.getElementById('username').value.trim();
-      const p = document.getElementById('password').value;
-      if (credentials[u] === p) {
-        loginContainer.style.display = 'none';
-        mainContent.style.display = 'none';
-        dashboard.style.display = 'block';
-      } else { errorDiv.textContent = 'Sai tên hoặc mật khẩu.'; }
+    // Demo static counter via CountAPI
+    function getCount(key, elId) {
+      fetch(`https://api.countapi.xyz/get/demo/${key}`)
+        .then(res=>res.json())
+        .then(data=> document.getElementById(elId).innerText = data.value)
+        .catch(()=> document.getElementById(elId).innerText = '0');
+    }
+    document.getElementById('adminBtn').onclick = ()=> document.getElementById('login-container').style.display='flex';
+    document.getElementById('loginBtn').onclick = ()=>{
+      const u=document.getElementById('username').value.trim(), p=document.getElementById('password').value;
+      if(u==='admin'&&p==='admin'){ document.getElementById('login-container').style.display='none';document.getElementById('main-content').style.display='none';document.getElementById('dashboard').style.display='block'; getCount('index','cntIndex'); getCount('encrypt','cntEncrypt'); }
+      else document.getElementById('loginError').innerText='Sai tên hoặc mật khẩu.';
     };
-    function logout(){ dashboard.style.display = 'none'; mainContent.style.display = 'block'; }
-    function backToMain(){ logout(); }
-    // GA visit count placeholder
-    document.getElementById('visitCount').innerText = '...';
+    function logout(){document.getElementById('dashboard').style.display='none';document.getElementById('main-content').style.display='block';}
+    function backToMain(){logout();}
+    // Initialize CountAPI keys if not exists (optional)
+    ['index','encrypt'].forEach(key=> fetch(`https://api.countapi.xyz/create?namespace=demo&key=${key}&value=0&enable=true`));
   </script>
 </body>
 </html>
