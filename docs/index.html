@@ -1,84 +1,168 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <link rel="icon" href="images/logo.png" type="image/png">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trang Tổng Hợp Dự Án</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {--primary-color:#0066cc;--secondary-color:#005bb5;--bg-color:#f0f4f8;--card-bg:#fff;--text-color:#222;--shadow:rgba(0,0,0,0.1);} 
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);min-height:100vh;}
-    header{background:var(--primary-color);color:#fff;padding:1.5rem 1rem;position:relative;text-align:center;}
-    header h1{font-size:1.8rem;margin-bottom:0.2rem}
-    header p{opacity:0.85;font-size:1rem}
-    #adminBtn{position:absolute;top:1rem;right:1rem;background:var(--secondary-color);border:none;padding:0.5rem 1rem;border-radius:4px;color:#fff;cursor:pointer;transition:0.2s;}
-    #adminBtn:hover{background:#004999}
-    .container{max-width:1200px;margin:2rem auto;padding:0 1rem}
-    .grid{display:grid;grid-gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
-    .card{background:var(--card-bg);border-radius:8px;box-shadow:0 2px 6px var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform 0.2s}
-    .card:hover{transform:translateY(-4px)}
-    .card img{width:100%;height:140px;object-fit:cover}
-    .card-content{padding:1rem;flex:1;display:flex;flex-direction:column}
-    .card-content h3{margin-bottom:0.75rem;color:var(--primary-color);font-size:1.1rem}
-    .card-content p{flex:1;font-size:0.95rem;margin-bottom:1rem}
-    .card-content a{align-self:flex-start;text-decoration:none;background:var(--primary-color);color:#fff;padding:0.5rem 1rem;border-radius:4px;transition:0.2s}
-    .card-content a:hover{background:var(--secondary-color)}
-    footer{text-align:center;padding:1rem 0;background:#fff;border-top:1px solid #ddd;font-size:0.9rem;color:#555;margin-top:2rem}
+    :root {
+      --primary-color: #0066cc;
+      --secondary-color: #005bb5;
+      --bg-color: #f0f4f8;
+      --card-bg: #fff;
+      --text-color: #222;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); min-height:100vh; }
+    header { background:var(--primary-color); color:#fff; padding:1.5rem 1rem; position:relative; text-align:center; }
+    header h1 { font-size:1.8rem; margin-bottom:0.2rem; }
+    header p { opacity:0.85; font-size:1rem; }
+    #userArea { position:absolute; top:1rem; right:1rem; }
+    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+    .grid { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+    .card { background:var(--card-bg); border-radius:8px; box-shadow:0 2px 6px var(--shadow); overflow:hidden; display:flex; flex-direction:column; transition:transform .2s; }
+    .card:hover { transform:translateY(-4px); }
+    .card img { width:100%; height:140px; object-fit:cover; }
+    .card-content { padding:1rem; flex:1; display:flex; flex-direction:column; }
+    .card-content h3 { margin-bottom:.75rem; color:var(--primary-color); font-size:1.1rem; }
+    .card-content p { flex:1; font-size:.95rem; margin-bottom:1rem; }
+    .card-content a { align-self:flex-start; text-decoration:none; background:var(--primary-color); color:#fff; padding:.5rem 1rem; border-radius:4px; transition:background .2s; }
+    .card-content a:hover { background:var(--secondary-color); }
+    footer { text-align:center; padding:1rem 0; background:#fff; border-top:1px solid #ddd; font-size:.9rem; color:#555; margin-top:2rem; }
+
+    /* Login/Signup Overlay */
+    #login-container {
+      position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      display:none; justify-content:center; align-items:center; z-index:999;
+    }
+    .login-card {
+      background:#fff; padding:1.5rem; border-radius:8px;
+      box-shadow:0 2px 8px var(--shadow); width:320px; text-align:center;
+    }
+    .login-card h2 { color:var(--primary-color); margin-bottom:1rem; font-size:1.25rem; }
+    .login-card input {
+      width:100%; padding:.5rem; margin-bottom:.75rem;
+      border:1px solid #ccc; border-radius:4px;
+    }
+    .login-card button {
+      width:48%; padding:.5rem; background:var(--primary-color);
+      color:#fff; border:none; border-radius:4px; cursor:pointer; transition:.2s;
+    }
+    .login-card button:hover { background:var(--secondary-color); }
+    .login-card .error { color:red; font-size:.85rem; margin-top:.5rem; }
+
     /* Dashboard styles */
-    #dashboard{display:none;padding:2rem 0}
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
-    .stat-card{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow);text-align:center}
-    .stat-card h4{font-size:1rem;color:var(--primary-color);margin-bottom:0.5rem}
-    .stat-card p{font-size:1.6rem;font-weight:bold}
-    .chart-container{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow)}
-    /* Login overlay */
-    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:999}
-    .login-card{background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px var(--shadow);width:320px;text-align:center}
-    .login-card h2{color:var(--primary-color);margin-bottom:1rem;font-size:1.25rem}
-    .login-card input{width:100%;padding:0.5rem;margin-bottom:0.75rem;border:1px solid #ccc;border-radius:4px}
-    .login-card button{width:100%;padding:0.5rem;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer;transition:0.2s}
-    .login-card button:hover{background:var(--secondary-color)}
-    .login-card .error{color:red;font-size:0.85rem;margin-top:0.5rem}
+    #dashboard { display:none; padding:2rem 0; }
+    .stats-grid {
+      display:grid; gap:1rem;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      margin-bottom:2rem;
+    }
+    .stat-card {
+      background:var(--card-bg); padding:1rem; border-radius:8px;
+      box-shadow:0 1px 4px var(--shadow); text-align:center;
+    }
+    .stat-card h4 { font-size:1rem; color:var(--primary-color); margin-bottom:.5rem; }
+    .stat-card p { font-size:1.6rem; font-weight:bold; }
+    .chart-container {
+      background:var(--card-bg); padding:1rem; border-radius:8px;
+      box-shadow:0 1px 4px var(--shadow);
+    }
+    #btnLogout { background:var(--secondary-color); color:#fff; border:none; padding:.5rem 1rem; border-radius:4px; cursor:pointer; }
+    #btnBack { background:transparent; color:var(--secondary-color); border:1px solid var(--secondary-color); padding:.5rem 1rem; border-radius:4px; cursor:pointer; margin-right:1rem; }
   </style>
-  
 </head>
 <body>
-  <!-- Login Overlay -->
+
+  <!-- Login / Signup Overlay -->
   <div id="login-container">
     <div class="login-card">
-      <h2>Đăng nhập Admin</h2>
-      <input type="text" id="username" placeholder="Tên admin">
-      <input type="password" id="password" placeholder="Mật khẩu">
-      <button id="loginBtn">Đăng nhập</button>
-      <div id="loginError" class="error"></div>
+      <h2>Đăng ký / Đăng nhập</h2>
+      <input id="auth-email"    type="email"    placeholder="Email">
+      <input id="auth-password" type="password" placeholder="Mật khẩu">
+      <div style="display:flex; justify-content:space-between; gap:4%;">
+        <button id="btnSignup">Đăng ký</button>
+        <button id="btnLogin" >Đăng nhập</button>
+      </div>
+      <p id="authError" class="error"></p>
     </div>
   </div>
 
-  <!-- Public Content -->
+  <!-- Header & User Area -->
   <header>
     <h1>Trang Tổng Hợp Dự Án</h1>
     <p>Nơi tập trung các công cụ &amp; tính năng</p>
-    <div id="userArea">
-  <button id="adminBtn">Đăng nhập</button>
-</div>
+    <div id="userArea"></div>
   </header>
 
+  <!-- Main Content -->
   <div id="main-content" class="container">
     <nav class="grid">
-      <!-- Example cards -->
-      <div class="card"><img src="images/encrypt-tool.png"><div class="card-content"><h3>Mã Hóa/Giải Mã</h3><p>Hỗ trợ JSON, XML, BEPOS với AES &amp; Base64</p><a href="./En-Comp.V3.html">Chi tiết</a></div></div>
-      <div class="card"><img src="images/ticks-converter.png"><div class="card-content"><h3>DateTime &amp; Ticks</h3><p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p><a href="./datetimetoticks_V2.html">Chi tiết</a></div></div>
-      <div class="card"><img src="images/xml-merge.png"><div class="card-content"><h3>Gộp file XML</h3><p>Gộp nhiều file XML thành 1</p><a href="./GopFileXML.html">Chi tiết</a></div></div>
-      <div class="card"><img src="images/task-stats.png"><div class="card-content"><h3>Thống Kê Công Việc</h3><p>Nhập số liệu, thống kê, tìm kiếm nâng cao</p><a href="./TyLeXuLy.html">Chi tiết</a></div></div>
-      <div class="card"><img src="images/notes-manager.png"><div class="card-content"><h3>Quản Lý Ghi Chú</h3><p>Thêm, hoàn thành, xóa; import/export JSON</p><a href="./Note.html">Chi tiết</a></div></div>
-      <div class="card"><img src="images/invoice.png"><div class="card-content"><h3>Tạo Hóa Đơn XML</h3><p>Giao diện tạo hóa đơn xuất XML</p><a href="./CreateInvoice_UpdateV2.html">Chi tiết</a></div></div>
+      <div class="card">
+        <img src="images/encrypt-tool.png" alt="Encrypt Tool">
+        <div class="card-content">
+          <h3>Công Cụ Mã Hóa/Giải Mã</h3>
+          <p>Hỗ trợ JSON, XML, BEPOS với AES &amp; Base64</p>
+          <a href="./En-Comp.V3.html">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/ticks-converter.png" alt="Ticks Converter">
+        <div class="card-content">
+          <h3>Chuyển Đổi DateTime &amp; Ticks</h3>
+          <p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p>
+          <a href="./datetimetoticks_V2.html">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/xml-merge.png" alt="Merge XML">
+        <div class="card-content">
+          <h3>Gộp file XML</h3>
+          <p>Gộp nhiều file XML thành 1</p>
+          <a href="./GopFileXML.html">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/task-stats.png" alt="Task Stats">
+        <div class="card-content">
+          <h3>Thống Kê Công Việc</h3>
+          <p>Nhập số liệu, thống kê, tìm kiếm nâng cao</p>
+          <a href="./TyLeXuLy.html">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/notes-manager.png" alt="Notes Manager">
+        <div class="card-content">
+          <h3>Quản Lý Ghi Chú</h3>
+          <p>Thêm, hoàn thành, xóa; import/export JSON</p>
+          <a href="./Note.html">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/invoice.png" alt="Invoice Generator">
+        <div class="card-content">
+          <h3>Tạo Hóa Đơn XML</h3>
+          <p>Giao diện tạo hóa đơn xuất XML</p>
+          <a href="./CreateInvoice_UpdateV2.html">Chi tiết</a>
+        </div>
+      </div>
     </nav>
   </div>
 
   <!-- Admin Dashboard -->
   <div id="dashboard" class="container">
-    <nav style="text-align:right;margin-bottom:1rem;"><button onclick="backToMain()">→ Về trang chính</button> <button onclick="logout()">Đăng xuất</button></nav>
+    <div style="text-align:right; margin-bottom:1rem;">
+      <button id="btnBack">Về trang chính</button>
+      <button id="btnLogout">Đăng xuất</button>
+    </div>
+    <h2>Admin Dashboard</h2>
     <div class="stats-grid">
       <div class="stat-card"><h4>Tổng truy cập</h4><p id="cntTotal">...</p></div>
       <div class="stat-card"><h4>Trang mã hóa</h4><p id="cntEncrypt">...</p></div>
@@ -90,123 +174,102 @@
   </div>
 
   <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
-    authDomain: "ehoadon-bkav.firebaseapp.com",
-    projectId: "ehoadon-bkav",
-    storageBucket: "ehoadon-bkav.firebasestorage.app",
-    messagingSenderId: "688737951508",
-    appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
-    measurementId: "G-VJFL3C86WM"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    let isLoggedIn = false;
-    // Credentials
-    const credentials={admin:'admin'};
-    const loginContainer=document.getElementById('login-container');
-    const mainContent=document.getElementById('main-content');
-    const dashboard=document.getElementById('dashboard');
-    const loginError=document.getElementById('loginError');
-    document.getElementById('adminBtn').onclick=()=>loginContainer.style.display='flex';
-    document.getElementById('loginBtn').onclick=()=>{
-      const u=document.getElementById('username').value,
-            p=document.getElementById('password').value;
-if (credentials[u] === p) {
-  isLoggedIn = true;
-  loginContainer.style.display = 'none';
-  mainContent.style.display = 'none';
-  dashboard.style.display = 'block';
-  updateLoginStatus();
-  loadStats();
-}
-
-
-      else loginError.textContent='Sai tên hoặc mật khẩu.';
+    // 1) Firebase config & init
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      databaseURL: "https://ehoadon-bkav-default-rtdb.firebaseio.com",
+      projectId: "ehoadon-bkav",
+      storageBucket: "ehoadon-bkav.appspot.com",
+      messagingSenderId: "688737951508",
+      appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
+      measurementId: "G-VJFL3C86WM"
     };
-function logout() {
-  isLoggedIn = false;
-  dashboard.style.display = 'none';
-  mainContent.style.display = 'block';
-  updateLoginStatus();
-}
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db   = firebase.database();
 
+    // 2) UI elements
+    const loginContainer = document.getElementById('login-container');
+    const btnSignup      = document.getElementById('btnSignup');
+    const btnLogin       = document.getElementById('btnLogin');
+    const authError      = document.getElementById('authError');
+    const userArea       = document.getElementById('userArea');
+    const mainContent    = document.getElementById('main-content');
+    const dashboard      = document.getElementById('dashboard');
+    const btnLogout      = document.getElementById('btnLogout');
+    const btnBack        = document.getElementById('btnBack');
 
-function backToMain() {
-  dashboard.style.display = 'none';
-  mainContent.style.display = 'block';
-  updateLoginStatus(); // cập nhật lại nút đăng nhập
-}
+    // 3) Show/hide UI based on auth state
+    function updateUI(user) {
+      if (user) {
+        loginContainer.style.display = 'none';
+        userArea.innerHTML = `👋 <strong>${user.email}</strong>`;
+        mainContent.style.display = '';
+        // Only admin sees dashboard
+        if (user.email === 'admin@yourdomain.com') {
+          dashboard.style.display = '';
+          loadStats();
+        } else {
+          dashboard.style.display = 'none';
+        }
+      } else {
+        loginContainer.style.display = '';
+        userArea.innerHTML = '';
+        mainContent.style.display = 'none';
+        dashboard.style.display = 'none';
+      }
+    }
 
+    // 4) Firebase auth listener
+    auth.onAuthStateChanged(user => updateUI(user));
 
-    // Load stats via CountAPI
-    async function fetchCount(key){ try{const r=await fetch(`https://api.countapi.xyz/get/demo/${key}`);return (await r.json()).value;}catch{return 0;} }
+    // 5) Sign up
+    btnSignup.onclick = () => {
+      const email = document.getElementById('auth-email').value;
+      const pass  = document.getElementById('auth-password').value;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .catch(err => authError.textContent = err.message);
+    };
+
+    // 6) Login
+    btnLogin.onclick = () => {
+      const email = document.getElementById('auth-email').value;
+      const pass  = document.getElementById('auth-password').value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(err => authError.textContent = err.message);
+    };
+
+    // 7) Logout & back
+    btnLogout.onclick = () => auth.signOut();
+    btnBack.onclick   = () => mainContent.scrollIntoView();
+
+    // 8) CountAPI & Chart.js for stats
+    async function fetchCount(key){
+      try {
+        const r = await fetch(`https://api.countapi.xyz/get/demo/${key}`);
+        return (await r.json()).value;
+      } catch { return 0; }
+    }
     async function loadStats(){
-      const total=await fetchCount('index');
-      const enc=await fetchCount('encrypt');
-      const stats=await fetchCount('stats');
-      document.getElementById('cntTotal').innerText=total;
-      document.getElementById('cntEncrypt').innerText=enc;
-      document.getElementById('cntStats').innerText=stats;
-      // Chart
-      new Chart(document.getElementById('pageChart'),{type:'bar',data:{labels:['Homepage','Encrypt','Stats'],datasets:[{label:'Views',data:[total,enc,stats]}]},options:{scales:{y:{beginAtZero:true}}}});
+      const total   = await fetchCount('index');
+      const enc     = await fetchCount('encrypt');
+      const stats   = await fetchCount('stats');
+      document.getElementById('cntTotal').innerText   = total;
+      document.getElementById('cntEncrypt').innerText = enc;
+      document.getElementById('cntStats').innerText   = stats;
+      new Chart(document.getElementById('pageChart'),{
+        type:'bar',
+        data:{ labels:['Homepage','Encrypt','Stats'], datasets:[{ label:'Views', data:[total,enc,stats] }] },
+        options:{ scales:{ y:{ beginAtZero:true } } }
+      });
     }
     // Initialize CountAPI keys
-    ['index','encrypt','stats'].forEach(k=>fetch(`https://api.countapi.xyz/create?namespace=demo&key=${k}&value=0&enable=true`));
-    const userArea = document.getElementById('userArea');
-
-// Lưu trạng thái đăng nhập
-function saveLogin(user) {
-  sessionStorage.setItem('authenticated', 'true');
-  sessionStorage.setItem('username', user);
-}
-
-// Hiển thị lời chào
-function updateGreeting(user) {
-  userArea.innerHTML = `👋 Chào mừng <strong>${user}</strong>`;
-}
-
-// Kiểm tra nếu user đã đăng nhập trước đó
-window.addEventListener('DOMContentLoaded', () => {
-  const isAuth = sessionStorage.getItem('authenticated') === 'true';
-  const username = sessionStorage.getItem('username');
-  if (isAuth && username) {
-    mainContent.style.display = 'block';
-    loginContainer.style.display = 'none';
-    dashboard.style.display = 'none';
-    updateGreeting(username);
-  }
-});
-    function updateLoginStatus() {
-  const btn = document.getElementById('adminBtn');
-  if (isLoggedIn) {
-    btn.innerHTML = '<strong>👋 Chào mừng Admin</strong>';
-    btn.onclick = () => {
-      mainContent.style.display = 'none';
-      dashboard.style.display = 'block';
-    };
-  } else {
-    btn.innerText = 'Đăng nhập';
-    btn.onclick = () => loginContainer.style.display = 'flex';
-  }
-}
-
-
+    ['index','encrypt','stats'].forEach(k=>
+      fetch(`https://api.countapi.xyz/create?namespace=demo&key=${k}&value=0&enable=true`)
+    );
   </script>
 </body>
 </html>
