@@ -105,6 +105,9 @@
   <!-- Main Content -->
   <div id="main-content" class="container" style="display:none;">
     <nav class="grid">
+      <div style="text-align:right; margin-bottom:1rem;">
+  <button id="btnLogoutUser" style="background:var(--secondary-color); color:#fff; border:none; padding:.5rem 1rem; border-radius:4px; cursor:pointer;">Đăng xuất</button>
+</div>
       <!-- các card công cụ cũ giữ nguyên -->
       <div class="card">
         <img src="images/encrypt-tool.png" alt="Encrypt Tool">
@@ -203,11 +206,14 @@
     const dashboard      = document.getElementById('dashboard');
     const btnLogout      = document.getElementById('btnLogout');
     const btnBack        = document.getElementById('btnBack');
+    const btnLogoutUser = document.getElementById('btnLogoutUser');
+
 
     // 3) Show/hide according to auth
     function updateUI(user) {
       if (user) {
         loginContainer.style.display = 'none';
+            alert("Đăng nhập thành công!");
         userArea.innerHTML = `👋 Chào mừng <strong>${user.email}</strong>`;
         mainContent.style.display = 'block';
         // admin only
@@ -248,6 +254,11 @@
 
     // 7) Logout & Back
     btnLogout.onclick = () => auth.signOut();
+    btnLogoutUser.onclick = () => {
+  alert("Bạn đã đăng xuất.");
+  auth.signOut();
+};
+
     btnBack.onclick   = () => mainContent.scrollIntoView();
 
     // 8) CountAPI + Chart.js
