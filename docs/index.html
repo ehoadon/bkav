@@ -208,7 +208,7 @@
     function updateUI(user) {
       if (user) {
         loginContainer.style.display = 'none';
-        userArea.innerHTML = `👋 <strong>${user.email}</strong>`;
+        userArea.innerHTML = `👋 Chào mừng <strong>${user.email}</strong>`;
         mainContent.style.display = 'block';
         // admin only
         if (user.email === 'thanghdb@bkav.com') {
