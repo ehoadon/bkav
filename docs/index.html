@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
-  <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
       --primary-color: #0066cc;
@@ -22,31 +25,73 @@
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); min-height:100vh; }
     header { background:var(--primary-color); color:#fff; padding:1.5rem 1rem; position:relative; text-align:center; }
-    header h1 { font-size:1.8rem; margin-bottom:0.2rem; }
-    header p  { opacity:0.85; font-size:1rem; }
-    #userArea { position:absolute; top:1rem; right:1rem; }
+    header h1 { font-size:1.8rem; margin-bottom:.2rem; }
+    header p  { opacity:.85; font-size:1rem; }
+    #userArea {
+      position:absolute; top:1rem; right:1rem;
+      text-align:right;
+      color:#fff;
+    }
+    #userArea button {
+      display:block;
+      margin-top:.5rem;
+      background:var(--secondary-color);
+      color:#fff;
+      border:none;
+      padding:.5rem 1rem;
+      border-radius:4px;
+      cursor:pointer;
+    }
     .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
     .grid { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
-    .card { background:var(--card-bg); border-radius:8px; box-shadow:0 2px 6px var(--shadow); overflow:hidden; display:flex; flex-direction:column; transition:transform .2s; }
+    .card {
+      background:var(--card-bg);
+      border-radius:8px;
+      box-shadow:0 2px 6px var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      transition:transform .2s;
+    }
     .card:hover { transform:translateY(-4px); }
     .card img { width:100%; height:140px; object-fit:cover; }
     .card-content { padding:1rem; flex:1; display:flex; flex-direction:column; }
     .card-content h3 { margin-bottom:.75rem; color:var(--primary-color); font-size:1.1rem; }
     .card-content p { flex:1; font-size:.95rem; margin-bottom:1rem; }
-    .card-content a { align-self:flex-start; text-decoration:none; background:var(--primary-color); color:#fff; padding:.5rem 1rem; border-radius:4px; transition:background .2s; }
+    .card-content a {
+      align-self:flex-start;
+      text-decoration:none;
+      background:var(--primary-color);
+      color:#fff;
+      padding:.5rem 1rem;
+      border-radius:4px;
+      transition:background .2s;
+    }
     .card-content a:hover { background:var(--secondary-color); }
-    footer { text-align:center; padding:1rem 0; background:#fff; border-top:1px solid #ddd; font-size:.9rem; color:#555; margin-top:2rem; }
+    footer {
+      text-align:center;
+      padding:1rem 0;
+      background:#fff;
+      border-top:1px solid #ddd;
+      font-size:.9rem;
+      color:#555;
+      margin-top:2rem;
+    }
 
-    /* Login/Signup Overlay */
+    /* Login Overlay */
     #login-container {
-      position:fixed; inset:0; background:rgba(0,0,0,0.5);
-      justify-content:center; align-items:center; display:none; z-index:999;
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.5);
+      display:flex; justify-content:center; align-items:center;
+      z-index:999;
     }
     .login-card {
       background:#fff; padding:1.5rem; border-radius:8px;
       box-shadow:0 2px 8px var(--shadow); width:320px; text-align:center;
     }
-    .login-card h2 { color:var(--primary-color); margin-bottom:1rem; font-size:1.25rem; }
+    .login-card h2 {
+      color:var(--primary-color); margin-bottom:1rem; font-size:1.25rem;
+    }
     .login-card input {
       width:100%; padding:.5rem; margin-bottom:.75rem;
       border:1px solid #ccc; border-radius:4px;
@@ -58,7 +103,7 @@
     .login-card button:hover { background:var(--secondary-color); }
     .login-card .error { color:red; font-size:.85rem; margin-top:.5rem; }
 
-    /* Dashboard styles */
+    /* Admin Dashboard */
     #dashboard { display:none; padding:2rem 0; }
     .stats-grid {
       display:grid; gap:1rem;
@@ -75,8 +120,15 @@
       background:var(--card-bg); padding:1rem; border-radius:8px;
       box-shadow:0 1px 4px var(--shadow);
     }
-    #btnLogout { background:var(--secondary-color); color:#fff; border:none; padding:.5rem 1rem; border-radius:4px; cursor:pointer; }
-    #btnBack   { background:transparent; color:var(--secondary-color); border:1px solid var(--secondary-color); padding:.5rem 1rem; border-radius:4px; cursor:pointer; margin-right:1rem; }
+    #btnBack {
+      background:transparent;
+      color:var(--secondary-color);
+      border:1px solid var(--secondary-color);
+      padding:.5rem 1rem;
+      border-radius:4px;
+      cursor:pointer;
+      margin-bottom:1rem;
+    }
   </style>
 </head>
 <body>
@@ -85,8 +137,8 @@
   <div id="login-container">
     <div class="login-card">
       <h2>Đăng ký / Đăng nhập</h2>
-      <input  id="auth-email"    type="email"    placeholder="Email">
-      <input  id="auth-password" type="password" placeholder="Mật khẩu">
+      <input id="auth-email"    type="email"    placeholder="Email">
+      <input id="auth-password" type="password" placeholder="Mật khẩu">
       <div style="display:flex; justify-content:space-between; gap:4%;">
         <button id="btnSignup">Đăng ký</button>
         <button id="btnLogin" >Đăng nhập</button>
@@ -101,14 +153,11 @@
     <p>Nơi tập trung các công cụ &amp; tính năng</p>
     <div id="userArea"></div>
   </header>
-<div style="text-align:right; margin-bottom:1rem;">
-  <button id="btnLogoutUser" style="background:var(--secondary-color); color:#fff; border:none; padding:.5rem 1rem; border-radius:4px; cursor:pointer;">Đăng xuất</button>
-</div>
 
   <!-- Main Content -->
   <div id="main-content" class="container" style="display:none;">
     <nav class="grid">
-      <!-- các card công cụ cũ giữ nguyên -->
+      <!-- Công Cụ Mã hóa -->
       <div class="card">
         <img src="images/encrypt-tool.png" alt="Encrypt Tool">
         <div class="card-content">
@@ -117,56 +166,57 @@
           <a href="./En-Comp.V3.html">Chi tiết</a>
         </div>
       </div>
+      <!-- Chuyển Đổi Ticks -->
       <div class="card">
         <img src="images/ticks-converter.png" alt="Ticks Converter">
         <div class="card-content">
-          <h3>Công Cụ Chuyển đổi Ticks</h3>
-          <p>Hỗ trợ Chuyển đổi Datetime sang Ticks</p>
+          <h3>Chuyển Đổi DateTime &amp; Ticks</h3>
+          <p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p>
           <a href="./datetimetoticks_V2.html">Chi tiết</a>
         </div>
       </div>
+      <!-- Gộp XML -->
       <div class="card">
         <img src="images/xml-merge.png" alt="XML Merge">
         <div class="card-content">
-          <h3>Công Cụ Gộp File XML</h3>
-          <p>Hỗ trợ gộp nhiều file XML thành 1 file</p>
-          <a href="./GopFileXML">Chi tiết</a>
+          <h3>Gộp file XML</h3>
+          <p>Gộp nhiều file XML thành 1</p>
+          <a href="./GopFileXML.html">Chi tiết</a>
         </div>
       </div>
+      <!-- Ghi chú -->
       <div class="card">
         <img src="images/notes-manager.png" alt="Notes Manager">
         <div class="card-content">
-          <h3>Công cụ Ghi chú công việc</h3>
-          <p>Hỗ trợ Ghi chú công việc cần làm</p>
+          <h3>Quản Lý Ghi Chú</h3>
+          <p>Thêm, hoàn thành, xóa; import/export JSON</p>
           <a href="./Note.html">Chi tiết</a>
         </div>
       </div>
+      <!-- Thống kê -->
       <div class="card">
         <img src="images/task-stats.png" alt="Task Stats">
         <div class="card-content">
-          <h3>Công Cụ Thống kê công việc</h3>
-          <p>Hỗ trợ Thống kê công việc theo ngày-tháng</p>
+          <h3>Thống Kê Công Việc</h3>
+          <p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao</p>
           <a href="./TyLeXuLy.html">Chi tiết</a>
         </div>
       </div>
+      <!-- Hóa đơn -->
       <div class="card">
         <img src="images/invoice.png" alt="Invoice">
         <div class="card-content">
-          <h3>Công Cụ Tạo hóa đơn</h3>
-          <p>Hỗ trợ tạo hóa đơn và xuất ra file .xml</p>
-          <a href="./CreateInvoice_UpdateV2">Chi tiết</a>
+          <h3>Tạo Hóa Đơn XML</h3>
+          <p>Giao diện tạo hóa đơn xuất XML</p>
+          <a href="./CreateInvoice_UpdateV2.html">Chi tiết</a>
         </div>
       </div>
-      <!-- ... các card khác ... -->
     </nav>
   </div>
 
   <!-- Admin Dashboard -->
-  <div id="dashboard" class="container">
-<!--     <div style="text-align:right; margin-bottom:1rem;">
-      <button id="btnBack">Về trang chính</button>
-      <button id="btnLogout">Đăng xuất</button>
-    </div> -->
+  <div id="dashboard" class="container" style="display:none;">
+    <button id="btnBack">← Về trang chính</button>
     <h2>Admin Dashboard</h2>
     <div class="stats-grid">
       <div class="stat-card"><h4>Tổng truy cập</h4><p id="cntTotal">...</p></div>
@@ -184,13 +234,13 @@
     // 1) Firebase init
     const firebaseConfig = {
       apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
-      authDomain: "ehoadon‑bkav.firebaseapp.com",
-      databaseURL: "https://ehoadon‑bkav-default-rtdb.firebaseio.com",
-      projectId: "ehoadon‑bkav",
-      storageBucket: "ehoadon‑bkav.appspot.com",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      databaseURL: "https://ehoadon-bkav-default-rtdb.firebaseio.com",
+      projectId: "ehoadon-bkav",
+      storageBucket: "ehoadon-bkav.appspot.com",
       messagingSenderId: "688737951508",
       appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
-      measurementId: "G‑VJFL3C86WM"
+      measurementId: "G-VJFL3C86WM"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
@@ -204,69 +254,85 @@
     const userArea       = document.getElementById('userArea');
     const mainContent    = document.getElementById('main-content');
     const dashboard      = document.getElementById('dashboard');
-    const btnLogout      = document.getElementById('btnLogout');
     const btnBack        = document.getElementById('btnBack');
-    const btnLogoutUser = document.getElementById('btnLogoutUser');
 
-
-    // 3) Show/hide according to auth
+    // 3) Cập nhật UI tùy auth
     function updateUI(user) {
       if (user) {
+        // 3.1: Ẩn login form, hiện main content
         loginContainer.style.display = 'none';
-            alert("Đăng nhập thành công!");
-        userArea.innerHTML = `👋 Chào mừng <strong>${user.email}</strong>`;
-        mainContent.style.display = 'block';
-        // admin only
+        mainContent.style.display     = 'block';
+
+        // 3.2: Hiển thị lời chào và nút đăng xuất
+        const nameOnly = user.email.split('@')[0];
+        userArea.innerHTML = `
+          👋 Chào mừng <strong>${nameOnly}</strong>
+          <button id="btnLogoutUser">Đăng xuất</button>
+        `;
+        document.getElementById('btnLogoutUser').onclick = () => {
+          alert("Bạn đã đăng xuất.");
+          auth.signOut();
+        };
+
+        // 3.3: Chỉ admin mới thấy dashboard
         if (user.email === 'thanghdb@bkav.com') {
           dashboard.style.display = 'block';
+          mainContent.style.display = 'none';
           loadStats();
         } else {
           dashboard.style.display = 'none';
         }
+
       } else {
+        // 3.4: Chưa login → show form, ẩn nội dung
         loginContainer.style.display = 'flex';
-        userArea.innerHTML = '';
-        mainContent.style.display = 'none';
-        dashboard.style.display = 'none';
+        mainContent.style.display    = 'none';
+        dashboard.style.display      = 'none';
+        userArea.innerHTML           = '';
       }
     }
 
-    // 4) Auth listener
-    auth.onAuthStateChanged(user => updateUI(user));
-    // initial
-    //updateUI(null);
+    // 4) Lắng nghe auth state
+    auth.onAuthStateChanged(updateUI);
 
     // 5) Sign‑up
     btnSignup.onclick = () => {
-      const email = document.getElementById('auth-email').value;
-      const pass  = document.getElementById('auth-password').value;
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = "Vui lòng nhập email và mật khẩu.";
+        return;
+      }
       auth.createUserWithEmailAndPassword(email, pass)
         .catch(e => authError.textContent = e.message);
     };
 
     // 6) Login
     btnLogin.onclick = () => {
-      const email = document.getElementById('auth-email').value;
-      const pass  = document.getElementById('auth-password').value;
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = "Vui lòng nhập email và mật khẩu.";
+        return;
+      }
       auth.signInWithEmailAndPassword(email, pass)
         .catch(e => authError.textContent = e.message);
     };
 
-    // 7) Logout & Back
-    btnLogout.onclick = () => auth.signOut();
-    btnLogoutUser.onclick = () => {
-  alert("Bạn đã đăng xuất.");
-  auth.signOut();
-};
-
-    btnBack.onclick   = () => mainContent.scrollIntoView();
+    // 7) Back to main
+    btnBack.onclick = () => {
+      dashboard.style.display = 'none';
+      mainContent.style.display = 'block';
+    };
 
     // 8) CountAPI + Chart.js
     async function fetchCount(key) {
       try {
         const r = await fetch(`https://api.countapi.xyz/get/demo/${key}`);
         return (await r.json()).value;
-      } catch { return 0; }
+      } catch {
+        return 0;
+      }
     }
     async function loadStats() {
       const total = await fetchCount('index'),
@@ -281,8 +347,8 @@
         options:{ scales:{ y:{ beginAtZero:true } } }
       });
     }
-    // init CountAPI keys
-    ['index','encrypt','stats'].forEach(k=>
+    // Khởi tạo CountAPI keys
+    ['index','encrypt','stats'].forEach(k =>
       fetch(`https://api.countapi.xyz/create?namespace=demo&key=${k}&value=0&enable=true`)
     );
   </script>
