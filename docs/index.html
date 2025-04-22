@@ -41,6 +41,7 @@
     .login-card button:hover{background:var(--secondary-color)}
     .login-card .error{color:red;font-size:0.85rem;margin-top:0.5rem}
   </style>
+  
 </head>
 <body>
   <!-- Login Overlay -->
@@ -89,7 +90,30 @@
   </div>
 
   <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+    authDomain: "ehoadon-bkav.firebaseapp.com",
+    projectId: "ehoadon-bkav",
+    storageBucket: "ehoadon-bkav.firebasestorage.app",
+    messagingSenderId: "688737951508",
+    appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
+    measurementId: "G-VJFL3C86WM"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let isLoggedIn = false;
