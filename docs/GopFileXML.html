@@ -1,28 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gộp File Nâng Cao</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gộp File XML & Chuẩn Hóa</title>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 30px; padding: 20px; background: #f0f0f0; }
-    .container { background: white; border-radius: 10px; padding: 20px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    input[type="file"], select { margin-bottom: 20px; }
-    .filters { margin-bottom: 20px; }
+    /* Reset & chung */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; min-height: 100vh; }
+
+    /* LOGIN OVERLAY */
+    #login-container {
+      position: fixed; inset:0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999;
+    }
+    .login-card {
+      background: #fff; padding: 2rem; border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: 320px; text-align: center;
+    }
+    .login-card h2 { margin-bottom: 1rem; color: #0066cc; }
+    .login-card input {
+      width: 100%; padding: .5rem; margin-bottom: .75rem;
+      border: 1px solid #ccc; border-radius: 4px;
+    }
+    .login-card button {
+      width: 48%; padding: .5rem; margin: 0 .5%;
+      border: none; border-radius: 4px; cursor: pointer;
+      background: #0066cc; color: #fff; transition: background .2s;
+    }
+    .login-card button:hover { background: #005bb5; }
+    .login-card .error { color: red; font-size: .85rem; margin-top: .5rem; }
+
+    /* TOOL CONTAINER */
+    #toolContainer { display: none; padding: 20px; max-width: 800px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+    /* Merge tool style */
+    .container { }
+    h1 { text-align: center; margin-bottom: 20px; color: #2c3e50; }
+    input[type="file"] { display: block; margin: 20px auto; }
+    .filters { margin-bottom: 20px; text-align: center; }
     .filters label { margin-right: 15px; }
-    button { padding: 10px 20px; border: none; border-radius: 6px; background: #28a745; color: white; cursor: pointer; font-size: 16px; }
+    select, button { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; }
+    select { margin-bottom: 20px; }
+    button { background: #28a745; color: #fff; transition: background .2s; }
     button:hover { background: #218838; }
-    #status { margin-top: 15px; color: #155724; }
-    #summary { margin-top: 10px; color: #333; }
+    #status { margin-top: 15px; color: #155724; text-align: center; }
+    #summary { margin-top: 10px; color: #333; text-align: center; }
     .note { margin-top: 40px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; color: #856404; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Gộp & Chuẩn hóa File</h2>
-    <input type="file" id="fileInput" multiple accept=".xml,.txt" />
+
+  <!-- LOGIN OVERLAY -->
+  <div id="login-container">
+    <div class="login-card">
+      <h2>Đăng ký / Đăng nhập</h2>
+      <input  id="auth-email"    type="email"    placeholder="Email">
+      <input  id="auth-password" type="password" placeholder="Mật khẩu">
+      <div style="display:flex; justify-content:space-between;">
+        <button id="btnSignup">Đăng ký</button>
+        <button id="btnLogin" >Đăng nhập</button>
+      </div>
+      <p id="authError" class="error"></p>
+    </div>
+  </div>
+
+  <!-- MERGE TOOL -->
+  <div id="toolContainer">
+    <h1>Gộp & Chuẩn Hóa File XML/TXT</h1>
+    <input type="file" id="fileInput" multiple accept=".xml,.txt">
     <div class="filters" id="dateFilters"></div>
-    <label for="formatSelect"><strong>Chọn định dạng tải xuống:</strong></label>
+    <label for="formatSelect" style="display:block; text-align:center; margin-bottom:8px;">
+      <strong>Chọn định dạng tải xuống:</strong>
+    </label>
     <select id="formatSelect">
       <option value="xml">.xml</option>
       <option value="txt">.txt</option>
@@ -35,21 +92,72 @@
       <h4>Ghi chú chức năng:</h4>
       <ul>
         <li>Hỗ trợ chọn nhiều file XML/TXT và gộp thành 1 hoặc nhiều file.</li>
-        <li>Tự động loại bỏ khai báo XML: <code>&lt;?xml version="1.0" encoding="utf-8"?&gt;</code>.</li>
-        <li>Dọn sạch khoảng trắng trong nội dung thẻ XML: mỗi khoảng trắng chỉ còn 1 space.</li>
-        <li>Nếu file chứa nhiều <code>&lt;ArrayOfInvoiceDataWS&gt;</code>, chỉ lấy nội dung <code>&lt;InvoiceDataWS&gt;</code> từ file thứ 2 trở đi.</li>
-        <li>Sắp xếp file theo <code>InvoiceDate</code> (dạng: 2025-04-14T05:06:54).</li>
-        <li>Tick chọn InvoiceDate để chỉ tải các file có ngày được chọn.</li>
-        <li>Nếu không chọn ngày, toàn bộ file sẽ được gộp vào 1 lần tải.</li>
-        <li>Nếu số file vượt quá 100, hệ thống tự chia thành nhiều file tải xuống.</li>
-        <li>Nếu có file chứa InvoiceDate = 2025-04-14, sẽ tách thành file riêng.</li>
-        <li>Cho phép chọn định dạng tải xuống là .xml hoặc .txt.</li>
+        <li>Tự động loại bỏ khai báo XML <code>&lt;?xml ...?&gt;</code> và dọn khoảng trắng thừa.</li>
+        <li>Sắp xếp theo <code>InvoiceDate</code>, có thể lọc chọn ngày cụ thể.</li>
+        <li>Chia batch nếu >100 file.</li>
+        <li>Chọn xuất .xml hoặc .txt.</li>
       </ul>
     </div>
   </div>
 
   <script>
-    let fileDataArrGlobal = [];
+    // 1) Firebase init
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      projectId: "ehoadon-bkav",
+      storageBucket: "ehoadon-bkav.appspot.com",
+      messagingSenderId: "688737951508",
+      appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
+      measurementId: "G-VJFL3C86WM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // UI refs
+    const loginContainer = document.getElementById('login-container');
+    const toolContainer  = document.getElementById('toolContainer');
+    const btnSignup      = document.getElementById('btnSignup');
+    const btnLogin       = document.getElementById('btnLogin');
+    const authError      = document.getElementById('authError');
+
+    // Auth listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginContainer.style.display = 'none';
+        toolContainer.style.display  = 'block';
+        // ghi nhận lượt truy cập page "merge"
+        fetch('https://api.countapi.xyz/hit/thanghdb/merge').catch(()=>{});
+      } else {
+        loginContainer.style.display = 'flex';
+        toolContainer.style.display  = 'none';
+      }
+    });
+
+    // Sign-up
+    btnSignup.onclick = () => {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = 'Vui lòng nhập email và mật khẩu.';
+        return;
+      }
+      auth.createUserWithEmailAndPassword(email, pass).catch(e => authError.textContent = e.message);
+    };
+    // Login
+    btnLogin.onclick = () => {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = 'Vui lòng nhập email và mật khẩu.';
+        return;
+      }
+      auth.signInWithEmailAndPassword(email, pass).catch(e => authError.textContent = e.message);
+    };
+
+    // --- Merge tool logic below ---
+
+    let fileDataArr = [];
     document.getElementById('fileInput').addEventListener('change', handleFileSelect);
 
     function handleFileSelect() {
@@ -58,132 +166,76 @@
       const summaryDiv = document.getElementById('summary');
       filtersDiv.innerHTML = '';
       summaryDiv.textContent = '';
-      fileDataArrGlobal = [];
-      if (!files.length) return;
+      fileDataArr = [];
 
-      const readers = files.map(file => new Promise(resolve => {
+      if (!files.length) return;
+      Promise.all(files.map(f => readFile(f))).then(() => renderFilters());
+    }
+
+    function readFile(file) {
+      return new Promise(resolve => {
         const reader = new FileReader();
         reader.onload = e => {
-          const raw = e.target.result.replace(/\s+/g, ' ').trim();
-          const match = raw.match(/<InvoiceDate>([^<]+)<\/InvoiceDate>/);
-          const invoiceDate = match ? match[1].split('T')[0] : null;
-          fileDataArrGlobal.push({ file, text: raw, invoiceDate });
+          const text = e.target.result.replace(/\s+/g,' ').trim();
+          const m = text.match(/<InvoiceDate>([^<]+)<\/InvoiceDate>/);
+          const date = m ? m[1].split('T')[0] : null;
+          fileDataArr.push({ text, date });
           resolve();
         };
-        reader.onerror = () => resolve();
         reader.readAsText(file);
-      }));
-
-      Promise.all(readers).then(() => {
-        const dates = Array.from(new Set(
-          fileDataArrGlobal.map(d => d.invoiceDate).filter(d => d)
-        )).sort();
-        if (dates.length) {
-          filtersDiv.innerHTML = '<strong>Chọn ngày InvoiceDate:</strong><br>' +
-            dates.map(d => `<label><input type="checkbox" value="${d}" onchange="updateSummary()"> ${d}</label>`).join('');
-        }
-        updateSummary();
       });
     }
 
+    function renderFilters() {
+      const dates = [...new Set(fileDataArr.map(d=>d.date).filter(Boolean))].sort();
+      if (!dates.length) return;
+      document.getElementById('dateFilters').innerHTML =
+        dates.map(d => `<label><input type="checkbox" value="${d}" onchange="updateSummary()"> ${d}</label>`).join(' ');
+      updateSummary();
+    }
+
     function updateSummary() {
-      const total = fileDataArrGlobal.length;
-      const checked = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
-      const specialCount = checked.length
-        ? fileDataArrGlobal.filter(d => checked.includes(d.invoiceDate)).length
-        : 0;
-      const remaining = total - specialCount;
-      const batches = checked.length ? Math.ceil(remaining / 100) : 1;
+      const total = fileDataArr.length;
+      const sel   = [...document.querySelectorAll('#dateFilters input:checked')].map(i=>i.value);
+      const hit   = sel.length ? fileDataArr.filter(d=>sel.includes(d.date)).length : 0;
+      const rem   = total - hit;
       document.getElementById('summary').textContent =
         `Tổng file: ${total}` +
-        (checked.length ? `; Đã chọn ngày: ${specialCount}` : '') +
-        `; Còn lại: ${remaining}; Số lượt tải: ${batches}${checked.length ? '' : ' (tất cả)'}`;
+        (hit? `; Lọc ngày: ${hit}` : '') +
+        `; Còn lại: ${rem}`;
     }
 
     function mergeFiles() {
-      if (!fileDataArrGlobal.length) {
+      if (!fileDataArr.length) {
         document.getElementById('status').textContent = 'Chưa có file để gộp.';
         return;
       }
       document.getElementById('status').textContent = '';
 
-      const selectedFormat = document.getElementById('formatSelect').value;
-      const extension = selectedFormat === 'xml' ? 'xml' : 'txt';
+      const checked = [...document.querySelectorAll('#dateFilters input:checked')].map(i=>i.value);
+      const selected = checked.length
+        ? fileDataArr.filter(d=>checked.includes(d.date))
+        : fileDataArr;
 
-      let wrapperOpen = '';
-      const parser = new DOMParser();
-      const serializer = new XMLSerializer();
+      const ext = document.getElementById('formatSelect').value;
+      const outText = selected.map(d=>stripXmlHeader(d.text)).join('\n');
+      downloadBlob(outText, `merged.${ext}`);
+      document.getElementById('status').textContent = `Đã gộp ${selected.length} file.`;
+    }
 
-      const withDate = fileDataArrGlobal.filter(d => d.invoiceDate)
-        .sort((a, b) => new Date(a.invoiceDate) - new Date(b.invoiceDate));
-      const withoutDate = fileDataArrGlobal.filter(d => !d.invoiceDate);
-      const sortedArr = [...withDate, ...withoutDate];
+    function stripXmlHeader(s) {
+      return s.replace(/<\?xml[\s\S]*?\?>/, '').trim();
+    }
 
-      const checkedDates = Array.from(document.querySelectorAll('.filters input:checked')).map(i => i.value);
-      const specialArr = checkedDates.length
-        ? sortedArr.filter(d => checkedDates.includes(d.invoiceDate))
-        : [];
-      const remainingArr = checkedDates.length
-        ? sortedArr.filter(d => !checkedDates.includes(d.invoiceDate))
-        : sortedArr;
-
-      let countFiles = 0;
-      function processAndDownload(batch, suffix) {
-        let mergedChild = [];
-        let otherContents = [];
-        batch.forEach(fd => {
-          const rawClean = fd.text.replace(/<\?xml[\s\S]*?\?>/g, '').trim();
-          const doc = parser.parseFromString(rawClean, 'application/xml');
-          const arrNode = doc.getElementsByTagName('ArrayOfInvoiceDataWS');
-          if (arrNode.length) {
-            if (!wrapperOpen) {
-              const op = rawClean.match(/<ArrayOfInvoiceDataWS[^>]*>/);
-              wrapperOpen = op ? op[0] : '<ArrayOfInvoiceDataWS>';
-            }
-            Array.from(doc.getElementsByTagName('InvoiceDataWS')).forEach(n => {
-              let str = serializer.serializeToString(n);
-              str = str.replace(/>\s*(.*?)\s*</g, (m, t) => `>${t.replace(/\s+/g,' ')}<`);
-              mergedChild.push(str);
-            });
-          } else {
-            otherContents.push(rawClean);
-          }
-        });
-        let out = '';
-        if (mergedChild.length) out = wrapperOpen + '\n' + mergedChild.join('\n') + '\n</ArrayOfInvoiceDataWS>';
-        if (otherContents.length) out += (out ? '\n\n' : '') + otherContents.join('\n\n');
-        const blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `merged${suffix}.${extension}`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-
-      if (!checkedDates.length) {
-        processAndDownload(sortedArr, '_all');
-        countFiles = 1;
-      } else {
-        if (specialArr.length) { processAndDownload(specialArr, '_special'); countFiles++; }
-        for (let i = 0; i < remainingArr.length; i += 100) {
-          processAndDownload(remainingArr.slice(i, i + 100), `_part${countFiles + 1}`);
-          countFiles++;
-        }
-      }
-      document.getElementById('status').textContent = `Hoàn tất: đã tạo ${countFiles} file gộp.`;
+    function downloadBlob(text, filename) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
     }
   </script>
-  <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    fetch('https://api.countapi.xyz/hit/thanghdb/merge')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Ghi nhận truy cập trang gộp file XML:', data.value);
-      })
-      .catch(console.error);
-  });
-</script>
-
 </body>
 </html>
