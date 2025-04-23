@@ -1,252 +1,322 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    :root {
-      --primary-color:#0066cc;
-      --secondary-color:#005bb5;
-      --bg-color:#f0f4f8;
-      --card-bg:#fff;
-      --text-color:#222;
-      --shadow:rgba(0,0,0,0.1);
-    }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:Arial,sans-serif;background:var(--bg-color);color:var(--text-color);min-height:100vh;}
-    header{background:var(--primary-color);color:#fff;padding:1.5rem;text-align:center;position:relative;}
-    header h1{font-size:1.8rem;}
-    header p{opacity:.85;}
-    /* userArea */
-    #userArea{position:absolute;top:1rem;right:1rem;display:flex;align-items:center;gap:.8rem;color:#fff;font-size:.95rem;}
-    #userArea a,#userArea button{font-size:.9rem;background:var(--secondary-color);color:#fff;border:none;padding:.4rem .8rem;border-radius:4px;cursor:pointer;text-decoration:none;transition:background .2s;}
-    #userArea a.dashboard-link{background:transparent;text-decoration:underline;padding:0;}
-    .container{max-width:1200px;margin:2rem auto;padding:0 1rem;}
-    .grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
-    .card{background:var(--card-bg);border-radius:8px;box-shadow:0 2px 6px var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s;}
-    .card:hover{transform:translateY(-4px);}
-    .card img{width:100%;height:140px;object-fit:cover;}
-    .card-content{padding:1rem;flex:1;display:flex;flex-direction:column;}
-    .card-content h3{margin-bottom:.75rem;color:var(--primary-color);}
-    .card-content p{flex:1;}
-    .card-content a{align-self:flex-start;background:var(--primary-color);color:#fff;padding:.5rem 1rem;border-radius:4px;transition:background .2s;}
-    .card-content a:hover{background:var(--secondary-color);}
-    footer{margin-top:2rem;text-align:center;padding:1rem 0;background:#fff;border-top:1px solid #ddd;color:#555;}
-    /* Login Overlay */
-    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:999;}
-    .login-card{background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px var(--shadow);width:320px;text-align:center;}
-    .login-card h2{color:var(--primary-color);margin-bottom:1rem;}
-    .login-card input{width:100%;padding:.5rem;margin-bottom:.75rem;border:1px solid #ccc;border-radius:4px;}
-    .login-card button{width:48%;padding:.5rem;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer;transition:.2s;}
-    .login-card button:hover{background:var(--secondary-color);}
-    .login-card .error{color:red;font-size:.85rem;margin-top:.5rem;}
-    /* Dashboard */
-    #dashboard{display:none;padding:2rem 0;}
-    .stats-grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:2rem;}
-    .stat-card{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow);text-align:center;}
-    .stat-card h4{color:var(--primary-color);}
-    .chart-container{background:var(--card-bg);padding:1rem;border-radius:8px;box-shadow:0 1px 4px var(--shadow);}
-    #btnBack{background:transparent;color:var(--secondary-color);border:1px solid var(--secondary-color);padding:.5rem 1rem;border-radius:4px;cursor:pointer;margin-bottom:1rem;}
-  </style>
-</head>
-<body>
-
-  <!-- LOGIN / SIGNUP OVERLAY -->
-  <div id="login-container">
-    <div class="login-card">
-      <h2>Đăng ký / Đăng nhập</h2>
-      <input id="auth-email"    type="email"    placeholder="Email">
-      <input id="auth-password" type="password" placeholder="Mật khẩu">
-      <div style="display:flex;justify-content:space-between;gap:4%;">
-        <button id="btnSignup">Đăng ký</button>
-        <button id="btnLogin">Đăng nhập</button>
-      </div>
-      <p id="authError" class="error"></p>
-    </div>
-  </div>
-
-  <!-- HEADER + USER AREA -->
-  <header>
-    <h1>Trang Tổng Hợp Dự Án</h1>
-    <p>Nơi tập trung các công cụ &amp; tính năng</p>
-    <div id="userArea"></div>
-  </header>
-
-  <!-- MAIN CONTENT -->
-  <div id="main-content" class="container" style="display:none;">
-    <nav class="grid">
-      <div class="card">
-        <img src="images/encrypt-tool.png" alt="Encrypt Tool">
-        <div class="card-content">
-          <h3>Công Cụ Mã Hóa/Giải Mã</h3>
-          <p>Hỗ trợ JSON, XML, BEPOS với AES &amp; Base64</p>
-          <a href="./En-Comp.V3.html" data-key="encrypt">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/ticks-converter.png" alt="Ticks Converter">
-        <div class="card-content">
-          <h3>Chuyển Đổi DateTime &amp; Ticks</h3>
-          <p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p>
-          <a href="./datetimetoticks_V2.html" data-key="ticks">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/xml-merge.png" alt="XML Merge">
-        <div class="card-content">
-          <h3>Gộp file XML</h3>
-          <p>Gộp nhiều file XML thành 1</p>
-          <a href="./GopFileXML.html" data-key="merge">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/task-stats.png" alt="Task Stats">
-        <div class="card-content">
-          <h3>Thống Kê Công Việc</h3>
-          <p>Nhập số liệu, thống kê theo tháng...</p>
-          <a href="./TyLeXuLy.html" data-key="stats">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/notes-manager.png" alt="Notes Manager">
-        <div class="card-content">
-          <h3>Quản Lý Ghi Chú</h3>
-          <p>Thêm, hoàn thành, xóa; import/export JSON</p>
-          <a href="./Note.html" data-key="notes">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
-        <img src="images/invoice.png" alt="Invoice">
-        <div class="card-content">
-          <h3>Tạo Hóa Đơn XML</h3>
-          <p>Giao diện tạo hóa đơn xuất XML</p>
-          <a href="./CreateInvoice_UpdateV2.html" data-key="invoice">Chi tiết</a>
-        </div>
-      </div>
-    </nav>
-  </div>
-
-  <!-- ADMIN DASHBOARD -->
-  <div id="dashboard" class="container" style="display:none;">
-    <button id="btnBack">← Về trang chính</button>
-    <h2>Admin Dashboard</h2>
-    <div class="stats-grid">
-      <div class="stat-card"><h4>Tổng Home</h4><p id="cntHome">...</p></div>
-      <div class="stat-card"><h4>Encrypt</h4><p id="cntEncrypt">...</p></div>
-      <div class="stat-card"><h4>Ticks</h4><p id="cntTicks">...</p></div>
-      <div class="stat-card"><h4>Merge</h4><p id="cntMerge">...</p></div>
-      <div class="stat-card"><h4>Stats</h4><p id="cntStats">...</p></div>
-      <div class="stat-card"><h4>Notes</h4><p id="cntNotes">...</p></div>
-      <div class="stat-card"><h4>Invoice</h4><p id="cntInvoice">...</p></div>
-    </div>
-    <div class="chart-container">
-      <canvas id="pageChart" height="100"></canvas>
-    </div>
-  </div>
-
-  <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
-
-  <script>
-    // Firebase init
-    const firebaseConfig = {
-      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
-      authDomain: "ehoadon-bkav.firebaseapp.com",
-      databaseURL: "https://ehoadon-bkav-default-rtdb.firebaseio.com",
-      projectId: "ehoadon-bkav",
-      storageBucket: "ehoadon-bkav.appspot.com",
-      messagingSenderId: "688737951508",
-      appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
-      measurementId: "G-VJFL3C86WM"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // UI refs
-    const loginContainer = document.getElementById('login-container');
-    const btnSignup      = document.getElementById('btnSignup');
-    const btnLogin       = document.getElementById('btnLogin');
-    const authError      = document.getElementById('authError');
-    const userArea       = document.getElementById('userArea');
-    const mainContent    = document.getElementById('main-content');
-    const dashboard      = document.getElementById('dashboard');
-    const btnBack        = document.getElementById('btnBack');
-    const chartCtx       = document.getElementById('pageChart').getContext('2d');
-
-    // CountAPI helpers
-    async function hit(key) {
-      await fetch(`https://api.countapi.xyz/hit/thanghdb/${key}`).catch(()=>{});
-      const res = await fetch(`https://api.countapi.xyz/get/thanghdb/${key}`).catch(()=>null);
-      return res? (await res.json()).value : 0;
-    }
-
-    // updateUI
-    function updateUI(user) {
-      if (user) {
-        loginContainer.style.display = 'none';
-        const nameOnly = user.email.split('@')[0];
-        let html = `👋 <strong>${nameOnly}</strong>`;
-        if (user.email==='thanghdb@bkav.com')
-          html+=` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
-        html+=` <button id="btnLogoutUser">Logout</button>`;
-        userArea.innerHTML = html;
-        document.getElementById('btnLogoutUser').onclick=()=>auth.signOut();
-        const dashLink=document.getElementById('linkDashboard');
-        if(dashLink) dashLink.onclick=e=>{
-          e.preventDefault();
-          mainContent.style.display='none';
-          dashboard.style.display='block';
-          loadStats();
-        };
-        mainContent.style.display='block';
-        hit('home');
-      } else {
-        loginContainer.style.display='flex';
-        mainContent.style.display='none';
-        dashboard.style.display='none';
-        userArea.innerHTML='';
-      }
-    }
-    auth.onAuthStateChanged(updateUI);
-
-    btnSignup.onclick=()=>{
-      const e=document.getElementById('auth-email').value.trim(),
-            p=document.getElementById('auth-password').value.trim();
-      if(!e||!p){authError.textContent='Vui lòng nhập';return;}
-      auth.createUserWithEmailAndPassword(e,p).catch(e=>authError.textContent=e.message);
-    };
-    btnLogin.onclick=()=>{
-      const e=document.getElementById('auth-email').value.trim(),
-            p=document.getElementById('auth-password').value.trim();
-      if(!e||!p){authError.textContent='Vui lòng nhập';return;}
-      auth.signInWithEmailAndPassword(e,p).catch(e=>authError.textContent=e.message);
-    };
-
-    btnBack.onclick=()=>{
-      dashboard.style.display='none';
-      mainContent.style.display='block';
-    };
-
-    // loadStats
-    async function loadStats(){
-      const keys=['home','encrypt','ticks','merge','stats','notes','invoice'];
-      const vals=await Promise.all(keys.map(k=>hit(k)));
-      ['Home','Encrypt','Ticks','Merge','Stats','Notes','Invoice']
-        .forEach((lbl,i)=> document.getElementById('cnt'+lbl).innerText=vals[i]);
-      new Chart(chartCtx,{
-        type:'bar',
-        data:{
-          labels:['Home','Encrypt','Ticks','Merge','Stats','Notes','Invoice'],
-          datasets:[{label:'Views',data:vals,backgroundColor:'rgba(0,102,204,0.6)'}]
-        },
-        options:{scales:{y:{beginAtZero:true}}}
-      });
-    }
-  </script>
-</body>
-</html>
+ <html lang="vi">
+ <head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
+ 
+   <!-- Firebase Compat SDKs -->
+   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
+ 
+   <!-- Chart.js -->
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+   <style>
+     :root {
+       --primary-color: #0066cc;
+       --secondary-color: #005bb5;
+       --bg-color: #f0f4f8;
+       --card-bg: #fff;
+       --text-color: #222;
+       --shadow: rgba(0,0,0,0.1);
+     }
+     * { box-sizing:border-box; margin:0; padding:0; }
+     body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); min-height:100vh; }
+     header { background:var(--primary-color); color:#fff; padding:1.5rem 1rem; position:relative; text-align:center; }
+     header h1 { font-size:1.8rem; margin-bottom:.2rem; }
+     header p  { opacity:.85; font-size:1rem; }
+ 
+     /* User area: greeting, dashboard link and logout inline */
+     #userArea {
+       position: absolute;
+       top: 1rem;
+       right: 1rem;
+       display: flex;
+       align-items: center;
+       gap: 1rem;
+       gap: 0.8rem;
+       color: #fff;
+       font-size: 0.95rem;
+     }
+     #userArea a, #userArea button {
+       font-size: 0.9rem;
+       background: var(--secondary-color);
+       color: #fff;
+       border: none;
+       padding: 0.4rem 0.8rem;
+       border-radius: 4px;
+       cursor: pointer;
+       text-decoration: none;
+       white-space: nowrap;
+       transition: background 0.2s;
+     }
+     #userArea a:hover, #userArea button:hover {
+       background: #004999;
+     }
+     #userArea a.dashboard-link {
+       background: transparent;
+       text-decoration: underline;
+       padding: 0;
+       color: #fff;
+     }
+ 
+     .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
+     .grid { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
+     .card { background:var(--card-bg); border-radius:8px; box-shadow:0 2px 6px var(--shadow); overflow:hidden; display:flex; flex-direction:column; transition:transform .2s; }
+     .card:hover { transform:translateY(-4px); }
+     .card img { width:100%; height:140px; object-fit:cover; }
+     .card-content { padding:1rem; flex:1; display:flex; flex-direction:column; }
+     .card-content h3 { margin-bottom:.75rem; color:var(--primary-color); font-size:1.1rem; }
+     .card-content p { flex:1; font-size:.95rem; margin-bottom:1rem; }
+     .card-content a { align-self:flex-start; text-decoration:none; background:var(--primary-color); color:#fff; padding:.5rem 1rem; border-radius:4px; transition:background .2s; }
+     .card-content a:hover { background:var(--secondary-color); }
+     footer { text-align:center; padding:1rem 0; background:#fff; border-top:1px solid #ddd; font-size:.9rem; color:#555; margin-top:2rem; }
+ 
+     /* Login Overlay */
+     #login-container { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:999; }
+     .login-card { background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 2px 8px var(--shadow); width:320px; text-align:center; }
+     .login-card h2 { color:var(--primary-color); margin-bottom:1rem; font-size:1.25rem; }
+     .login-card input { width:100%; padding:.5rem; margin-bottom:.75rem; border:1px solid #ccc; border-radius:4px; }
+     .login-card button { width:48%; padding:.5rem; background:var(--primary-color); color:#fff; border:none; border-radius:4px; cursor:pointer; transition:.2s; }
+     .login-card button:hover { background:var(--secondary-color); }
+     .login-card .error { color:red; font-size:.85rem; margin-top:.5rem; }
+ 
+     /* Admin Dashboard */
+     #dashboard { display:none; padding:2rem 0; }
+     .stats-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); margin-bottom:2rem; }
+     .stat-card { background:var(--card-bg); padding:1rem; border-radius:8px; box-shadow:0 1px 4px var(--shadow); text-align:center; }
+     .stat-card h4 { font-size:1rem; color:var(--primary-color); margin-bottom:.5rem; }
+     .stat-card p { font-size:1.6rem; font-weight:bold; }
+     .chart-container { background:var(--card-bg); padding:1rem; border-radius:8px; box-shadow:0 1px 4px var(--shadow); }
+     #btnBack { background:transparent; color:var(--secondary-color); border:1px solid var(--secondary-color); padding:.5rem 1rem; border-radius:4px; cursor:pointer; margin-bottom:1rem; }
+   </style>
+ </head>
+ <body>
+ 
+   <!-- Login / Signup Overlay -->
+   <div id="login-container">
+     <div class="login-card">
+       <h2>Đăng ký / Đăng nhập</h2>
+       <input id="auth-email"    type="email"    placeholder="Email">
+       <input id="auth-password" type="password" placeholder="Mật khẩu">
+       <h2>Đăng ký / Đăng nhập</n2>
+       <input  id="auth-email"    type="email"    placeholder="Email">
+       <input  id="auth-password" type="password" placeholder="Mật khẩu">
+       <div style="display:flex; justify-content:space-between; gap:4%;">
+         <button id="btnSignup">Đăng ký</button>
+         <button id="btnLogin">Đăng nhập</button>
+       </div>
+       <p id="authError" class="error"></p>
+     </div>
+   </div>
+ 
+   <!-- Header & User Area -->
+   <header>
+     <h1>Trang Tổng Hợp Dự Án</h1>
+     <p>Nơi tập trung các công cụ &amp; tính năng</p>
+     <div id="userArea"></div>
+   </header>
+ 
+   <!-- Main Content -->
+   <div id="main-content" class="container" style="display:none;">
+     <nav class="grid">
+       <div class="card">
+         <img src="images/encrypt-tool.png" alt="Encrypt Tool">
+         <div class="card-content">
+           <h3>Công Cụ Mã Hóa/Giải Mã</h3>
+           <p>Hỗ trợ JSON, XML, BEPOS với AES &amp; Base64</p>
+           <a href="./En-Comp.V3.html">Chi tiết</a>
+         </div>
+       </div>
+       <!-- ...other cards... -->
+       <div class="card">
+         <img src="images/ticks-converter.png" alt="Ticks Converter">
+         <div class="card-content">
+           <h3>Chuyển Đổi DateTime &amp; Ticks</h3>
+           <p>Chuyển đổi nhanh giữa DateTime &amp; ticks .NET</p>
+           <a href="./datetimetoticks_V2.html">Chi tiết</a>
+         </div>
+       </div>
+       <div class="card">
+         <img src="images/xml-merge.png" alt="XML Merge">
+         <div class="card-content">
+           <h3>Gộp file XML</h3>
+           <p>Gộp nhiều file XML thành 1</p>
+           <a href="./GopFileXML.html">Chi tiết</a>
+         </div>
+       </div>
+       <div class="card">
+         <img src="images/task-stats.png" alt="Task Stats">
+         <div class="card-content">
+           <h3>Thống Kê Công Việc</h3>
+           <p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao</p>
+           <a href="./TyLeXuLy.html">Chi tiết</a>
+         </div>
+       </div>
+       <div class="card">
+         <img src="images/notes-manager.png" alt="Notes Manager">
+         <div class="card-content">
+           <h3>Quản Lý Ghi Chú</h3>
+           <p>Thêm, hoàn thành, xóa; import/export JSON</p>
+           <a href="./Note.html">Chi tiết</a>
+         </div>
+       </div>
+       <div class="card">
+         <img src="images/invoice.png" alt="Invoice">
+         <div class="card-content">
+           <h3>Tạo Hóa Đơn XML</h3>
+           <p>Giao diện tạo hóa đơn xuất XML</p>
+           <a href="./CreateInvoice_UpdateV2.html">Chi tiết</a>
+         </div>
+       </div>
+     </nav>
+   </div>
+ 
+   <!-- Admin Dashboard -->
+   <div id="dashboard" class="container" style="display:none;">
+     <button id="btnBack">← Về trang chính</button>
+     <h2>Admin Dashboard</h2>
+     <div class="stats-grid">
+       <div class="stat-card"><h4>Tổng truy cập</h4><p id="cntTotal">...</p></div>
+       <div class="stat-card"><h4>Trang mã hóa</h4><p id="cntEncrypt">...</p></div>
+       <div class="stat-card"><h4>Trang thống kê</h4><p id="cntStats">...</p></div>
+     </div>
+     <div class="chart-container">
+       <canvas id="pageChart" height="100"></canvas>
+     </div>
+   </div>
+ 
+   <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
+ 
+   <script>
+     // Firebase init
+     const firebaseConfig = {apiKey:"AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",authDomain:"ehoadon-bkav.firebaseapp.com",databaseURL:"https://ehoadon-bkav-default-rtdb.firebaseio.com",projectId:"ehoadon-bkav",storageBucket:"ehoadon-bkav.appspot.com",messagingSenderId:"688737951508",appId:"1:688737951508:web:965514a6a1f7c4de15ac01",measurementId:"G-VJFL3C86WM"};
+     const firebaseConfig = { apiKey:"AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU", authDomain:"ehoadon-bkav.firebaseapp.com", databaseURL:"https://ehoadon-bkav-default-rtdb.firebaseio.com", projectId:"ehoadon-bkav", storageBucket:"ehoadon-bkav.appspot.com", messagingSenderId:"688737951508", appId:"1:688737951508:web:965514a6a1f7c4de15ac01", measurementId:"G-VJFL3C86WM" };
+     firebase.initializeApp(firebaseConfig);
+     const auth = firebase.auth();
+     const db   = firebase.database();
+ 
+     // UI refs
+     const loginContainer = document.getElementById('login-container');
+     const btnSignup      = document.getElementById('btnSignup');
+     const btnLogin       = document.getElementById('btnLogin');
+     const authError      = document.getElementById('authError');
+     const userArea       = document.getElementById('userArea');
+     const mainContent    = document.getElementById('main-content');
+     const dashboard      = document.getElementById('dashboard');
+     const btnBack        = document.getElementById('btnBack');
+ 
+     // CountAPI helpers
+     async function fetchCount(key) {
+       try {const r=await fetch(`https://api.countapi.xyz/get/thanghdb/${key}`); return (await r.json()).value;}catch{return 0;}
+     }
+     async function incrementCount(key) {
+       try {await fetch(`https://api.countapi.xyz/hit/thanghdb/${key}`);} catch {}
+     }
+     async function fetchCount(key) { try { const r=await fetch(`https://api.countapi.xyz/get/thanghdb/${key}`); return (await r.json()).value; } catch { return 0; } }
+     async function incrementCount(key) { try { await fetch(`https://api.countapi.xyz/hit/thanghdb/${key}`); } catch {} }
+ 
+     // Update UI based on auth
+     function updateUI(user) {
+       if (user) {
+         loginContainer.style.display = 'none';
+         mainContent.style.display    = 'block';
+ 
+         // Greeting + logout + dashboard link if admin
+         const nameOnly = user.email.split('@')[0];
+         let html = `👋 Chào mừng <strong>${nameOnly}</strong>`;
+         if (user.email === 'thanghdb@bkav.com') {
+           html += `<a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
+         }
+         html += `<button id="btnLogoutUser">Đăng xuất</button>`;
+         if (user.email === 'thanghdb@bkav.com') html += ` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
+         html += ` <button id="btnLogoutUser">Đăng xuất</button>`;
+         userArea.innerHTML = html;
+ 
+         document.getElementById('btnLogoutUser').onclick = () => {
+           alert('Bạn đã đăng xuất.');
+           auth.signOut();
+         };
+         if (user.email === 'thanghdb@bkav.com') {
+           document.getElementById('linkDashboard').onclick = () => {
+             mainContent.style.display = 'none';
+             dashboard.style.display   = 'block';
+             loadStats();
+           };
+         }
+         document.getElementById('btnLogoutUser').onclick = () => { alert('Bạn đã đăng xuất.'); auth.signOut(); };
+         if (user.email === 'thanghdb@bkav.com') document.getElementById('linkDashboard').onclick = () => { mainContent.style.display='none'; dashboard.style.display='block'; loadStats(); };
+ 
+         incrementCount('home');
+       } else {
+         loginContainer.style.display = 'flex';
+         mainContent.style.display    = 'none';
+         dashboard.style.display      = 'none';
+         userArea.innerHTML           = '';
+       }
+     }
+ 
+     // Auth state listener
+     // Auth listener
+     auth.onAuthStateChanged(updateUI);
+ 
+     // Sign-up
+     btnSignup.onclick = () => {
+       const email = document.getElementById('auth-email').value.trim();
+       const pass  = document.getElementById('auth-password').value.trim();
+       if (!email || !pass) { authError.textContent = "Vui lòng nhập email và mật khẩu."; return; }
+       auth.createUserWithEmailAndPassword(email, pass)
+         .catch(e => authError.textContent = e.message);
+       if (!email||!pass) { authError.textContent="Vui lòng nhập email và mật khẩu."; return; }
+       auth.createUserWithEmailAndPassword(email, pass).catch(e=>authError.textContent=e.message);
+     };
+ 
+     // Login
+     btnLogin.onclick = () => {
+       const email = document.getElementById('auth-email').value.trim();
+       const pass  = document.getElementById('auth-password').value.trim();
+       if (!email || !pass) { authError.textContent = "Vui lòng nhập email và mật khẩu."; return; }
+       auth.signInWithEmailAndPassword(email, pass)
+         .catch(e => authError.textContent = e.message);
+       if (!email||!pass) { authError.textContent="Vui lòng nhập email và mật khẩu."; return; }
+       auth.signInWithEmailAndPassword(email, pass).catch(e=>authError.textContent=e.message);
+     };
+ 
+     // Back to main
+     btnBack.onclick = () => {
+       dashboard.style.display   = 'none';
+       mainContent.style.display = 'block';
+     };
+     btnBack.onclick = () => { dashboard.style.display='none'; mainContent.style.display='block'; };
+ 
+     // Load stats & Chart
+     async function loadStats() {
+       const home  = await fetchCount('home'),
+             enc   = await fetchCount('encrypt'),
+             stats = await fetchCount('stats');
+       document.getElementById('cntTotal'  ).innerText = home;
+       document.getElementById('cntEncrypt').innerText = enc;
+       document.getElementById('cntStats'  ).innerText = stats;
+       new Chart(document.getElementById('pageChart'), {
+         type:'bar',
+         data:{ labels:['Home','Encrypt','Stats'], datasets:[{ label:'Views', data:[home,enc,stats] }] },
+         options:{ scales:{ y:{ beginAtZero:true } } }
+       });
+       const home  = await fetchCount('home'), enc = await fetchCount('encrypt'), stats = await fetchCount('stats');
+       document.getElementById('cntTotal').innerText=home;
+       document.getElementById('cntEncrypt').innerText=enc;
+       document.getElementById('cntStats').innerText=stats;
+       new Chart(document.getElementById('pageChart'),{type:'bar',data:{labels:['Home','Encrypt','Stats'],datasets:[{label:'Views',data:[home,enc,stats]}]},options:{scales:{y:{beginAtZero:true}}}});
+     }
+ 
+     // Init CountAPI keys once
+     ['home','encrypt','stats'].forEach(k =>
+       fetch(`https://api.countapi.xyz/create?namespace=thanghdb&key=${k}&value=0&enable=true`).catch(()=>{})
+     );
+     // Initialize CountAPI keys once
+     ['home','encrypt','stats'].forEach(k=>fetch(`https://api.countapi.xyz/create?namespace=thanghdb&key=${k}&value=0&enable=true`).catch(()=>{}));
+   </script>
+ </body>
+ </html>
