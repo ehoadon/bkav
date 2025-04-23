@@ -174,5 +174,16 @@
       document.getElementById('status').textContent = `Hoàn tất: đã tạo ${countFiles} file gộp.`;
     }
   </script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://api.countapi.xyz/hit/thanghdb/merge')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ghi nhận truy cập trang gộp file XML:', data.value);
+      })
+      .catch(console.error);
+  });
+</script>
+
 </body>
 </html>
