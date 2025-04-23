@@ -882,5 +882,16 @@
     }
     populateFilterOptions();
   </script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://api.countapi.xyz/hit/thanghdb/stats')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ghi nhận truy cập trang stats:', data.value);
+      })
+      .catch(console.error);
+  });
+</script>
+
 </body>
 </html>
