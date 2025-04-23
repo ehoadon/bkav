@@ -779,5 +779,16 @@ function loadFromFile(event) {
         // Tải ghi chú khi trang được load
         window.onload = loadNotes;
     </script>
+    <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://api.countapi.xyz/hit/thanghdb/notes')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ghi nhận truy cập trang notes:', data.value);
+      })
+      .catch(console.error);
+  });
+</script>
+
 </body>
 </html>
