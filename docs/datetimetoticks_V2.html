@@ -1,115 +1,231 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chuyển đổi DateTime ↔ Ticks</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #1E1E2E;
-            color: white;
-            flex-direction: column;
-            padding: 40px 20px;
-        }
-        .container {
-            background: #29293F;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 420px;
-            text-align: center;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            border: none;
-        }
-        input {
-            background: #3A3A5A;
-            color: white;
-        }
-        button {
-            background: #FF6B6B;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        button:hover {
-            background: #FF4C4C;
-        }
-        footer {
-            margin-top: 2rem;
-            background-color: #29293F;
-            padding: 15px 20px;
-            border-radius: 10px;
-            max-width: 600px;
-            line-height: 1.5;
-            font-size: 0.95em;
-        }
-        footer h3 {
-            color: #FFD700;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chuyển đổi DateTime ↔ Ticks (Yêu cầu đăng nhập)</title>
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+
+  <!-- Chart.js (giữ nếu bạn cần vẽ biểu đồ) -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+  <style>
+    :root {
+      --primary-color: #0066cc;
+      --secondary-color: #005bb5;
+      --bg-color: #f4f7fb;
+      --card-bg: #fff;
+      --text-color: #333;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); min-height:100vh; }
+    header {
+      background:var(--primary-color);
+      color:#fff;
+      padding:1rem;
+      position:relative;
+      text-align:center;
+    }
+    header h1 { font-size:1.5rem; }
+    #userArea {
+      position:absolute; top:1rem; right:1rem;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    #userArea span { font-size:0.9rem; }
+    #userArea button {
+      font-size:0.8rem;
+      background:var(--secondary-color);
+      border:none; color:#fff;
+      padding:0.3rem 0.6rem;
+      border-radius:4px;
+      cursor:pointer;
+    }
+    /* Login Overlay */
+    #login-container {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.5);
+      display:flex; justify-content:center; align-items:center;
+      z-index:999;
+    }
+    .login-card {
+      background:#fff; padding:1.5rem;
+      border-radius:8px; box-shadow:0 2px 8px var(--shadow);
+      width:320px; text-align:center;
+    }
+    .login-card h2 { color:var(--primary-color); margin-bottom:1rem; }
+    .login-card input {
+      width:100%; padding:0.5rem; margin-bottom:0.75rem;
+      border:1px solid #ccc; border-radius:4px;
+    }
+    .login-card button {
+      width:48%; padding:0.5rem;
+      background:var(--primary-color); color:#fff;
+      border:none; border-radius:4px; cursor:pointer;
+      transition:background .2s;
+    }
+    .login-card button:hover { background:var(--secondary-color); }
+    .login-card .error { color:red; font-size:0.85rem; margin-top:0.5rem; }
+
+    /* Main tool */
+    #main-content {
+      display:none;
+      padding:2rem 1rem;
+    }
+    .container {
+      background:white; max-width:420px; width:100%;
+      margin:0 auto; padding:1.5rem;
+      border-radius:12px; box-shadow:0 4px 12px var(--shadow);
+    }
+    .container h2 { text-align:center; color:var(--primary-color); margin-bottom:1rem; }
+    input, button {
+      width:100%; padding:10px; margin-top:0.75rem;
+      border-radius:6px; border:1px solid #ccc; font-size:1rem;
+    }
+    button.convert {
+      background:var(--primary-color); color:#fff; border:none; cursor:pointer;
+    }
+    button.convert:hover { background:var(--secondary-color); }
+    #result { margin-top:1.2rem; font-weight:bold; text-align:center; }
+    footer {
+      margin-top:2rem; text-align:left; font-size:0.9rem; color:#555;
+      max-width:600px; margin-left:auto; margin-right:auto;
+    }
+    footer h3 { color:var(--primary-color); margin-bottom:0.5rem; }
+    footer ul { list-style:disc inside; padding-left:1rem; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Chuyển đổi DateTime ↔ Ticks</h2>
-        <input type="datetime-local" id="datetimeInput" step="1">
-        <button onclick="convertToTicks()">Chuyển thành Ticks</button>
-        <input type="text" id="ticksInput" placeholder="Nhập ticks">
-        <button onclick="convertToDatetime()">Chuyển thành DateTime</button>
-        <h3 id="result"></h3>
+
+  <!-- Login Overlay -->
+  <div id="login-container">
+    <div class="login-card">
+      <h2>Đăng ký / Đăng nhập</h2>
+      <input id="auth-email" type="email" placeholder="Email">
+      <input id="auth-password" type="password" placeholder="Mật khẩu">
+      <div style="display:flex; justify-content:space-between; gap:4%">
+        <button id="btnSignup">Đăng ký</button>
+        <button id="btnLogin">Đăng nhập</button>
+      </div>
+      <p id="authError" class="error"></p>
     </div>
+  </div>
 
-    <footer>
-        <h3>📘 Hướng dẫn sử dụng công cụ</h3>
-        <ul>
-            <li>👉 Nhập ngày giờ theo định dạng <strong>DateTime</strong> vào ô đầu tiên (có hỗ trợ chọn thời gian) rồi bấm <strong>“Chuyển thành Ticks”</strong> để lấy giá trị ticks tương ứng.</li>
-            <li>👉 Ngược lại, bạn có thể nhập một giá trị <strong>ticks</strong> (số 64-bit) vào ô phía dưới rồi bấm <strong>“Chuyển thành DateTime”</strong> để xem lại thời gian theo giờ địa phương.</li>
-            <li>⏱️ Kết quả hiển thị sẽ tự động cân nhắc múi giờ hệ thống để giúp bạn chuyển đổi chính xác theo giờ địa phương.</li>
-            <li>📌 Cách tính ticks: 1 tick = 100 nanoseconds kể từ 00:00:00 ngày 1/1/0001 (theo chuẩn .NET).</li>
-        </ul>
-        <p><em>Lưu ý:</em> Giá trị ticks thường dùng trong hệ thống .NET hoặc khi thao tác với thời gian dạng nhị phân/chuỗi.</p>
-    </footer>
+  <!-- Header -->
+  <header>
+    <h1>Chuyển đổi DateTime ↔ Ticks</h1>
+    <div id="userArea"></div>
+  </header>
 
-<script>
+  <!-- Main Tool Content -->
+  <div id="main-content">
+    <div class="container">
+      <h2>Chuyển đổi</h2>
+      <input type="datetime-local" id="datetimeInput" step="1">
+      <button class="convert" onclick="convertToTicks()">→ Ticks</button>
+      <input type="text" id="ticksInput" placeholder="Nhập ticks .NET">
+      <button class="convert" onclick="convertToDatetime()">→ DateTime</button>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <footer>
+    <h3>📘 Hướng dẫn sử dụng</h3>
+    <ul>
+      <li>Nhập ngày giờ (DateTime) rồi nhấn “→ Ticks” để lấy giá trị ticks (.NET).</li>
+      <li>Nhập ticks rồi nhấn “→ DateTime” để chuyển về định dạng ngày giờ địa phương.</li>
+      <li>1 tick = 100ns kể từ 00:00:00 ngày 1/1/0001 theo chuẩn .NET.</li>
+    </ul>
+  </footer>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      projectId: "ehoadon-bkav",
+      storageBucket: "ehoadon-bkav.appspot.com",
+      messagingSenderId: "688737951508",
+      appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
+      measurementId: "G-VJFL3C86WM"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // UI refs
+    const loginContainer = document.getElementById('login-container');
+    const btnSignup = document.getElementById('btnSignup');
+    const btnLogin  = document.getElementById('btnLogin');
+    const authError = document.getElementById('authError');
+    const userArea  = document.getElementById('userArea');
+    const mainContent = document.getElementById('main-content');
+
+    // Show/hide by auth state
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginContainer.style.display = 'none';
+        mainContent.style.display = 'block';
+        const name = user.email.split('@')[0];
+        userArea.innerHTML = `👋 <strong>${name}</strong>
+          <button id="btnLogout">Đăng xuất</button>`;
+        document.getElementById('btnLogout')
+          .onclick = () => auth.signOut();
+        // ghi nhận lượt truy cập
+        fetch('https://api.countapi.xyz/hit/thanghdb/ticks')
+          .catch(()=>{});
+      } else {
+        loginContainer.style.display = 'flex';
+        mainContent.style.display = 'none';
+        userArea.innerHTML = '';
+      }
+    });
+
+    // Sign-up
+    btnSignup.onclick = () => {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = 'Vui lòng nhập đủ thông tin.';
+        return;
+      }
+      auth.createUserWithEmailAndPassword(email, pass)
+        .catch(e => authError.textContent = e.message);
+    };
+
+    // Login
+    btnLogin.onclick = () => {
+      const email = document.getElementById('auth-email').value.trim();
+      const pass  = document.getElementById('auth-password').value.trim();
+      if (!email || !pass) {
+        authError.textContent = 'Vui lòng nhập đủ thông tin.';
+        return;
+      }
+      auth.signInWithEmailAndPassword(email, pass)
+        .catch(e => authError.textContent = e.message);
+    };
+
+    // Conversion functions
     function convertToTicks() {
-        let datetime = document.getElementById("datetimeInput").value;
-        if (!datetime) return;
-        let date = new Date(datetime);
-        date.setMilliseconds(0); // Loại bỏ phần millisecond nếu cần
-        let offsetTicks = date.getTimezoneOffset() * 600000000;
-        let ticks = (date.getTime() * 10000) + 621355968000000000 - offsetTicks;
-        document.getElementById("result").innerText = "Ticks: " + ticks;
+      const datetime = document.getElementById("datetimeInput").value;
+      if (!datetime) return;
+      const date = new Date(datetime);
+      date.setMilliseconds(0);
+      const offsetTicks = date.getTimezoneOffset() * 600000000;
+      const ticks = date.getTime() * 10000 + 621355968000000000 - offsetTicks;
+      document.getElementById("result").innerText = "Ticks: " + ticks;
     }
-
     function convertToDatetime() {
-        let ticks = document.getElementById("ticksInput").value;
-        if (!ticks || isNaN(ticks)) return;
-        let offsetTicks = (new Date()).getTimezoneOffset() * 600000000;
-        let milliseconds = ((ticks - 621355968000000000) + offsetTicks) / 10000;
-        let date = new Date(milliseconds);
-        document.getElementById("result").innerText = "DateTime: " + date.toLocaleString();
+      const t = parseInt(document.getElementById("ticksInput").value);
+      if (!t || isNaN(t)) return;
+      const offsetTicks = (new Date()).getTimezoneOffset() * 600000000;
+      const ms = (t - 621355968000000000 + offsetTicks) / 10000;
+      const d = new Date(ms);
+      document.getElementById("result").innerText = "DateTime: " + d.toLocaleString();
     }
-</script>
-    <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    fetch('https://api.countapi.xyz/hit/thanghdb/ticks')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Ghi nhận truy cập trang datetimetoticks:', data.value);
-      })
-      .catch(console.error);
-  });
-</script>
+  </script>
 
 </body>
 </html>
