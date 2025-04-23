@@ -23,9 +23,9 @@
     header{background:var(--primary-color);color:#fff;padding:1.5rem;text-align:center;position:relative;}
     header h1{font-size:1.8rem;}
     header p{opacity:.85;}
-    /* userArea: greeting + Dashboard + Logout */
+    /* userArea */
     #userArea{position:absolute;top:1rem;right:1rem;display:flex;align-items:center;gap:.8rem;color:#fff;font-size:.95rem;}
-    #userArea a, #userArea button{font-size:.9rem;background:var(--secondary-color);color:#fff;border:none;padding:.4rem .8rem;border-radius:4px;cursor:pointer;text-decoration:none;transition:background .2s;}
+    #userArea a,#userArea button{font-size:.9rem;background:var(--secondary-color);color:#fff;border:none;padding:.4rem .8rem;border-radius:4px;cursor:pointer;text-decoration:none;transition:background .2s;}
     #userArea a.dashboard-link{background:transparent;text-decoration:underline;padding:0;}
     .container{max-width:1200px;margin:2rem auto;padding:0 1rem;}
     .grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
@@ -56,6 +56,7 @@
   </style>
 </head>
 <body>
+
   <!-- LOGIN / SIGNUP OVERLAY -->
   <div id="login-container">
     <div class="login-card">
@@ -80,7 +81,6 @@
   <!-- MAIN CONTENT -->
   <div id="main-content" class="container" style="display:none;">
     <nav class="grid">
-      <!-- Mã hóa -->
       <div class="card">
         <img src="images/encrypt-tool.png" alt="Encrypt Tool">
         <div class="card-content">
@@ -89,7 +89,6 @@
           <a href="./En-Comp.V3.html" data-key="encrypt">Chi tiết</a>
         </div>
       </div>
-      <!-- DateTime ↔ Ticks -->
       <div class="card">
         <img src="images/ticks-converter.png" alt="Ticks Converter">
         <div class="card-content">
@@ -98,7 +97,6 @@
           <a href="./datetimetoticks_V2.html" data-key="ticks">Chi tiết</a>
         </div>
       </div>
-      <!-- Gộp XML -->
       <div class="card">
         <img src="images/xml-merge.png" alt="XML Merge">
         <div class="card-content">
@@ -107,7 +105,6 @@
           <a href="./GopFileXML.html" data-key="merge">Chi tiết</a>
         </div>
       </div>
-      <!-- Thống kê -->
       <div class="card">
         <img src="images/task-stats.png" alt="Task Stats">
         <div class="card-content">
@@ -116,7 +113,6 @@
           <a href="./TyLeXuLy.html" data-key="stats">Chi tiết</a>
         </div>
       </div>
-      <!-- Ghi chú -->
       <div class="card">
         <img src="images/notes-manager.png" alt="Notes Manager">
         <div class="card-content">
@@ -125,7 +121,6 @@
           <a href="./Note.html" data-key="notes">Chi tiết</a>
         </div>
       </div>
-      <!-- Hóa đơn -->
       <div class="card">
         <img src="images/invoice.png" alt="Invoice">
         <div class="card-content">
@@ -142,7 +137,7 @@
     <button id="btnBack">← Về trang chính</button>
     <h2>Admin Dashboard</h2>
     <div class="stats-grid">
-      <div class="stat-card"><h4>Tổng truy cập Home</h4><p id="cntHome">...</p></div>
+      <div class="stat-card"><h4>Tổng Home</h4><p id="cntHome">...</p></div>
       <div class="stat-card"><h4>Encrypt</h4><p id="cntEncrypt">...</p></div>
       <div class="stat-card"><h4>Ticks</h4><p id="cntTicks">...</p></div>
       <div class="stat-card"><h4>Merge</h4><p id="cntMerge">...</p></div>
@@ -158,7 +153,7 @@
   <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
 
   <script>
-    // Firebase 初始化
+    // Firebase init
     const firebaseConfig = {
       apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
       authDomain: "ehoadon-bkav.firebaseapp.com",
@@ -172,7 +167,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // UI 參考
+    // UI refs
     const loginContainer = document.getElementById('login-container');
     const btnSignup      = document.getElementById('btnSignup');
     const btnLogin       = document.getElementById('btnLogin');
@@ -190,70 +185,60 @@
       return res? (await res.json()).value : 0;
     }
 
-    // 更新 UI
+    // updateUI
     function updateUI(user) {
       if (user) {
         loginContainer.style.display = 'none';
         const nameOnly = user.email.split('@')[0];
         let html = `👋 <strong>${nameOnly}</strong>`;
-        if (user.email === 'thanghdb@bkav.com') {
-          html += ` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
-        }
-        html += ` <button id="btnLogoutUser">Logout</button>`;
+        if (user.email==='thanghdb@bkav.com')
+          html+=` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
+        html+=` <button id="btnLogoutUser">Logout</button>`;
         userArea.innerHTML = html;
-
-        document.getElementById('btnLogoutUser').onclick = () => auth.signOut();
-        const dashLink = document.getElementById('linkDashboard');
-        if (dashLink) dashLink.onclick = e => {
+        document.getElementById('btnLogoutUser').onclick=()=>auth.signOut();
+        const dashLink=document.getElementById('linkDashboard');
+        if(dashLink) dashLink.onclick=e=>{
           e.preventDefault();
-          mainContent.style.display = 'none';
-          dashboard.style.display   = 'block';
+          mainContent.style.display='none';
+          dashboard.style.display='block';
           loadStats();
         };
-
-        mainContent.style.display = 'block';
-        // record home hit
+        mainContent.style.display='block';
         hit('home');
       } else {
-        loginContainer.style.display = 'flex';
-        mainContent.style.display    = 'none';
-        dashboard.style.display      = 'none';
-        userArea.innerHTML           = '';
+        loginContainer.style.display='flex';
+        mainContent.style.display='none';
+        dashboard.style.display='none';
+        userArea.innerHTML='';
       }
     }
-
     auth.onAuthStateChanged(updateUI);
 
-    btnSignup.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
-      const pass  = document.getElementById('auth-password').value.trim();
-      if (!email||!pass) { authError.textContent="Vui lòng nhập đầy đủ."; return; }
-      auth.createUserWithEmailAndPassword(email,pass).catch(e=>authError.textContent=e.message);
+    btnSignup.onclick=()=>{
+      const e=document.getElementById('auth-email').value.trim(),
+            p=document.getElementById('auth-password').value.trim();
+      if(!e||!p){authError.textContent='Vui lòng nhập';return;}
+      auth.createUserWithEmailAndPassword(e,p).catch(e=>authError.textContent=e.message);
     };
-    btnLogin.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
-      const pass  = document.getElementById('auth-password').value.trim();
-      auth.signInWithEmailAndPassword(email,pass).catch(e=>authError.textContent=e.message);
-    };
-
-    btnBack.onclick = () => {
-      dashboard.style.display = 'none';
-      mainContent.style.display = 'block';
+    btnLogin.onclick=()=>{
+      const e=document.getElementById('auth-email').value.trim(),
+            p=document.getElementById('auth-password').value.trim();
+      if(!e||!p){authError.textContent='Vui lòng nhập';return;}
+      auth.signInWithEmailAndPassword(e,p).catch(e=>authError.textContent=e.message);
     };
 
-    // 加載統計
-    async function loadStats() {
-      const keys = ['home','encrypt','ticks','merge','stats','notes','invoice'];
-      const vals = await Promise.all(keys.map(k=>hit(k)));
-      document.getElementById('cntHome').innerText    = vals[0];
-      document.getElementById('cntEncrypt').innerText = vals[1];
-      document.getElementById('cntTicks').innerText   = vals[2];
-      document.getElementById('cntMerge').innerText   = vals[3];
-      document.getElementById('cntStats').innerText   = vals[4];
-      document.getElementById('cntNotes').innerText   = vals[5];
-      document.getElementById('cntInvoice').innerText = vals[6];
+    btnBack.onclick=()=>{
+      dashboard.style.display='none';
+      mainContent.style.display='block';
+    };
 
-      new Chart(chartCtx, {
+    // loadStats
+    async function loadStats(){
+      const keys=['home','encrypt','ticks','merge','stats','notes','invoice'];
+      const vals=await Promise.all(keys.map(k=>hit(k)));
+      ['Home','Encrypt','Ticks','Merge','Stats','Notes','Invoice']
+        .forEach((lbl,i)=> document.getElementById('cnt'+lbl).innerText=vals[i]);
+      new Chart(chartCtx,{
         type:'bar',
         data:{
           labels:['Home','Encrypt','Ticks','Merge','Stats','Notes','Invoice'],
