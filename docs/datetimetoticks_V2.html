@@ -2,95 +2,198 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chuyển đổi DateTime ↔ Ticks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chuyển Đổi DateTime ↔ Ticks</title>
+
   <!-- Firebase Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-  <!-- CountAPI namespace: thanghdb -->
+
   <style>
-    :root { --primary-color:#0066cc; --secondary-color:#005bb5; --bg:#f0f4f8; --card:#fff; --text:#222; --shadow:rgba(0,0,0,0.1);} *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-    header{background:var(--primary-color);color:#fff;padding:1rem;position:relative;text-align:center;}
-    header h1{margin:0;font-size:1.5rem;}
-    #userArea{position:absolute;top:1rem;right:1rem;font-size:0.9rem;}
-    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:1000;}
-    .login-card{background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px var(--shadow);width:320px;text-align:center;}
-    .login-card h2{margin-bottom:1rem;color:var(--primary-color);}
-    .login-card input{width:100%;padding:.5rem;margin:0.5rem 0;border:1px solid #ccc;border-radius:4px;}
-    .login-card button{width:48%;padding:.5rem;margin:0 .5%;background:var(--primary-color);color:#fff;border:none;border-radius:4px;cursor:pointer;}
-    main{flex:1;display:none;justify-content:center;align-items:center;padding:2rem;}
-    .container{background:var(--card);padding:2rem;border-radius:8px;box-shadow:0 2px 6px var(--shadow);max-width:420px;width:100%;text-align:center;}
-    input,button{width:100%;padding:10px;margin:10px 0;border-radius:5px;border:none;font-size:1rem;}
-    input{background:#eee;}
-    button.convert{background:var(--secondary-color);color:#fff;cursor:pointer;}
-    button.convert:hover{background:var(--primary-color);}
-    #result{margin-top:1rem;font-weight:bold;}
-    .nav-btn{margin-top:1rem;background:transparent;color:var(--primary-color);text-decoration:underline;cursor:pointer;border:none;}
+    :root {
+      --primary: #0066cc;
+      --secondary: #005bb5;
+      --bg: #f0f4f8;
+      --card: #fff;
+      --text: #222;
+      --shadow: rgba(0,0,0,0.1);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1rem;
+      position: relative;
+      text-align: center;
+    }
+    header h1 { font-size:1.5rem; }
+    #userArea {
+      position:absolute; top:1rem; right:1rem;
+      display:flex; gap:.5rem; align-items:center;
+    }
+    #userArea span { font-weight:bold; }
+    #userArea button, #userArea a {
+      background: var(--secondary);
+      color:#fff; border:none; padding:.4rem .8rem;
+      border-radius:4px; text-decoration:none; cursor:pointer;
+      font-size:0.9rem;
+    }
+    #userArea a:hover, #userArea button:hover { background: #004999; }
+    .container {
+      max-width:400px;
+      margin:2rem auto;
+      background: #fff;
+      padding:1.5rem;
+      border-radius:8px;
+      box-shadow:0 2px 8px var(--shadow);
+      text-align:center;
+    }
+    input, button {
+      width:100%; padding:.8rem; margin:0.5rem 0;
+      border:1px solid #ccc; border-radius:4px;
+    }
+    input { background:#fafafa; }
+    button {
+      background: var(--primary);
+      color:#fff; border:none; cursor:pointer;
+    }
+    button:hover { background: var(--secondary); }
+    #result { margin-top:1rem; font-weight:bold; }
+    #backBtn {
+      margin-top:1rem;
+      display:inline-block;
+    }
+
+    /* Login overlay */
+    #loginOverlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.5);
+      display:flex; align-items:center; justify-content:center;
+      z-index:999;
+    }
+    .loginCard {
+      background:#fff; padding:1rem; border-radius:6px;
+      width:300px; text-align:center; box-shadow:0 2px 8px var(--shadow);
+    }
+    .loginCard input { width:100%; margin:0.4rem 0; }
+    .loginCard .actions { display:flex; gap:0.5rem; justify-content:space-between; }
+    .loginCard .error { color:red; font-size:0.9rem; min-height:1.2em; }
   </style>
 </head>
 <body>
+
   <!-- Login Overlay -->
-  <div id="login-container">
-    <div class="login-card">
+  <div id="loginOverlay">
+    <div class="loginCard">
       <h2>Đăng nhập</h2>
-      <input id="auth-email" type="email" placeholder="Email">
-      <input id="auth-password" type="password" placeholder="Mật khẩu">
-      <div>
+      <input id="email" type="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Mật khẩu">
+      <div class="actions">
+        <button id="btnSign">Đăng ký</button>
         <button id="btnLogin">Đăng nhập</button>
       </div>
-      <p id="authError" style="color:red;"></p>
+      <div id="errMsg" class="error"></div>
     </div>
   </div>
+
+  <!-- Header -->
   <header>
-    <h1>Chuyển đổi DateTime ↔ Ticks</h1>
+    <h1>DateTime ↔ Ticks</h1>
     <div id="userArea"></div>
   </header>
-  <main>
-    <div class="container">
-      <input type="datetime-local" id="datetimeInput" step="1">
-      <button class="convert" id="toTicksBtn">Chuyển thành Ticks</button>
-      <input type="text" id="ticksInput" placeholder="Nhập ticks">
-      <button class="convert" id="toDateBtn">Chuyển thành DateTime</button>
-      <div id="result"></div>
-      <button class="nav-btn" onclick="location.href='index.html'">← Về Trang Chính</button>
-    </div>
-  </main>
+
+  <!-- Main -->
+  <div id="main" class="container" style="display:none;">
+    <input type="datetime-local" id="dtInput" step="1">
+    <button id="toTicks">Chuyển sang Ticks</button>
+    <input type="text" id="ticksInput" placeholder="Nhập ticks">
+    <button id="toDate">Chuyển sang DateTime</button>
+    <div id="result"></div>
+    <a id="backBtn" href="./index.html">← Về Trang Chính</a>
+  </div>
+
   <script>
     // Firebase init
-    const firebaseConfig = { apiKey:'AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU', authDomain:'ehoadon-bkav.firebaseapp.com', databaseURL:'https://ehoadon-bkav-default-rtdb.firebaseio.com', projectId:'ehoadon-bkav', storageBucket:'ehoadon-bkav.appspot.com', messagingSenderId:'688737951508', appId:'1:688737951508:web:965514a6a1f7c4de15ac01', measurementId:'G-VJFL3C86WM' };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    // Auth UI
-    const loginContainer = document.getElementById('login-container');
-    const userArea = document.getElementById('userArea');
-    const main = document.querySelector('main');
-    document.getElementById('btnLogin').onclick = ()=>{
-      const e=document.getElementById('auth-email').value;
-      const p=document.getElementById('auth-password').value;
-      auth.signInWithEmailAndPassword(e,p).catch(e=>document.getElementById('authError').innerText=e.message);
+    const cfg = {
+      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      projectId: "ehoadon-bkav",
     };
-    auth.onAuthStateChanged(u=>{
-      if(u){ loginContainer.style.display='none'; main.style.display='flex'; userArea.innerHTML=`👋 ${u.email.split('@')[0]} <button onclick="auth.signOut()">Đăng xuất</button>`; window.countHit(); }
-      else{ loginContainer.style.display='flex'; main.style.display='none'; userArea.innerText=''; }
+    firebase.initializeApp(cfg);
+    const auth = firebase.auth();
+
+    // UI refs
+    const overlay = document.getElementById('loginOverlay');
+    const errMsg  = document.getElementById('errMsg');
+    const ua      = document.getElementById('userArea');
+    const main    = document.getElementById('main');
+    const emailI  = document.getElementById('email');
+    const passI   = document.getElementById('pass');
+    const btnS    = document.getElementById('btnSign');
+    const btnL    = document.getElementById('btnLogin');
+
+    // Auth state
+    auth.onAuthStateChanged(u => {
+      if (u) {
+        overlay.style.display = 'none';
+        main.style.display    = 'block';
+        // greeting + logout
+        const name = u.email.split('@')[0];
+        ua.innerHTML = `
+          <span>👋 ${name}</span>
+          <button id="btnLogout">Đăng xuất</button>
+        `;
+        document.getElementById('btnLogout')
+          .onclick = () => auth.signOut();
+        // count hit
+        fetch('https://api.countapi.xyz/hit/thanghdb/ticks')
+          .catch(()=>{});
+      } else {
+        overlay.style.display = 'flex';
+        main.style.display    = 'none';
+        ua.innerHTML          = '';
+      }
     });
-    // Conversion
-    function convertToTicks(){
-      const dt=document.getElementById('datetimeInput').value; if(!dt)return;
-      const d=new Date(dt); const off=d.getTimezoneOffset()*600000000;
-      const ticks=d.getTime()*10000+621355968000000000-off;
-      document.getElementById('result').innerText='Ticks: '+ticks;
-    }
-    function convertToDate(){
-      const ticks=+document.getElementById('ticksInput').value||0;
-      const off=(new Date()).getTimezoneOffset()*600000000;
-      const ms=(ticks-621355968000000000+off)/10000;
-      document.getElementById('result').innerText='DateTime: '+new Date(ms).toLocaleString();
-    }
-    document.getElementById('toTicksBtn').onclick=convertToTicks;
-    document.getElementById('toDateBtn').onclick=convertToDate;
-    // CountAPI
-    window.countHit=()=>{ fetch('https://api.countapi.xyz/hit/thanghdb/ticks').catch(()=>{}); };
+
+    // Sign up
+    btnS.onclick = () => {
+      errMsg.textContent = '';
+      auth.createUserWithEmailAndPassword(emailI.value, passI.value)
+        .catch(e=> errMsg.textContent = e.message);
+    };
+    // Login
+    btnL.onclick = () => {
+      errMsg.textContent = '';
+      auth.signInWithEmailAndPassword(emailI.value, passI.value)
+        .catch(e=> errMsg.textContent = e.message);
+    };
+
+    // Converters
+    const dtIn   = document.getElementById('dtInput');
+    const tkIn   = document.getElementById('ticksInput');
+    const res    = document.getElementById('result');
+    document.getElementById('toTicks').onclick = () => {
+      if (!dtIn.value) return;
+      const d = new Date(dtIn.value);
+      const off = d.getTimezoneOffset()*600000000;
+      const ticks = d.getTime()*10000 + 621355968000000000 - off;
+      res.textContent = `Ticks: ${ticks}`;
+      fetch('https://api.countapi.xyz/hit/thanghdb/ticks').catch(()=>{});
+    };
+    document.getElementById('toDate').onclick = () => {
+      const t = parseInt(tkIn.value);
+      if (!t) return;
+      const off = (new Date()).getTimezoneOffset()*600000000;
+      const ms = (t - 621355968000000000 + off)/10000;
+      const dt = new Date(ms);
+      res.textContent = `DateTime: ${dt.toLocaleString()}`;
+      fetch('https://api.countapi.xyz/hit/thanghdb/ticks').catch(()=>{});
+    };
   </script>
 </body>
 </html>
