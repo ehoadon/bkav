@@ -2,74 +2,34 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Công cụ mã hóa và giải mã (Encrypt & Decrypt) hỗ trợ JSON, BEPOS và XML.">
+  <meta name="description" content="Công cụ mã hóa và giải mã (Encrypt & Decrypt) hỗ trợ JSON, BEPOS và XML. Dễ sử dụng, thân thiện với người dùng và tối ưu SEO.">
+  <meta name="keywords" content="encrypt, decrypt, JSON, XML, BEPOS, mã hóa, giải mã, công cụ">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Encrypt & Decrypt Tool</title>
-
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-
-  <!-- Pako cho zip/unzip -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
-  <!-- Style giống thiết kế gốc -->
+  <title>Encrypt & Decrypt Tool - Công cụ mã hóa giải mã</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
   <style>
-    body { font-family: Poppins, sans-serif; background: #f7f7f7; margin:0; padding:0; }
-    .wrapper { max-width:1200px; margin:20px auto; padding:20px; }
-    header { text-align:center; margin-bottom:30px; }
-    header h1 { font-size:2.5em; color:#007BFF; }
-    .row { display:flex; flex-wrap:wrap; gap:20px; }
-    .col { flex:1; min-width:280px; }
-    label { font-weight:bold; display:block; margin-bottom:5px; }
-    input, select, textarea, button { width:100%; padding:10px; font-size:1em; border:1px solid #ccc; border-radius:4px; }
-    textarea { resize:vertical; min-height:150px; font-family:monospace; }
-    button { background:#007BFF; color:#fff; cursor:pointer; }
-    button:hover { background:#0056b3; }
-    .result { background:#e7f3ff; padding:10px; border-left:4px solid #007BFF; white-space:pre-wrap; }
-    .error { color:red; font-size:0.9em; margin-top:5px; }
-
-    /* Login Overlay */
-    #login-container {
-      position:fixed; inset:0;
-      background:rgba(0,0,0,0.5);
-      display:flex; justify-content:center; align-items:center;
-      z-index:999;
-    }
-    .login-card {
-      background:#fff; padding:2rem; border-radius:8px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.2); width:320px; text-align:center;
-    }
-    .login-card h2 { margin-bottom:1rem; color:#007BFF; }
-    .login-card input { margin-bottom:1rem; }
-    .login-card button {
-      width:48%; margin:0 .5%;
-      background:#007BFF; color:#fff; border:none; border-radius:4px;
-    }
-    .login-card button:hover { background:#0056b3; }
-    .login-card .error { color:red; font-size:0.85em; }
-
-    /* Hide tool until login */
-    #toolContainer { display:none; }
+    body { font-family: Arial, sans-serif; background-color: #f7f7f7; margin: 0; padding: 0; color: #333; }
+    .wrapper { max-width: 1200px; margin: 20px auto; padding: 20px; }
+    header { text-align: center; margin-bottom: 30px; }
+    header h1 { font-size: 2.5em; color: #007BFF; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .col { flex: 1; min-width: 280px; }
+    label { font-weight: bold; display: block; margin-bottom: 5px; }
+    select, input[type="text"], textarea, button { width: 100%; padding: 10px; font-size: 1em; border: 1px solid #ccc; border-radius: 4px; }
+    textarea { resize: vertical; min-height: 150px; font-family: monospace; }
+    button { background-color: #007BFF; color: #fff; cursor: pointer; }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    button.loading { position: relative; }
+    button.loading::after { content: ''; position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .error { color: red; font-size: 0.9em; margin-top: 5px; }
+    .result { background-color: #e7f3ff; padding: 10px; border-left: 4px solid #007BFF; white-space: pre-wrap; overflow-x: auto; }
+    footer { margin-top: 40px; padding: 20px; background-color: #e9ecef; border-radius: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
 <body>
-
-  <!-- LOGIN OVERLAY -->
-  <div id="login-container">
-    <div class="login-card">
-      <h2>Đăng ký / Đăng nhập</h2>
-      <input id="auth-email"    type="email"    placeholder="Email">
-      <input id="auth-password" type="password" placeholder="Mật khẩu">
-      <div style="display:flex; justify-content:space-between;">
-        <button id="btnSignup">Đăng ký</button>
-        <button id="btnLogin">Đăng nhập</button>
-      </div>
-      <p id="authError" class="error"></p>
-    </div>
-  </div>
-
-  <!-- MAIN TOOL -->
-  <div id="toolContainer" class="wrapper">
+  <div class="wrapper">
     <header>
       <h1>Encrypt & Decrypt Tool</h1>
       <p>Công cụ mã hóa và giải mã hỗ trợ JSON, BEPOS và XML.</p>
@@ -99,7 +59,7 @@
         <textarea id="inputData" placeholder="Nhập dữ liệu JSON hoặc XML"></textarea>
         <div id="encryptError" class="error"></div>
         <button id="encryptBtn">Encrypt</button>
-        <textarea id="encryptedData" class="result" readonly placeholder="Kết quả mã hóa"></textarea>
+        <textarea id="encryptedData" class="result" readonly placeholder="Kết quả mã hóa (Base64)"></textarea>
         <button id="copyEncryptedBtn">Copy kết quả</button>
       </div>
       <div class="col">
@@ -111,132 +71,133 @@
         <button id="copyDecryptedBtn">Copy kết quả</button>
       </div>
     </div>
+
+    <footer>
+      <h3>📘 Hướng dẫn sử dụng</h3>
+      <ul>
+        <li>Nhập <strong>Partner Token</strong> đúng định dạng <code>Base64Key:Base64IV</code> cho các mode AES.</li>
+        <li>Chọn <strong>Mode</strong> phù hợp với dữ liệu (6,7,0,..).</li>
+        <li>Nhấn <strong>Encrypt</strong> để mã hóa hoặc <strong>Decrypt</strong> để giải mã.</li>
+        <li>Sao chép kết quả dễ dàng bằng nút <em>Copy</em>.</li>
+        <li>Toàn bộ xử lý chạy ngay trên trình duyệt, không gửi dữ liệu ra server.</li>
+        <li>Chế độ Mode 0, Mode 1 chỉ sử dụng Base64, không cần token.</li>
+      </ul>
+      <p class="note">Lưu ý: Đảm bảo chọn đúng định dạng và token, sẽ không khôi phục được nếu sai.</p>
+    </footer>
   </div>
 
-  <!-- Firebase & Tool Script -->
   <script>
-    // 1) Firebase init
-    const firebaseConfig = {
-      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
-      authDomain: "ehoadon-bkav.firebaseapp.com",
-      projectId: "ehoadon-bkav",
-      storageBucket: "ehoadon-bkav.appspot.com",
-      messagingSenderId: "688737951508",
-      appId: "1:688737951508:web:965514a6a1f7c4de15ac01",
-      measurementId: "G-VJFL3C86WM"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // 2) UI refs
-    const loginContainer = document.getElementById('login-container');
-    const toolContainer  = document.getElementById('toolContainer');
-    const btnSignup      = document.getElementById('btnSignup');
-    const btnLogin       = document.getElementById('btnLogin');
-    const authError      = document.getElementById('authError');
-
-    // 3) Auth listener
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        // hide login, show tool
-        loginContainer.style.display = 'none';
-        toolContainer.style.display  = 'block';
-        // ghi nhận lượt hit
-        fetch('https://api.countapi.xyz/hit/thanghdb/encrypt').catch(()=>{});
-      } else {
-        // back to login
-        loginContainer.style.display = 'flex';
-        toolContainer.style.display  = 'none';
-      }
-    });
-
-    // 4) Sign-up & Login handlers
-    btnSignup.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
-      const pass  = document.getElementById('auth-password').value.trim();
-      if (!email || !pass) {
-        authError.textContent = 'Vui lòng nhập email và mật khẩu.';
-        return;
-      }
-      auth.createUserWithEmailAndPassword(email, pass)
-          .catch(e => authError.textContent = e.message);
-    };
-    btnLogin.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
-      const pass  = document.getElementById('auth-password').value.trim();
-      if (!email || !pass) {
-        authError.textContent = 'Vui lòng nhập email và mật khẩu.';
-        return;
-      }
-      auth.signInWithEmailAndPassword(email, pass)
-          .catch(e => authError.textContent = e.message);
-    };
-
-    // 5) Encrypt/Decrypt logic (giống bản gốc)
     const fromBase64 = b64 => Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-    const toBase64   = arr => btoa(String.fromCharCode(...arr));
-    const zipData    = d => pako.gzip(d);
-    const unzipData  = d => pako.ungzip(d, { to: 'string' });
-    const addPadding = arr => { /* ... padding code ... */ return arr; };
-    const removePadding = arr => arr;
+    const toBase64 = arr => btoa(String.fromCharCode(...arr));
 
-    // Ví dụ mode1 (AES-CBC) – bạn có thể bổ sung tương tự cho các mode khác
+    const zipData = data => pako.gzip(data);
+    const unzipData = data => pako.ungzip(data, { to: 'string' });
+    const addPadding = arr => {
+      const block = 16, pad = block - (arr.length % block);
+      const res = new Uint8Array(arr.length + pad);
+      res.set(arr); res.fill(pad, arr.length);
+      return res;
+    };
+    const removePadding = arr => arr.slice(0, arr.length - arr[arr.length -1]);
+
     async function encryptDataMode1(data, key, iv) {
       const padded = addPadding(data);
-      const cryptoKey = await crypto.subtle.importKey('raw', key, { name:'AES-CBC' }, false,['encrypt']);
-      const enc = await crypto.subtle.encrypt({ name:'AES-CBC', iv }, cryptoKey, padded);
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt']);
+      const enc = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, padded);
       return toBase64(new Uint8Array(enc));
     }
     async function decryptDataMode1(enc, key, iv) {
-      const ck = await crypto.subtle.importKey('raw', key, { name:'AES-CBC' }, false,['decrypt']);
+      const ck = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']);
       const buf = fromBase64(enc);
-      const dec = await crypto.subtle.decrypt({ name:'AES-CBC', iv }, ck, buf);
-      return new TextDecoder().decode(new Uint8Array(dec));
+      const dec = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, ck, buf);
+      return removePadding(new Uint8Array(dec));
     }
 
-    // Các nút copy
-    document.getElementById('copyEncryptedBtn').onclick = async ()=>{
-      const v = document.getElementById('encryptedData').value;
-      if(v) await navigator.clipboard.writeText(v);
-    };
-    document.getElementById('copyDecryptedBtn').onclick = async ()=>{
-      const v = document.getElementById('responseOutput').value;
-      if(v) await navigator.clipboard.writeText(v);
-    };
+    document.getElementById('copyEncryptedBtn').addEventListener('click', async () => {
+      const text = document.getElementById('encryptedData').value;
+      if (!text) return;
+      await navigator.clipboard.writeText(text);
+      alert('Đã copy!');
+    });
+    document.getElementById('copyDecryptedBtn').addEventListener('click', async () => {
+      const text = document.getElementById('responseOutput').value;
+      if (!text) return;
+      await navigator.clipboard.writeText(text);
+      alert('Đã copy!');
+    });
 
-    // Nút Encrypt/Decrypt
-    document.getElementById('encryptBtn').onclick = async ()=>{
+    document.getElementById('encryptBtn').addEventListener('click', async () => {
+      const inp = document.getElementById('inputData').value.trim();
+      const mode = document.getElementById('modeSelect').value;
+      const token = document.getElementById('partnerToken').value.trim();
+      const err = document.getElementById('encryptError'); err.textContent = '';
+      if (!inp) return err.textContent = 'Vui lòng nhập dữ liệu.';
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!token) return err.textContent = 'Vui lòng nhập Partner Token.';
+        try { [key, iv] = token.split(':').map(fromBase64); } catch { return err.textContent = 'Token không hợp lệ.'; }
+      }
       try {
-        const tok = document.getElementById('partnerToken').value.trim();
-        if(!tok) throw new Error('Chưa nhập partnerToken');
-        const [b64k,b64iv] = tok.split(':');
-        const key = fromBase64(b64k), iv = fromBase64(b64iv);
-        const txt = document.getElementById('inputData').value;
-        if(!txt) throw new Error('Chưa nhập dữ liệu');
-        const data = new TextEncoder().encode(txt);
-        const mode = document.getElementById('modeSelect').value;
-        // chỉ demo mode1
-        const out = await encryptDataMode1(data, key, iv);
+        let out;
+        if (mode==='mode1') {
+          const json = JSON.stringify(JSON.parse(inp));
+          out = await encryptDataMode1(new Uint8Array(await zipData(json)), key, iv);
+        } else if (mode==='mode2') {
+          out = await encryptDataMode1(new TextEncoder().encode(inp), key, iv);
+        } else if (mode==='mode3') {
+          const esc = inp.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          out = await encryptDataMode1(new Uint8Array(await zipData(esc)), key, iv);
+        } else if (mode==='mode4') {
+          out = toBase64(new TextEncoder().encode(JSON.stringify(JSON.parse(inp))));
+        } else {
+          const esc = inp.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+          out = toBase64(new TextEncoder().encode(esc));
+        }
         document.getElementById('encryptedData').value = out;
-        document.getElementById('encryptError').textContent = '';
-      } catch(e) {
-        document.getElementById('encryptError').textContent = e.message;
+      } catch(e) { err.textContent = e.message || 'Mã hóa thất bại.'; }
+    });
+
+    document.getElementById('decryptResponseBtn').addEventListener('click', async () => {
+      const enc = document.getElementById('responseData').value.trim();
+      const mode = document.getElementById('modeSelect').value;
+      const token= document.getElementById('partnerToken').value.trim();
+      const err = document.getElementById('decryptError'); err.textContent='';
+      if (!enc) return err.textContent='Vui lòng nhập dữ liệu mã hóa.';
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!token) return err.textContent='Vui lòng nhập Partner Token.';
+        try { [key, iv] = token.split(':').map(fromBase64); } catch { return err.textContent='Token không hợp lệ.'; }
       }
-    };
-    document.getElementById('decryptResponseBtn').onclick = async ()=>{
       try {
-        const tok = document.getElementById('partnerToken').value.trim();
-        const [b64k,b64iv] = tok.split(':');
-        const key = fromBase64(b64k), iv = fromBase64(b64iv);
-        const enc = document.getElementById('responseData').value.trim();
-        if(!enc) throw new Error('Chưa nhập chuỗi mã hóa');
-        const out = await decryptDataMode1(enc, key, iv);
-        document.getElementById('responseOutput').value = out;
-        document.getElementById('decryptError').textContent = '';
-      } catch(e) {
-        document.getElementById('decryptError').textContent = e.message;
-      }
-    };
+        let res;
+        if (mode==='mode1') {
+          const bytes = await decryptDataMode1(enc, key, iv);
+          res = await unzipData(bytes);
+          res = JSON.stringify(JSON.parse(res), null, 2);
+        } else if (mode==='mode2') {
+          const bytes = await decryptDataMode1(enc, key, iv);
+          res = new TextDecoder().decode(bytes);
+        } else if (mode==='mode3') {
+          const bytes = await decryptDataMode1(enc, key, iv);
+          res = await unzipData(bytes);
+        } else if (mode==='mode4') {
+          res = new TextDecoder().decode(fromBase64(enc));
+        } else {
+          res = new TextDecoder().decode(fromBase64(enc));
+        }
+        document.getElementById('responseOutput').value = res;
+      } catch(e) { err.textContent = e.message || 'Giải mã thất bại.'; }
+    });
   </script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://api.countapi.xyz/hit/thanghdb/encrypt')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ghi nhận truy cập trang encrypt:', data.value);
+      })
+      .catch(console.error);
+  });
+</script>
 </body>
 </html>

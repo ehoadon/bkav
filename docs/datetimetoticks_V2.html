@@ -1,199 +1,115 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chuyển Đổi DateTime ↔ Ticks</title>
-
-  <!-- Firebase Compat SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-
-  <style>
-    :root {
-      --primary: #0066cc;
-      --secondary: #005bb5;
-      --bg: #f0f4f8;
-      --card: #fff;
-      --text: #222;
-      --shadow: rgba(0,0,0,0.1);
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 1rem;
-      position: relative;
-      text-align: center;
-    }
-    header h1 { font-size:1.5rem; }
-    #userArea {
-      position:absolute; top:1rem; right:1rem;
-      display:flex; gap:.5rem; align-items:center;
-    }
-    #userArea span { font-weight:bold; }
-    #userArea button, #userArea a {
-      background: var(--secondary);
-      color:#fff; border:none; padding:.4rem .8rem;
-      border-radius:4px; text-decoration:none; cursor:pointer;
-      font-size:0.9rem;
-    }
-    #userArea a:hover, #userArea button:hover { background: #004999; }
-    .container {
-      max-width:400px;
-      margin:2rem auto;
-      background: #fff;
-      padding:1.5rem;
-      border-radius:8px;
-      box-shadow:0 2px 8px var(--shadow);
-      text-align:center;
-    }
-    input, button {
-      width:100%; padding:.8rem; margin:0.5rem 0;
-      border:1px solid #ccc; border-radius:4px;
-    }
-    input { background:#fafafa; }
-    button {
-      background: var(--primary);
-      color:#fff; border:none; cursor:pointer;
-    }
-    button:hover { background: var(--secondary); }
-    #result { margin-top:1rem; font-weight:bold; }
-    #backBtn {
-      margin-top:1rem;
-      display:inline-block;
-    }
-
-    /* Login overlay */
-    #loginOverlay {
-      position:fixed; inset:0; background:rgba(0,0,0,0.5);
-      display:flex; align-items:center; justify-content:center;
-      z-index:999;
-    }
-    .loginCard {
-      background:#fff; padding:1rem; border-radius:6px;
-      width:300px; text-align:center; box-shadow:0 2px 8px var(--shadow);
-    }
-    .loginCard input { width:100%; margin:0.4rem 0; }
-    .loginCard .actions { display:flex; gap:0.5rem; justify-content:space-between; }
-    .loginCard .error { color:red; font-size:0.9rem; min-height:1.2em; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển đổi DateTime ↔ Ticks</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #1E1E2E;
+            color: white;
+            flex-direction: column;
+            padding: 40px 20px;
+        }
+        .container {
+            background: #29293F;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+        input {
+            background: #3A3A5A;
+            color: white;
+        }
+        button {
+            background: #FF6B6B;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #FF4C4C;
+        }
+        footer {
+            margin-top: 2rem;
+            background-color: #29293F;
+            padding: 15px 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            line-height: 1.5;
+            font-size: 0.95em;
+        }
+        footer h3 {
+            color: #FFD700;
+        }
+    </style>
 </head>
 <body>
-
-  <!-- Login Overlay -->
-  <div id="loginOverlay">
-    <div class="loginCard">
-      <h2>Đăng nhập</h2>
-      <input id="email" type="email" placeholder="Email">
-      <input id="pass" type="password" placeholder="Mật khẩu">
-      <div class="actions">
-        <button id="btnSign">Đăng ký</button>
-        <button id="btnLogin">Đăng nhập</button>
-      </div>
-      <div id="errMsg" class="error"></div>
+    <div class="container">
+        <h2>Chuyển đổi DateTime ↔ Ticks</h2>
+        <input type="datetime-local" id="datetimeInput" step="1">
+        <button onclick="convertToTicks()">Chuyển thành Ticks</button>
+        <input type="text" id="ticksInput" placeholder="Nhập ticks">
+        <button onclick="convertToDatetime()">Chuyển thành DateTime</button>
+        <h3 id="result"></h3>
     </div>
-  </div>
 
-  <!-- Header -->
-  <header>
-    <h1>DateTime ↔ Ticks</h1>
-    <div id="userArea"></div>
-  </header>
+    <footer>
+        <h3>📘 Hướng dẫn sử dụng công cụ</h3>
+        <ul>
+            <li>👉 Nhập ngày giờ theo định dạng <strong>DateTime</strong> vào ô đầu tiên (có hỗ trợ chọn thời gian) rồi bấm <strong>“Chuyển thành Ticks”</strong> để lấy giá trị ticks tương ứng.</li>
+            <li>👉 Ngược lại, bạn có thể nhập một giá trị <strong>ticks</strong> (số 64-bit) vào ô phía dưới rồi bấm <strong>“Chuyển thành DateTime”</strong> để xem lại thời gian theo giờ địa phương.</li>
+            <li>⏱️ Kết quả hiển thị sẽ tự động cân nhắc múi giờ hệ thống để giúp bạn chuyển đổi chính xác theo giờ địa phương.</li>
+            <li>📌 Cách tính ticks: 1 tick = 100 nanoseconds kể từ 00:00:00 ngày 1/1/0001 (theo chuẩn .NET).</li>
+        </ul>
+        <p><em>Lưu ý:</em> Giá trị ticks thường dùng trong hệ thống .NET hoặc khi thao tác với thời gian dạng nhị phân/chuỗi.</p>
+    </footer>
 
-  <!-- Main -->
-  <div id="main" class="container" style="display:none;">
-    <input type="datetime-local" id="dtInput" step="1">
-    <button id="toTicks">Chuyển sang Ticks</button>
-    <input type="text" id="ticksInput" placeholder="Nhập ticks">
-    <button id="toDate">Chuyển sang DateTime</button>
-    <div id="result"></div>
-    <a id="backBtn" href="./index.html">← Về Trang Chính</a>
-  </div>
+<script>
+    function convertToTicks() {
+        let datetime = document.getElementById("datetimeInput").value;
+        if (!datetime) return;
+        let date = new Date(datetime);
+        date.setMilliseconds(0); // Loại bỏ phần millisecond nếu cần
+        let offsetTicks = date.getTimezoneOffset() * 600000000;
+        let ticks = (date.getTime() * 10000) + 621355968000000000 - offsetTicks;
+        document.getElementById("result").innerText = "Ticks: " + ticks;
+    }
 
-  <script>
-    // Firebase init
-    const cfg = {
-      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
-      authDomain: "ehoadon-bkav.firebaseapp.com",
-      projectId: "ehoadon-bkav",
-    };
-    firebase.initializeApp(cfg);
-    const auth = firebase.auth();
+    function convertToDatetime() {
+        let ticks = document.getElementById("ticksInput").value;
+        if (!ticks || isNaN(ticks)) return;
+        let offsetTicks = (new Date()).getTimezoneOffset() * 600000000;
+        let milliseconds = ((ticks - 621355968000000000) + offsetTicks) / 10000;
+        let date = new Date(milliseconds);
+        document.getElementById("result").innerText = "DateTime: " + date.toLocaleString();
+    }
+</script>
+    <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    fetch('https://api.countapi.xyz/hit/thanghdb/ticks')
+      .then(res => res.json())
+      .then(data => {
+        console.log('Ghi nhận truy cập trang datetimetoticks:', data.value);
+      })
+      .catch(console.error);
+  });
+</script>
 
-    // UI refs
-    const overlay = document.getElementById('loginOverlay');
-    const errMsg  = document.getElementById('errMsg');
-    const ua      = document.getElementById('userArea');
-    const main    = document.getElementById('main');
-    const emailI  = document.getElementById('email');
-    const passI   = document.getElementById('pass');
-    const btnS    = document.getElementById('btnSign');
-    const btnL    = document.getElementById('btnLogin');
-
-    // Auth state
-    auth.onAuthStateChanged(u => {
-      if (u) {
-        overlay.style.display = 'none';
-        main.style.display    = 'block';
-        // greeting + logout
-        const name = u.email.split('@')[0];
-        ua.innerHTML = `
-          <span>👋 ${name}</span>
-          <button id="btnLogout">Đăng xuất</button>
-        `;
-        document.getElementById('btnLogout')
-          .onclick = () => auth.signOut();
-        // count hit
-        fetch('https://api.countapi.xyz/hit/thanghdb/ticks')
-          .catch(()=>{});
-      } else {
-        overlay.style.display = 'flex';
-        main.style.display    = 'none';
-        ua.innerHTML          = '';
-      }
-    });
-
-    // Sign up
-    btnS.onclick = () => {
-      errMsg.textContent = '';
-      auth.createUserWithEmailAndPassword(emailI.value, passI.value)
-        .catch(e=> errMsg.textContent = e.message);
-    };
-    // Login
-    btnL.onclick = () => {
-      errMsg.textContent = '';
-      auth.signInWithEmailAndPassword(emailI.value, passI.value)
-        .catch(e=> errMsg.textContent = e.message);
-    };
-
-    // Converters
-    const dtIn   = document.getElementById('dtInput');
-    const tkIn   = document.getElementById('ticksInput');
-    const res    = document.getElementById('result');
-    document.getElementById('toTicks').onclick = () => {
-      if (!dtIn.value) return;
-      const d = new Date(dtIn.value);
-      const off = d.getTimezoneOffset()*600000000;
-      const ticks = d.getTime()*10000 + 621355968000000000 - off;
-      res.textContent = `Ticks: ${ticks}`;
-      fetch('https://api.countapi.xyz/hit/thanghdb/ticks').catch(()=>{});
-    };
-    document.getElementById('toDate').onclick = () => {
-      const t = parseInt(tkIn.value);
-      if (!t) return;
-      const off = (new Date()).getTimezoneOffset()*600000000;
-      const ms = (t - 621355968000000000 + off)/10000;
-      const dt = new Date(ms);
-      res.textContent = `DateTime: ${dt.toLocaleString()}`;
-      fetch('https://api.countapi.xyz/hit/thanghdb/ticks').catch(()=>{});
-    };
-  </script>
 </body>
 </html>
