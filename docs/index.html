@@ -222,7 +222,7 @@
 
         // Greeting + logout + dashboard link if admin
         const nameOnly = user.email.split('@')[0];
-        let html = `👋 Chào mừng <strong>${nameOnly}</strong>`;
+        let html = `👋 Chào mừng<strong>${nameOnly}</strong>`;
         if (user.email === 'thanghdb@bkav.com') html += ` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
         html += ` <button id="btnLogoutUser">Đăng xuất</button>`;
         userArea.innerHTML = html;
