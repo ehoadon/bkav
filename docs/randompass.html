@@ -172,7 +172,7 @@
       <span>Password length:</span>
       <button class="slider-btn" onclick="changeLength(-1)">-</button>
       <div class="slider-container">
-        <input type="range" id="length" min="4" max="64" value="15" oninput="onLengthChange()">
+        <input type="range" id="length" min="4" max="64" value="10" oninput="onLengthChange()">
       </div>
       <button class="slider-btn" onclick="changeLength(1)">+</button>
       <div class="length-value" id="lengthVal">15</div>
@@ -193,18 +193,36 @@
     const strengthPill = document.getElementById('strengthPill');
 
     function generate() {
-      const len = +lengthInput.value;
-      const sets = [];
-      if (document.getElementById('uppercase').checked) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
-      if (document.getElementById('lowercase').checked) sets.push('abcdefghijklmnopqrstuvwxyz');
-      if (document.getElementById('numbers').checked) sets.push('0123456789');
-      if (document.getElementById('symbols').checked) sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
-      let all = sets.join('');
-      let pwd = '';
-      for (let i=0; i<len; i++) pwd += all[Math.floor(Math.random()*all.length)];
-      pwdInput.value = pwd;
-      evaluateStrength(pwd, sets.length);
-    }
+  const len = +lengthInput.value;
+  const sets = [];
+  if (uppercase.checked) sets.push('ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+  if (lowercase.checked) sets.push('abcdefghijklmnopqrstuvwxyz');
+  if (numbers.checked)   sets.push('0123456789');
+  if (symbols.checked)   sets.push('!@#$%^&*()_+-=[]{}|;:,.<>?');
+
+  let pwdArr = [];
+  // 1. Ép lấy 1 ký tự từ mỗi loại
+  sets.forEach(set => {
+    const ch = set[Math.floor(Math.random() * set.length)];
+    pwdArr.push(ch);
+  });
+
+  // 2. Lấy thêm ký tự ngẫu nhiên từ tổng hợp
+  const all = sets.join('');
+  for (let i = pwdArr.length; i < len; i++) {
+    pwdArr.push(all[Math.floor(Math.random() * all.length)]);
+  }
+
+  // 3. Shuffle để không lộ pattern
+  for (let i = pwdArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pwdArr[i], pwdArr[j]] = [pwdArr[j], pwdArr[i]];
+  }
+
+  const pwd = pwdArr.join('');
+  pwdInput.value = pwd;
+  evaluateStrength(pwd, sets.length);
+}
 
     function evaluateStrength(pwd, types) {
       let score = 0;
