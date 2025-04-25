@@ -221,49 +221,19 @@
     // Email format check
     function checkFormat(input, tick) {
       const val = input.value.trim();
-      if (!val) { tick.className = 'tick none'; return; }
-      tick.className = reEmail.test(val) ? 'tick valid' : 'tick invalid';
-    }
-    authEmailInput.addEventListener('input', () => checkFormat(authEmailInput, authEmailTick));
-    signupEmailIn .addEventListener('input', () => checkFormat(signupEmailIn, signupEmailTick));
-
-    function fmtErr(e) {
-      switch(e.code) {
-        case 'auth/invalid-email':        return 'Email không hợp lệ.';
-        case 'auth/email-already-in-use': return 'Email đã được đăng ký.';
-        case 'auth/user-not-found':       return 'Không tìm thấy tài khoản.';
-        case 'auth/wrong-password':       return 'Sai mật khẩu.';
-        default:                          return e.message;
+      if (!val) {
+        tick.className = 'tick none';
+        tick.textContent = '';
+        return;
       }
-    }
-
-    // Auto logout khi qua ngày mới
-    setInterval(() => {
-      const lastDay = localStorage.getItem('lastLoginDay');
-      const today   = new Date().toDateString();
-      if (lastDay && lastDay !== today) auth.signOut();
-    }, 60000);
-
-    // Auth state listener
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        localStorage.setItem('lastLoginDay', new Date().toDateString());
-        loginContainer.style.display = 'none';
-        mainContent.style.display    = 'block';
-        // Greeting + logout + dashboard link
-        const name = user.email.split('@')[0];
-        let html = `👋 Chào mừng:<strong>${name}</strong> <button id="btnLogout">Đăng xuất</button>`;
-        if (user.email === 'thanghdb@bkav.com') {
-          html += ` <a href="#" id="linkDashboard">Dashboard</a>`;
-        }
-        userArea.innerHTML = html;
-        document.getElementById('btnLogout').onclick = () => auth.signOut();
-        if (user.email === 'thanghdb@bkav.com') {
-          document.getElementById('linkDashboard').onclick = e => {
-            e.preventDefault();
-            mainContent.style.display = 'none';
-            dashboard.style.display   = 'block';
-          };
+      if (reEmail.test(val)) {
+        tick.className = 'tick valid';
+        tick.textContent = '✔️';
+      } else {
+        tick.className = 'tick invalid';
+        tick.textContent = '❌';
+      }
+    };
         }
       } else {
         loginContainer.style.display = 'flex';
