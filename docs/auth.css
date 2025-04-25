@@ -1,0 +1,72 @@
+/* auth.css */
+:root {
+  --primary-color: #0066cc;
+  --secondary-color: #004b99;
+  --bg-color: #f0f4f8;
+  --card-bg: #fff;
+  --text-color: #222;
+  --error-color: #d93025;
+  --valid-color: green;
+  --invalid-color: red;
+  --shadow: rgba(0,0,0,0.1);
+}
+/* Overlay container */
+#login-container {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 999;
+}
+.auth-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px var(--shadow);
+  max-width: 860px; width: 100%;
+  display: flex; flex-wrap: wrap;
+}
+.auth-form { flex: 1; padding: 2rem; }
+h2 { color: var(--primary-color); margin-bottom: 1rem; }
+.desc { font-size: .95rem; color: #555; margin-bottom: 1.5rem; }
+.input-group {
+  position: relative; margin-bottom: 1rem;
+}
+.input-group .icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%); font-size: 1.1rem; color: #888;
+}
+.input-group input {
+  width: 100%; padding: .75rem .75rem .75rem 38px;
+  border: 1px solid #ccc; border-radius: 4px;
+}
+.input-group .tick {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%); font-size: 1.2rem; display: none;
+}
+.tick.valid { color: var(--valid-color); display: block; }
+.tick.invalid { color: var(--invalid-color); display: block; }
+.tick.none    { display: none; }
+.options {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 1rem;
+}
+.options label { display: flex; align-items: center; gap: 6px; }
+.options a.toggle { color: var(--primary-color); text-decoration: none; }
+.options a.toggle:hover { text-decoration: underline; }
+.actions {
+  display: flex; gap: 1rem; margin-bottom: 1.5rem;
+}
+.actions button {
+  flex: 1; padding: .75rem; border: none; border-radius: 4px;
+  cursor: pointer; font-size: 1rem;
+}
+.btn-login { background: var(--primary-color); color: #fff; }
+.btn-login:hover { background: var(--secondary-color); }
+.btn-signup {
+  background: #fff; color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+.btn-signup:hover { background: var(--primary-color); color: #fff; }
+.error {
+  color: var(--error-color); font-size: .9rem;
+  min-height: 1.2rem; text-align: center; margin-top: .5rem;
+}
