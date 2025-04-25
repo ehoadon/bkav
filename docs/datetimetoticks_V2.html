@@ -58,8 +58,71 @@
             color: #FFD700;
         }
     </style>
+      <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
+      <script src="auth.js"></script>
 </head>
 <body>
+      <!-- Auth Overlay -->
+  <div id="login-container">
+    <div class="auth-card">
+      <div class="auth-form">
+        <!-- LOGIN PANEL -->
+        <div id="panel-login">
+          <h2>Chào mừng trở lại 👋</h2>
+          <p class="desc">Vui lòng đăng nhập hoặc <a href="#" id="show-signup" class="toggle">Đăng ký</a> | <a href="#" id="show-reset" class="toggle">Quên mật khẩu?</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="auth-email" type="email" placeholder="Email">
+            <span id="auth-email-tick" class="tick none">✔️</span>
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input id="auth-password" type="password" placeholder="Mật khẩu">
+          </div>
+          <div class="error" id="authError"></div>
+          <div class="options">
+            <label><input type="checkbox" id="rememberMe"> Lưu mật khẩu</label>
+          </div>
+          <div class="actions">
+            <button class="btn-login" id="btnLogin">Đăng nhập</button>
+          </div>
+        </div>
+        <!-- SIGNUP PANEL -->
+        <div id="panel-signup" style="display:none;">
+          <h2>Đăng ký</h2>
+          <p class="desc">Quay lại <a href="#" id="show-login" class="toggle">Đăng nhập</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="signup-email" type="email" placeholder="Email">
+            <span id="signup-email-tick" class="tick none">✔️</span>
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input id="signup-password" type="password" placeholder="Mật khẩu">
+          </div>
+          <div class="error" id="signupError"></div>
+          <div class="actions">
+            <button class="btn-login" id="btnSignup">Đăng ký</button>
+          </div>
+        </div>
+        <!-- RESET PANEL -->
+        <div id="panel-reset" style="display:none;">
+          <h2>Quên mật khẩu</h2>
+          <p class="desc">Quay lại <a href="#" id="back-to-login" class="toggle">Đăng nhập</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="reset-email" type="email" placeholder="Email">
+          </div>
+          <div class="error" id="resetError"></div>
+          <div class="actions">
+            <button class="btn-login" id="btnSendLink">Gửi Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    <a href="index.html">← Trang chủ</a>
     <div class="container">
         <h2>Chuyển đổi DateTime ↔ Ticks</h2>
         <input type="datetime-local" id="datetimeInput" step="1">
