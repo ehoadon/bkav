@@ -155,8 +155,8 @@
 <body>
   <div class="main">
     <div class="header">
-      <h1>Random Password Generator</h1>
-      <p>Create strong and secure passwords to keep your account safe online.</p>
+      <h1>Trình tạo mật khẩu ngẫu nhiên</h1>
+      <p>Tạo mật khẩu mạnh và an toàn để giữ an toàn cho tài khoản trực tuyến của bạn</p>
     </div>
 
     <div class="password-row">
@@ -164,12 +164,12 @@
       <button class="icon-btn" onclick="resetPassword()" title="Regenerate">
         <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6a6 6 0 11-6-6z"/></svg>
       </button>
-      <div id="strengthPill" class="strength-pill strength-medium">Medium</div>
-      <button class="copy-btn" onclick="copyPassword()">Copy</button>
+      <div id="strengthPill" class="strength-pill strength-medium">Trung bình</div>
+      <button class="copy-btn" onclick="copyPassword()">Sao chép</button>
     </div>
 
     <div class="slider-row">
-      <span>Password length:</span>
+      <span>Độ dài mật khẩu:</span>
       <button class="slider-btn" onclick="changeLength(-1)">-</button>
       <div class="slider-container">
         <input type="range" id="length" min="4" max="64" value="10" oninput="onLengthChange()">
@@ -230,7 +230,7 @@
       if (pwd.length >= 16) score++;
       if (types >= 3) score++;
       if (types === 4) score++;
-      const labels = ['Very weak','Weak','Medium','Strong','Very strong'];
+      const labels = ['Rất yếu','Yếu','Trung bình','Mạnh','Rất mạnh'];
       const bg = ['#F87171','#FB923C','#FBBF24','#34D399','#10B981'];
       const idx = Math.min(score,4);
       strengthPill.textContent = labels[idx];
