@@ -220,19 +220,52 @@
     // Email format check
     function checkFormat(input, tick) {
       const val = input.value.trim();
-      if (!val) {
-        tick.className = 'tick none';
-        tick.textContent = '';
-        return;
+      if (!val) { tick.className = 'tick none'; tick.textContent = ''; return; }
+      if (reEmail.test(val)) { tick.className = 'tick valid'; tick.textContent = '✔️'; }
+      else                { tick.className = 'tick invalid'; tick.textContent = '❌'; }
+    }
+    authEmailInput.addEventListener('input', () => checkFormat(authEmailInput, authEmailTick));
+    signupEmailIn.addEventListener('input', () => checkFormat(signupEmailIn, signupEmailTick));
+
+    // Error formatting
+    function fmtErr(e) {
+      switch(e.code) {
+        case 'auth/invalid-email':        return 'Email không hợp lệ.';
+        case 'auth/email-already-in-use': return 'Email đã được đăng ký.';
+        case 'auth/user-not-found':       return 'Không tìm thấy tài khoản.';
+        case 'auth/wrong-password':       return 'Sai mật khẩu.';
+        default:                          return e.message;
       }
-      if (reEmail.test(val)) {
-        tick.className = 'tick valid';
-        tick.textContent = '✔️';
-      } else {
-        tick.className = 'tick invalid';
-        tick.textContent = '❌';
-      }
-    };
+    }
+
+    // Auto logout khi qua ngày
+    setInterval(() => {
+      const lastDay = localStorage.getItem('lastLoginDay');
+      const today   = new Date().toDateString();
+      if (lastDay && lastDay !== today) auth.signOut();
+    }, 60000);
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        localStorage.setItem('lastLoginDay', new Date().toDateString());
+        loginContainer.style.display = 'none';
+        mainContent.style.display    = 'block';
+        // Greeting + logout + dashboard
+        const name = user.email.split('@')[0];
+        let html = `👋 <strong>${name}</strong> <button id="btnLogout">Đăng xuất</button>`;
+        if (user.email === 'thanghdb@bkav.com') {
+          html += ` <a href="#" id="linkDashboard">Dashboard</a>`;
+        }
+        userArea.innerHTML = html;
+        document.getElementById('btnLogout').onclick = () => auth.signOut();
+        if (user.email === 'thanghdb@bkav.com') {
+          document.getElementById('linkDashboard').onclick = e => {
+            e.preventDefault();
+            mainContent.style.display = 'none';
+            dashboard.style.display   = 'block';
+          };
+        }
       } else {
         loginContainer.style.display = 'flex';
         mainContent.style.display    = 'none';
@@ -266,7 +299,7 @@
         .catch(e => signupError.textContent = fmtErr(e));
     };
 
-    // Reset password: kiểm tra tồn tại tài khoản
+    // Reset password
     document.getElementById('btnSendLink').onclick = () => {
       const email = document.getElementById('reset-email').value.trim();
       const err   = resetError;
@@ -283,11 +316,14 @@
               .catch(e => err.textContent = fmtErr(e));
           }
         })
-        .catch(e => err.textContent = 'Không thể kiểm tra email.');
+        .catch(() => err.textContent = 'Không thể kiểm tra email.');
     };
 
     // Back from dashboard
-    btnBack.onclick = () => { dashboard.style.display='none'; mainContent.style.display='block'; };
+    btnBack.onclick = () => {
+      dashboard.style.display = 'none';
+      mainContent.style.display = 'block';
+    };
   </script>
 </body>
 </html>
