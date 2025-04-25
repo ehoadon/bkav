@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -5,125 +6,111 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Trang Tổng Hợp Dự Án & Admin Dashboard</title>
 
-  <!-- Firebase Compat SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.0/firebase-database-compat.js"></script>
-
-  <!-- Chart.js -->
+  <!-- Chart.js for dashboard (optional) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    :root {
-      --primary-color: #0066cc;
-      --secondary-color: #005bb5;
-      --bg-color: #f0f4f8;
-      --card-bg: #fff;
-      --text-color: #222;
-      --shadow: rgba(0,0,0,0.1);
-    }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:Arial,sans-serif; background:var(--bg-color); color:var(--text-color); min-height:100vh; }
-    header { background:var(--primary-color); color:#fff; padding:1.5rem 1rem; position:relative; text-align:center; }
-    header h1 { font-size:1.8rem; margin-bottom:.2rem; }
-    header p  { opacity:.85; font-size:1rem; }
-
-    /* User area */
-    #userArea {
-      position:absolute; top:1rem; right:1rem;
-      display:flex; align-items:center; gap:.8rem;
-      color:#fff; font-size:.95rem;
-    }
-    #userArea a, #userArea button {
-      font-size:.9rem; background:var(--secondary-color);
-      color:#fff; border:none; padding:.4rem .8rem;
-      border-radius:4px; cursor:pointer; text-decoration:none;
-      white-space:nowrap; transition:background .2s;
-    }
-    #userArea a.dashboard-link {
-      background:transparent; text-decoration:underline; padding:0; color:#fff;
-    }
-
-    .container { max-width:1200px; margin:2rem auto; padding:0 1rem; }
-    .grid { display:grid; gap:1.5rem; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); }
-    .card { background:var(--card-bg); border-radius:8px; box-shadow:0 2px 6px var(--shadow);
-      overflow:hidden; display:flex; flex-direction:column; transition:transform .2s;
-    }
-    .card:hover { transform:translateY(-4px); }
-    .card img { width:100%; height:140px; object-fit:cover; }
-    .card-content { padding:1rem; flex:1; display:flex; flex-direction:column; }
-    .card-content h3 { margin-bottom:.75rem; color:var(--primary-color); font-size:1.1rem; }
-    .card-content p { flex:1; font-size:.95rem; margin-bottom:1rem; }
-    .card-content a { align-self:flex-start; text-decoration:none;
-      background:var(--primary-color); color:#fff; padding:.5rem 1rem; border-radius:4px;
-      transition:background .2s;
-    }
-    .card-content a:hover { background:var(--secondary-color); }
-
-    footer { text-align:center; padding:1rem 0; background:#fff;
-      border-top:1px solid #ddd; font-size:.9rem; color:#555; margin-top:2rem;
-    }
-
-    /* Login Overlay */
-    #login-container { position:fixed; inset:0; background:rgba(0,0,0,0.5);
-      display:flex; justify-content:center; align-items:center; z-index:999;
-    }
-    .login-card { background:#fff; padding:1.5rem; border-radius:8px;
-      box-shadow:0 2px 8px var(--shadow); width:320px; text-align:center;
-    }
-    .login-card h2 { color:var(--primary-color); margin-bottom:1rem; font-size:1.25rem; }
-    .login-card input { width:100%; padding:.5rem; margin-bottom:.75rem;
-      border:1px solid #ccc; border-radius:4px;
-    }
-    .login-card button { width:48%; padding:.5rem; background:var(--primary-color);
-      color:#fff; border:none; border-radius:4px; cursor:pointer; transition:.2s;
-    }
-    .login-card button:hover { background:var(--secondary-color); }
-    .login-card .error { color:red; font-size:.85rem; margin-top:.5rem; }
-
-    /* Dashboard */
-    #dashboard { display:none; padding:2rem 0; }
-    .stats-grid { display:grid; gap:1rem;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); margin-bottom:2rem;
-    }
-    .stat-card { background:var(--card-bg); padding:1rem; border-radius:8px;
-      box-shadow:0 1px 4px var(--shadow); text-align:center;
-    }
-    .stat-card h4 { font-size:1rem; color:var(--primary-color); margin-bottom:.5rem; }
-    .stat-card p { font-size:1.6rem; font-weight:bold; }
-    .chart-container { background:var(--card-bg); padding:1rem; border-radius:8px;
-      box-shadow:0 1px 4px var(--shadow);
-    }
-    #btnBack { background:transparent; color:var(--secondary-color);
-      border:1px solid var(--secondary-color); padding:.5rem 1rem;
-      border-radius:4px; cursor:pointer; margin-bottom:1rem;
-    }
+ <style>
+    :root { --primary-color:#0066cc; --secondary-color:#004b99; --bg-color:#f0f4f8; --card-bg:#fff; --text-color:#222; --error-color:#d93025; --valid-color:green; --invalid-color:red; --shadow:rgba(0,0,0,0.1);} 
+    *{box-sizing:border-box;margin:0;padding:0;} 
+    body{font-family:'Segoe UI',sans-serif;background:var(--bg-color);color:var(--text-color);min-height:100vh;}
+    header{background:var(--primary-color);color:#fff;padding:1.5rem 1rem;position:relative;text-align:center;} header h1{font-size:1.8rem;margin-bottom:.2rem;} header p{opacity:.85;font-size:1rem;}
+    #userArea{position:absolute;top:1rem;right:1rem;display:flex;align-items:center;gap:.8rem;font-size:.95rem;} 
+    #userArea button,#userArea a{background:var(--secondary-color);color:#fff;border:none;padding:.4rem .8rem;border-radius:4px;cursor:pointer;text-decoration:none;transition:background .2s;} 
+    #userArea button:hover,#userArea a:hover{background:var(--primary-color);} 
+    .container{max-width:1200px;margin:2rem auto;padding:0 1rem;} .grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+    .card{background:var(--card-bg);border-radius:8px;box-shadow:0 2px 6px var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s;} .card:hover{transform:translateY(-4px);} .card img{width:100%;height:140px;object-fit:cover;}
+    .card-content{padding:1rem;flex:1;display:flex;flex-direction:column;} .card-content h3{margin-bottom:.75rem;color:var(--primary-color);font-size:1.1rem;} .card-content p{flex:1;font-size:.95rem;margin-bottom:1rem;} .card-content a{align-self:flex-start;background:var(--primary-color);color:#fff;padding:.5rem 1rem;border-radius:4px;text-decoration:none;transition:background .2s;} .card-content a:hover{background:var(--secondary-color);} 
+    #dashboard{display:none;padding:2rem 0;} #btnBack{background:transparent;border:1px solid var(--secondary-color);color:var(--secondary-color);padding:.5rem 1rem;border-radius:4px;cursor:pointer;margin-bottom:1rem;} #btnBack:hover{background:var(--secondary-color);color:#fff;}
+    footer{text-align:center;padding:1rem 0;background:#fff;border-top:1px solid #ddd;font-size:.9rem;color:#555;margin-top:2rem;}
+    /* Auth Overlay */
+    #login-container{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;z-index:999;}
+    .auth-card{background:var(--card-bg);border-radius:12px;box-shadow:0 8px 20px var(--shadow);overflow:hidden;max-width:860px;width:100%;display:flex;flex-wrap:wrap;}
+    .auth-form{flex:1;padding:2rem;position:relative;}
+    h2{color:var(--primary-color);margin-bottom:1rem;}
+    .desc{font-size:.95rem;color:#555;margin-bottom:1.5rem;}
+    .input-group{position:relative;margin-bottom:1rem;}
+    .input-group .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:1.1rem;color:#888;}
+    .input-group input{width:100%;padding:.75rem .75rem .75rem 38px;border:1px solid #ccc;border-radius:4px;font-size:1rem;}
+    .input-group .tick{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:1.2rem;display:none;}
+    .tick.valid{color:var(--valid-color);display:block;} .tick.invalid{color:var(--invalid-color);display:block;} .tick.none{display:none;}
+    .options{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;font-size:.9rem;}
+    .options label{display:flex;align-items:center;gap:6px;cursor:pointer;} .options a.toggle{color:var(--primary-color);text-decoration:none;} .options a.toggle:hover{text-decoration:underline;}
+    .actions{display:flex;gap:1rem;margin-bottom:1.5rem;}
+    .actions button{flex:1;padding:.75rem;font-size:1rem;border:none;border-radius:4px;cursor:pointer;}
+    .btn-login{background:var(--primary-color);color:#fff;} .btn-login:hover{background:var(--secondary-color);} .btn-signup{background:#fff;color:var(--primary-color);border:1px solid var(--primary-color);} .btn-signup:hover{background:var(--primary-color);color:#fff;}
+    .error{color:var(--error-color);font-size:.9rem;text-align:center;min-height:1.2rem;margin-top:.5rem;}
   </style>
 </head>
 <body>
-
-  <!-- Login / Signup Overlay -->
+  <!-- Auth Overlay -->
   <div id="login-container">
-    <div class="login-card">
-      <h2>Đăng ký / Đăng nhập</h2>
-      <input id="auth-email" type="email" placeholder="Email">
-      <input id="auth-password" type="password" placeholder="Mật khẩu">
-      <div style="display:flex; justify-content:space-between; gap:4%;">
-        <button id="btnSignup">Đăng ký</button>
-        <button id="btnLogin">Đăng nhập</button>
+    <div class="auth-card">
+      <div class="auth-form">
+        <!-- LOGIN PANEL -->
+        <div id="panel-login">
+          <h2>Chào mừng trở lại 👋</h2>
+          <p class="desc">Vui lòng đăng nhập hoặc <a href="#" id="show-signup" class="toggle">Đăng ký</a> | <a href="#" id="show-reset" class="toggle">Quên mật khẩu?</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="auth-email" type="email" placeholder="Email">
+            <span id="auth-email-tick" class="tick none">✔️</span>
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input id="auth-password" type="password" placeholder="Mật khẩu">
+          </div>
+          <div class="error" id="authError"></div>
+          <div class="options">
+            <label><input type="checkbox" id="rememberMe"> Lưu mật khẩu</label>
+          </div>
+          <div class="actions">
+            <button class="btn-login" id="btnLogin">Đăng nhập</button>
+          </div>
+        </div>
+        <!-- SIGNUP PANEL -->
+        <div id="panel-signup" style="display:none;">
+          <h2>Đăng ký</h2>
+          <p class="desc">Quay lại <a href="#" id="show-login" class="toggle">Đăng nhập</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="signup-email" type="email" placeholder="Email">
+            <span id="signup-email-tick" class="tick none">✔️</span>
+          </div>
+          <div class="input-group">
+            <span class="icon">🔒</span>
+            <input id="signup-password" type="password" placeholder="Mật khẩu">
+          </div>
+          <div class="error" id="signupError"></div>
+          <div class="actions">
+            <button class="btn-login" id="btnSignup">Đăng ký</button>
+          </div>
+        </div>
+        <!-- RESET PANEL -->
+        <div id="panel-reset" style="display:none;">
+          <h2>Quên mật khẩu</h2>
+          <p class="desc">Quay lại <a href="#" id="back-to-login" class="toggle">Đăng nhập</a></p>
+          <div class="input-group">
+            <span class="icon">✉️</span>
+            <input id="reset-email" type="email" placeholder="Email">
+          </div>
+          <div class="error" id="resetError"></div>
+          <div class="actions">
+            <button class="btn-login" id="btnSendLink">Gửi Link</button>
+          </div>
+        </div>
       </div>
-      <p id="authError" class="error"></p>
     </div>
   </div>
 
-  <!-- Header & User Area -->
+  <!-- Header & Main -->
   <header>
     <h1>Trang Tổng Hợp Dự Án</h1>
-    <p>Nơi tập trung các công cụ &amp; tính năng</p>
+    <p>Nơi tập trung các công cụ & tính năng</p>
     <div id="userArea"></div>
   </header>
-
-  <!-- Main Content -->
   <div id="main-content" class="container" style="display:none;">
     <nav class="grid">
       <div class="card">
@@ -151,19 +138,19 @@
         </div>
       </div>
       <div class="card">
-        <img src="images/task-stats.png" alt="Task Stats">
-        <div class="card-content">
-          <h3>Thống Kê Công Việc</h3>
-          <p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao</p>
-          <a href="./TyLeXuLy.html" data-key="stats">Chi tiết</a>
-        </div>
-      </div>
-      <div class="card">
         <img src="images/randompass.png" alt="Random Pass">
         <div class="card-content">
           <h3>Mật khẩu ngẫu nhiên</h3>
           <p>Tạo mật khẩu ngẫu nhiên để tạo tài khoản hệ thống</p>
           <a href="./randompass.html" data-key="stats">Chi tiết</a>
+        </div>
+      </div>
+      <div class="card">
+        <img src="images/task-stats.png" alt="Task Stats">
+        <div class="card-content">
+          <h3>Thống Kê Công Việc</h3>
+          <p>Nhập số liệu, thống kê theo tháng, tìm kiếm nâng cao</p>
+          <a href="./TyLeXuLy.html" data-key="stats">Chi tiết</a>
         </div>
       </div>
       <div class="card">
@@ -184,118 +171,155 @@
       </div>
     </nav>
   </div>
+    </nav>
+  </div>
 
-  <!-- Admin Dashboard -->
+  <!-- Dashboard -->
   <div id="dashboard" class="container" style="display:none;">
     <button id="btnBack">← Về trang chính</button>
-    <h2>Admin Dashboard</h2>
-    <div class="stats-grid">
-      <div class="stat-card"><h4>Tổng truy cập</h4><p id="cntTotal">...</p></div>
-      <div class="stat-card"><h4>Trang mã hóa</h4><p id="cntEncrypt">...</p></div>
-      <div class="stat-card"><h4>Trang thống kê</h4><p id="cntStats">...</p></div>
-    </div>
-    <div class="chart-container">
-      <canvas id="pageChart" height="100"></canvas>
-    </div>
+    <h2>Admin Dashboard (Demo)</h2>
+    <p>Thống kê & báo cáo mẫu.</p>
   </div>
 
   <footer>&copy; 2025 ThangHDb. All rights reserved.</footer>
 
   <script>
     // Firebase init
-    const firebaseConfig = { apiKey:"AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU", authDomain:"ehoadon-bkav.firebaseapp.com", databaseURL:"https://ehoadon-bkav-default-rtdb.firebaseio.com", projectId:"ehoadon-bkav", storageBucket:"ehoadon-bkav.appspot.com", messagingSenderId:"688737951508", appId:"1:688737951508:web:965514a6a1f7c4de15ac01", measurementId:"G-VJFL3C86WM" };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+      authDomain: "ehoadon-bkav.firebaseapp.com",
+      projectId: "ehoadon-bkav"
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db   = firebase.database();
 
-    // UI refs
+    const reEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+    // Elements
     const loginContainer = document.getElementById('login-container');
-    const btnSignup      = document.getElementById('btnSignup');
-    const btnLogin       = document.getElementById('btnLogin');
+    const panelLogin     = document.getElementById('panel-login');
+    const panelSignup    = document.getElementById('panel-signup');
+    const panelReset     = document.getElementById('panel-reset');
+    const authEmailInput = document.getElementById('auth-email');
+    const authEmailTick  = document.getElementById('auth-email-tick');
+    const signupEmailIn  = document.getElementById('signup-email');
+    const signupEmailTick= document.getElementById('signup-email-tick');
     const authError      = document.getElementById('authError');
-    const userArea       = document.getElementById('userArea');
+    const signupError    = document.getElementById('signupError');
+    const resetError     = document.getElementById('resetError');
     const mainContent    = document.getElementById('main-content');
     const dashboard      = document.getElementById('dashboard');
+    const userArea       = document.getElementById('userArea');
     const btnBack        = document.getElementById('btnBack');
 
-    // CountAPI helpers
-    async function fetchCount(key) { try { const r=await fetch(`https://api.countapi.xyz/get/thanghdb/${key}`); return (await r.json()).value; } catch { return 0; } }
-    async function incrementCount(key) { try { await fetch(`https://api.countapi.xyz/hit/thanghdb/${key}`); } catch {} }
+    // Panel toggles
+    document.getElementById('show-signup').onclick = e => { e.preventDefault(); panelLogin.style.display = 'none'; panelSignup.style.display = 'block'; };
+    document.getElementById('show-login').onclick  = e => { e.preventDefault(); panelSignup.style.display = 'none'; panelLogin.style.display = 'block'; };
+    document.getElementById('show-reset').onclick  = e => { e.preventDefault(); panelLogin.style.display = 'none'; panelReset.style.display = 'block'; };
+    document.getElementById('back-to-login').onclick = e => { e.preventDefault(); panelReset.style.display = 'none'; panelLogin.style.display = 'block'; };
 
-    // Update UI based on auth
-    function updateUI(user) {
+    // Email format check
+    function checkFormat(input, tick) {
+      const val = input.value.trim();
+      if (!val) { tick.className = 'tick none'; return; }
+      tick.className = reEmail.test(val) ? 'tick valid' : 'tick invalid';
+    }
+    authEmailInput.addEventListener('input', () => checkFormat(authEmailInput, authEmailTick));
+    signupEmailIn .addEventListener('input', () => checkFormat(signupEmailIn, signupEmailTick));
+
+    function fmtErr(e) {
+      switch(e.code) {
+        case 'auth/invalid-email':        return 'Email không hợp lệ.';
+        case 'auth/email-already-in-use': return 'Email đã được đăng ký.';
+        case 'auth/user-not-found':       return 'Không tìm thấy tài khoản.';
+        case 'auth/wrong-password':       return 'Sai mật khẩu.';
+        default:                          return e.message;
+      }
+    }
+
+    // Auto logout khi qua ngày mới
+    setInterval(() => {
+      const lastDay = localStorage.getItem('lastLoginDay');
+      const today   = new Date().toDateString();
+      if (lastDay && lastDay !== today) auth.signOut();
+    }, 60000);
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
       if (user) {
+        localStorage.setItem('lastLoginDay', new Date().toDateString());
         loginContainer.style.display = 'none';
         mainContent.style.display    = 'block';
-
-        // Greeting + logout + dashboard link if admin
-        const nameOnly = user.email.split('@')[0];
-        let html = `👋 Chào mừng<strong>${nameOnly}</strong>`;
-        if (user.email === 'thanghdb@bkav.com') html += ` <a href="#" class="dashboard-link" id="linkDashboard">Dashboard</a>`;
-        html += ` <button id="btnLogoutUser">Đăng xuất</button>`;
+        // Greeting + logout + dashboard link
+        const name = user.email.split('@')[0];
+        let html = `👋 Chào mừng:<strong>${name}</strong> <button id="btnLogout">Đăng xuất</button>`;
+        if (user.email === 'thanghdb@bkav.com') {
+          html += ` <a href="#" id="linkDashboard">Dashboard</a>`;
+        }
         userArea.innerHTML = html;
-
-        document.getElementById('btnLogoutUser').onclick = () => { alert('Bạn đã đăng xuất.'); auth.signOut(); };
-        if (user.email === 'thanghdb@bkav.com') document.getElementById('linkDashboard').onclick = () => { mainContent.style.display='none'; dashboard.style.display='block'; loadStats(); };
-
-        // count home view
-        incrementCount('home');
+        document.getElementById('btnLogout').onclick = () => auth.signOut();
+        if (user.email === 'thanghdb@bkav.com') {
+          document.getElementById('linkDashboard').onclick = e => {
+            e.preventDefault();
+            mainContent.style.display = 'none';
+            dashboard.style.display   = 'block';
+          };
+        }
       } else {
         loginContainer.style.display = 'flex';
         mainContent.style.display    = 'none';
         dashboard.style.display      = 'none';
         userArea.innerHTML           = '';
       }
-    }
-
-    // Auth listener
-    auth.onAuthStateChanged(updateUI);
-
-    // Sign-up
-    btnSignup.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
-      const pass  = document.getElementById('auth-password').value.trim();
-      if (!email||!pass) { authError.textContent="Vui lòng nhập email và mật khẩu."; return; }
-      auth.createUserWithEmailAndPassword(email, pass).catch(e=>authError.textContent=e.message);
-    };
+    });
 
     // Login
-    btnLogin.onclick = () => {
-      const email = document.getElementById('auth-email').value.trim();
+    document.getElementById('btnLogin').onclick = () => {
+      const email = authEmailInput.value.trim();
       const pass  = document.getElementById('auth-password').value.trim();
-      if (!email||!pass) { authError.textContent="Vui lòng nhập email và mật khẩu."; return; }
-      auth.signInWithEmailAndPassword(email, pass).catch(e=>authError.textContent=e.message);
+      authError.textContent = '';
+      if (!email || !pass) { authError.textContent = 'Nhập đầy đủ thông tin.'; return; }
+      const persistence = document.getElementById('rememberMe')?.checked
+        ? firebase.auth.Auth.Persistence.LOCAL
+        : firebase.auth.Auth.Persistence.SESSION;
+      auth.setPersistence(persistence)
+        .then(() => auth.signInWithEmailAndPassword(email, pass))
+        .catch(e => authError.textContent = fmtErr(e));
     };
 
-    // Back to main
+    // Signup
+    document.getElementById('btnSignup').onclick = () => {
+      const email = signupEmailIn.value.trim();
+      const pass  = document.getElementById('signup-password').value.trim();
+      signupError.textContent = '';
+      if (!email || !pass) { signupError.textContent = 'Nhập đầy đủ thông tin.'; return; }
+      if (!reEmail.test(email)) { signupError.textContent = 'Email không hợp lệ.'; return; }
+      auth.createUserWithEmailAndPassword(email, pass)
+        .catch(e => signupError.textContent = fmtErr(e));
+    };
+
+    // Reset password: kiểm tra tồn tại tài khoản
+    document.getElementById('btnSendLink').onclick = () => {
+      const email = document.getElementById('reset-email').value.trim();
+      const err   = resetError;
+      err.textContent = '';
+      if (!email) { err.textContent = 'Nhập email.'; return; }
+      if (!reEmail.test(email)) { err.textContent = 'Email không hợp lệ.'; return; }
+      auth.fetchSignInMethodsForEmail(email)
+        .then(methods => {
+          if (methods.length === 0) {
+            err.textContent = 'Email chưa được đăng ký.';
+          } else {
+            return auth.sendPasswordResetEmail(email)
+              .then(() => alert('Đã gửi link khôi phục!'))
+              .catch(e => err.textContent = fmtErr(e));
+          }
+        })
+        .catch(e => err.textContent = 'Không thể kiểm tra email.');
+    };
+
+    // Back from dashboard
     btnBack.onclick = () => { dashboard.style.display='none'; mainContent.style.display='block'; };
-
-    // Attach click-tracking to cards
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.card-content a[data-key]').forEach(el => {
-        el.addEventListener('click', () => incrementCount(el.dataset.key));
-      });
-    });
-
-    // Load stats & Chart
-    async function loadStats() {
-      const home  = await fetchCount('home'),
-            enc   = await fetchCount('encrypt'),
-            stats = await fetchCount('stats');
-      document.getElementById('cntTotal').innerText  = home;
-      document.getElementById('cntEncrypt').innerText= enc;
-      document.getElementById('cntStats').innerText  = stats;
-      new Chart(document.getElementById('pageChart'),{
-        type:'bar',
-        data:{ labels:['Home','Encrypt','Stats'], datasets:[{ label:'Views', data:[home,enc,stats] }] },
-        options:{ scales:{ y:{ beginAtZero:true } } }
-      });
-    }
-
-    // Initialize CountAPI keys once
-    ['home','encrypt','ticks','stats','merge','invoice','notes'].forEach(k => {
-      fetch(`https://api.countapi.xyz/create?namespace=thanghdb&key=${k}&value=0&enable=true`).catch(()=>{});
-    });
   </script>
 </body>
 </html>
