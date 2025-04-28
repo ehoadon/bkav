@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đọc file JSON/XML</title>
+  <style>
+    :root {
+      --primary-color: #4a90e2;
+      --bg-color: #f5f7fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #e1e5ea;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      margin-bottom: 24px;
+      font-size: 28px;
+      color: var(--primary-color);
+    }
+    .file-input { margin-bottom: 24px; }
+    .sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .section {
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+    .section h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 8px;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .key-list {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .key-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .key-item input[type="checkbox"] {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary-color);
+    }
+    .key-item label { flex: 1; cursor: pointer; }
+    .result-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 8px;
+      margin-bottom: 12px;
+    }
+    .copy-btn {
+      padding: 8px 16px;
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+    .copy-btn:hover { opacity: 0.9; }
+    .invoice-card {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background: var(--card-bg);
+    }
+    .invoice-summary { margin-bottom: 12px; font-weight: bold; }
+    .invoice-detail { margin-left: 16px; font-size: 14px; }
+    .toggle-label { font-size: 14px; cursor: pointer; }
+    .toggle-label input { margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Đọc file JSON/XML</h1>
+    <div class="file-input">
+      <label for="fileInput">Chọn file:</label>
+      <input type="file" id="fileInput" accept=".json,.xml">
+    </div>
+
+    <div class="sections">
+      <div class="section">
+        <h2>Chọn trường chính</h2>
+        <div id="keysContainer" class="key-list"></div>
+      </div>
+      <div class="section">
+        <h2>
+          <span>Chọn trường chi tiết</span>
+          <label class="toggle-label">
+            <input type="checkbox" id="toggleDetails"> Hiển thị chi tiết
+          </label>
+        </h2>
+        <div id="detailsContainer" class="key-list"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Kết quả</h2>
+      <button id="copyBtn" class="copy-btn">Copy kết quả</button>
+      <div id="resultContainer" class="result-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const keysContainer = document.getElementById('keysContainer');
+    const detailsContainer = document.getElementById('detailsContainer');
+    const resultContainer = document.getElementById('resultContainer');
+    const copyBtn = document.getElementById('copyBtn');
+    const toggleDetails = document.getElementById('toggleDetails');
+    let dataArr = null;
+    let dataObj = null;
+    let selectedMain = [];
+    let selectedDetail = [];
+
+    fileInput.addEventListener('change', loadFile);
+    copyBtn.addEventListener('click', copyResults);
+    toggleDetails.addEventListener('change', () => {
+      detailsContainer.style.display = toggleDetails.checked ? 'block' : 'none';
+      if (!toggleDetails.checked) {
+        selectedDetail = [];
+        detailsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      }
+      updateResult();
+    });
+
+    function loadFile(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => parseContent(reader.result, file.name);
+      reader.readAsText(file);
+    }
+
+    function parseContent(text, fileName) {
+      const ext = fileName.split('.').pop().toLowerCase();
+      try {
+        if (ext === 'json') {
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) { dataArr = parsed; dataObj = parsed[0] || {}; }
+          else { dataArr = null; dataObj = parsed; }
+        } else if (ext === 'xml') {
+          const xml = new DOMParser().parseFromString(text, 'application/xml');
+          dataArr = null;
+          dataObj = xmlToObj(xml.documentElement);
+        }
+      } catch {
+        alert('File không hợp lệ!'); return;
+      }
+      selectedMain = [];
+      selectedDetail = [];
+      toggleDetails.checked = false;
+      detailsContainer.style.display = 'none';
+      renderMainOptions(dataObj);
+      renderDetailOptions(dataArr);
+      resultContainer.innerHTML = '';
+    }
+
+    function xmlToObj(node) {
+      const obj = {};
+      Array.from(node.children).forEach(child => {
+        obj[child.nodeName] = child.children.length ? xmlToObj(child) : child.textContent;
+      });
+      return obj;
+    }
+
+    function renderMainOptions(obj) {
+      keysContainer.innerHTML = '';
+      traverse(obj, keysContainer, 'main');
+    }
+
+    function renderDetailOptions(arr) {
+      detailsContainer.innerHTML = '';
+      if (!arr || !arr[0].ListInvoiceDetailsWS) return;
+      const detailsObj = arr[0].ListInvoiceDetailsWS[0];
+      traverse(detailsObj, detailsContainer, 'detail');
+      detailsContainer.style.display = 'none';
+    }
+
+    function traverse(obj, container, type, parentKey = '') {
+      Object.keys(obj).forEach(key => {
+        // Skip root ListInvoiceDetailsWS in main keys
+        if (type === 'main' && parentKey === '' && key === 'ListInvoiceDetailsWS') return;
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+        const div = document.createElement('div'); div.classList.add('key-item');
+        const chk = document.createElement('input'); chk.type = 'checkbox'; chk.value = fullKey;
+        chk.addEventListener('change', () => handleSelection(fullKey, type, chk.checked));
+        const lbl = document.createElement('label'); lbl.textContent = fullKey;
+        div.append(chk, lbl);
+        container.append(div);
+        if (obj[key] && typeof obj[key] === 'object') traverse(obj[key], container, type, fullKey);
+      });
+    }
+
+    function handleSelection(key, type, checked) {
+      if (type === 'detail' && !toggleDetails.checked) return;
+      const arr = type === 'main' ? selectedMain : selectedDetail;
+      if (checked) arr.push(key);
+      else arr.splice(arr.indexOf(key), 1);
+      updateResult();
+    }
+
+    function getValue(obj, path) {
+      return path.split('.').reduce((o, k) => o?.[k], obj) ?? '';
+    }
+
+    function updateResult() {
+      resultContainer.innerHTML = '';
+      if (!selectedMain.length && (!toggleDetails.checked || !selectedDetail.length)) return;
+      const items = dataArr || [dataObj];
+      items.forEach(item => {
+        const card = document.createElement('div'); card.classList.add('invoice-card');
+        if (selectedMain.length) {
+          const values = selectedMain.map(p => getValue(item, p)).join(' | ');
+          const divS = document.createElement('div'); divS.classList.add('invoice-summary'); divS.textContent = values;
+          card.append(divS);
+        }
+        if (toggleDetails.checked && selectedDetail.length && item.ListInvoiceDetailsWS) {
+          item.ListInvoiceDetailsWS.forEach(d => {
+            const divD = document.createElement('div'); divD.classList.add('invoice-detail');
+            divD.textContent = selectedDetail.map(p => getValue(d, p)).join(' | ');
+            card.append(divD);
+          });
+        }
+        resultContainer.append(card);
+      });
+    }
+
+    function copyResults() {
+      const text = resultContainer.innerText;
+      if (!text) return alert('Không có gì để copy!');
+      navigator.clipboard.writeText(text)
+        .then(() => alert('Đã copy kết quả!'))
+        .catch(() => alert('Copy thất bại!'));
+    }
+  </script>
+</body>
+</html>
