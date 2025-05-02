@@ -1,437 +1,411 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nhập Dữ Liệu & Thống Kê (RTDB)</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="description" content="Công cụ mã hóa và giải mã (Encrypt & Decrypt) hỗ trợ JSON, BEPOS và XML. Dễ sử dụng, thân thiện với người dùng và tối ưu SEO.">
+  <meta name="keywords" content="encrypt, decrypt, JSON, XML, BEPOS, mã hóa, giải mã, công cụ">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encrypt & Decrypt Tool - Công cụ mã hóa giải mã</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
   <style>
-    /* Reset & Base */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #eef2f5; color: #333; }
-    .container { max-width: 1000px; margin: 20px auto; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .header { display: flex; justify-content: space-between; align-items: center; background: #3498db; color: #fff; padding: 12px 20px; }
-    .header h2 { font-size: 1.4rem; }
-    .header .user-controls { display: flex; align-items: center; gap: 10px; }
-    .header .user-controls span { font-size: 0.95rem; }
-    #btnLogout { display: none; background: #2980b9; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #fff; }
-    #btnLogout:hover { background: #2273a5; }
-    #mainSection { display: none; padding: 20px; }
-    .layout { display: flex; gap: 20px; align-items: stretch; }
-    .panel { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; padding: 16px; display: flex; flex-direction: column; }
-    .panel-left, .panel-right { flex: 1; }
-    .panel-left table { flex: 1; width: 100%; }
-    .panel-left button { margin-top: auto; }
-    .panel-right { display: flex; flex-direction: column; }
-    .panel-summary { flex: 0 0 auto; margin-bottom: 12px; }
-    .panel-stats { flex: 1; display: flex; flex-direction: column; }
-    .chart-container { flex: 1; margin-bottom: 12px; }
-    .filter-controls { display: flex; gap: 8px; margin-top: auto; }
-    .filter-controls input[type="month"] { width: 120px; }
-    .filter-controls button { flex: 1; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; font-size: 0.95rem; }
-    th { background: #f0f0f0; }
-    input[type="number"], input[type="email"], input[type="password"] { width: 100%; padding: 6px; border: 1px solid #bbb; border-radius: 4px; }
-    button.full { width: 100%; }
-    button.primary { background: #3498db; color: #fff; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
-    button.primary:hover { background: #2980b9; }
-    button.success { background: #27ae60; color: #fff; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
-    button.success:hover { background: #219150; }
-    .console { background: #222; color: #0f0; padding: 10px; border-radius: 4px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
-    .msg { color: #27ae60; text-align: center; font-size: 0.9rem; margin-top: 6px; }
-    #lastEntryLog { text-align: center; font-style: italic; margin: 10px 0; }
-    #authSection { padding: 20px; }
-    #authSection input, #authSection button { max-width: 300px; margin: 8px auto; display: block; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+    .wrapper {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1.2em;
+      color: #666;
+    }
+    .partner-token, .mode-selection {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .partner-token input, .mode-selection select {
+      max-width: 400px;
+      width: 80%;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .section {
+      flex: 1 1 45%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+    }
+    .section h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.8em;
+      color: #007BFF;
+    }
+    select, textarea, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .result {
+      background-color: #e7f3ff;
+      padding: 10px;
+      border-left: 4px solid #007BFF;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+      }
+      .section {
+        flex: 1 1 100%;
+      }
+    }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h2>Nhập Dữ Liệu & Thống Kê</h2>
-      <div class="user-controls">
-        <span id="welcomeMsg"></span>
-        <button id="btnLogout">Đăng xuất</button>
+  <div class="wrapper">
+    <header>
+      <h1>Encrypt & Decrypt Tool</h1>
+      <!-- <p>Công cụ mã hóa và giải mã hỗ trợ JSON, BEPOS và XML</p> -->
+    </header>
+    
+    <!-- Partner Token -->
+    <div class="partner-token">
+      <input type="text" id="partnerToken" placeholder="Nhập Partner Token (Base64Key:Base64IV)">
+      <div class="error" id="tokenError"></div>
+    </div>
+    
+    <!-- Chọn chế độ -->
+    <div class="mode-selection">
+      <select id="modeSelect">
+        <option value="mode1">Mode 6: Compress & Zip (JSON - AES)</option>
+        <option value="mode2">Mode 4: Compress (BEPOS)</option>
+        <option value="mode3">Mode 7: XML (Zip & Escape - AES)</option>
+        <option value="mode4">Mode 0: JSON (Base64)</option>
+        <option value="mode5">Mode 1: XML (Escape & Base64)</option>
+        <option value="mode6">Mode 10: Json DES (Comming soon)</option>
+      </select>
+    </div>
+    
+    <div class="content">
+      <!-- Phần Encrypt -->
+      <div class="section" id="encryptSection">
+        <h2>Dữ liệu mã hóa</h2>
+        <textarea id="inputData" placeholder="Nhập dữ liệu (JSON hoặc XML)"></textarea>
+        <button id="encryptBtn">Encrypt</button>
+        <div class="error" id="encryptError"></div>
+        <textarea id="encryptedData" class="result" placeholder="Kết quả mã hóa (Base64)" readonly></textarea>
+        <button id="copyEncryptedBtn">Copy kết quả</button>
       </div>
-    </div>
-    <div id="authSection">
-      <h3 style="text-align:center; margin-bottom:12px;">Đăng nhập hệ thống</h3>
-      <input id="email" type="email" placeholder="Email" />
-      <input id="password" type="password" placeholder="Mật khẩu" />
-      <button id="btnLogin" class="primary full">Đăng nhập</button>
-      <div class="msg" id="authMsg"></div>
-    </div>
-    <div id="mainSection">
-      <div class="layout">
-        <div class="panel panel-left">
-          <h3>Nhập giá trị</h3>
-          <table>
-            <tr><th>Nội dung</th><th>Giá trị</th></tr>
-            <tbody id="entryRows"></tbody>
-          </table>
-          <button id="btnSaveAll" class="primary full">Lưu tất cả và ghi log</button>
-          <div class="msg" id="saveAllMsg"></div>
-        </div>
-        <div class="panel panel-right">
-          <div class="panel-summary">
-            <h3>Tổng lượt nhập theo ngày</h3>
-            <div id="dailySummary"></div>
-          </div>
-          <div class="panel-stats">
-            <h3>Thống kê tháng</h3>
-            <div class="chart-container"><canvas id="statsChart"></canvas></div>
-            <div id="statsOutput"></div>
-            <div class="filter-controls">
-              <input type="month" id="monthPicker" />
-              <button id="btnLoadStats" class="primary full">Tải thống kê</button>
-              <button id="btnCopyMonthly" class="success full">Copy % tháng</button>
-            </div>
-          </div>
-        </div>
+      
+      <!-- Phần Decrypt -->
+      <div class="section" id="decryptSection">
+        <h2>Kết quả trả về</h2>
+        <textarea id="responseData" placeholder="Dán dữ liệu đã mã hóa tại đây"></textarea>
+        <button id="decryptResponseBtn">Decrypt</button>
+        <div class="error" id="decryptError"></div>
+        <textarea id="responseOutput" class="result" placeholder="Kết quả giải mã" readonly></textarea>
+        <button id="copyDecryptedBtn">Copy kết quả</button>
       </div>
-      <div id="lastEntryLog" class="msg"></div>
-    </div>
-    <div style="padding:20px;">
-      <h3>Console Log</h3>
-      <div id="logConsole" class="console"></div>
     </div>
   </div>
+
   <script>
-  // console override
-  (function(){
-    const c = document.getElementById('logConsole');
-    const timestamp = () => {
-      const now = new Date();
-      return `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}.${now.getMilliseconds().toString().padStart(3,'0')}]`;
-    };
-    
-    ['log', 'error', 'warn', 'info'].forEach(fn => {
-      const o = console[fn];
-      console[fn] = (...args) => {
-        const prefix = timestamp() + ` [${fn.toUpperCase()}] `;
-        o.apply(console, [prefix, ...args]);
-        c.textContent += prefix + args.join(' ') + '\n';
-        c.scrollTop = c.scrollHeight;
-      };
-    });
-    
-    // Thêm các log helper functions
-    console.auth = (...args) => console.log('📲 AUTH:', ...args);
-    console.db = (...args) => console.log('💾 DB:', ...args);
-    console.ui = (...args) => console.log('🖥️ UI:', ...args);
-    console.process = (...args) => console.log('⚙️ PROCESS:', ...args);
-    
-    console.log('=== Hệ thống log mở rộng đã khởi tạo ===');
-    window.addEventListener('error', e => console.error('ERROR:', e.message));
-  })();
-
-  // Firebase
-  const cfg={apiKey:'AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU',authDomain:'ehoadon-bkav.firebaseapp.com',databaseURL:'https://ehoadon-bkav-default-rtdb.firebaseio.com',projectId:'ehoadon-bkav'};
-  firebase.initializeApp(cfg);
-  const auth=firebase.auth(), db=firebase.database();
-  const categories=['Truyền nhận','TVAN','IVAN','eCT','eHD','CKS','AIBooks','eContract','eQLHĐ'];
-
-  // Hàm lưu đơn lẻ
-  async function saveEntry(category, val) {
-    const u = auth.currentUser; 
-    if(!u) {
-      console.auth('Không tìm thấy user đăng nhập, hủy thao tác lưu');
-      return;
+    // Hàm chuyển đổi Base64
+    function fromBase64(base64) {
+      return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    }
+    function toBase64(data) {
+      return btoa(String.fromCharCode(...data));
     }
     
-    console.process(`Bắt đầu lưu dữ liệu cho user UID: ${u.uid}, email: ${u.email}`);
-    console.process(`Lưu dữ liệu cho danh mục: ${category}, giá trị: ${val}`);
-    
-    const now = new Date();
-    const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
-    const mk = `${y}-${m}`, dk = `${y}-${m}-${d}`;
-    
-    console.db(`Khóa monthly: ${mk}, khóa daily: ${dk}`);
-    
-    // monthly
-    console.db(`Đang truy vấn dữ liệu tháng hiện tại cho user: ${u.uid}, danh mục: ${category}`);
-    const refM = db.ref(`users/${u.uid}/monthly/${mk}/${category}`);
-    const prevM = (await refM.once('value')).val() || 0;
-    console.db(`Giá trị hiện tại của danh mục ${category} trong tháng: ${prevM}`);
-    await refM.set(prevM + val);
-    console.db(`Đã lưu ${category}: +${val} (tổng tháng hiện tại: ${prevM+val})`);
-    
-    // daily summary
-    console.db(`Đang truy vấn dữ liệu ngày hiện tại cho user: ${u.uid}`);
-    const dRef = db.ref(`users/${u.uid}/dailySummary/${dk}`);
-    const prevD = (await dRef.once('value')).val() || 0;
-    console.db(`Giá trị hiện tại của ngày ${dk}: ${prevD}`);
-    await dRef.set(prevD + val);
-    console.db(`Đã cập nhật tổng ngày ${dk}: +${val} (tổng hiện tại: ${prevD+val})`);
-    
-    // last entry timestamp
-    const ts = new Date().toLocaleString('vi-VN');
-    console.db(`Cập nhật timestamp lần nhập cuối: ${ts}`);
-    await db.ref(`users/${u.uid}/lastEntry`).set(ts);
-    console.db(`Đã lưu timestamp lần nhập cuối`);
-    
-    document.getElementById('lastEntryLog').innerText = `Lần nhập cuối: ${ts}`;
-    console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
-    
-    console.process('Đang tải lại tổng hợp theo ngày');
-    await loadDailySummary();
-    console.process('Đang tải lại thống kê');
-    await loadStats();
-    console.process('Hoàn thành quá trình lưu trữ và cập nhật');
-  }
-
-  function buildEntryRows() {
-    console.ui('Đang tạo các hàng nhập liệu');
-    const tbody = document.getElementById('entryRows');
-    tbody.innerHTML = categories.map(c => 
-      `<tr><td>${c}</td><td><input id="in-${c}" type="number" min="0" /></td></tr>`
-    ).join('');
-    
-    // thêm sự kiện Enter
-    categories.forEach(c => {
-      const inp = document.getElementById(`in-${c}`);
-      inp.addEventListener('keypress', async e => {
-        if(e.key === 'Enter') {
-          const v = parseInt(inp.value) || 0;
-          if(v > 0) {
-            console.ui(`Người dùng nhấn Enter tại danh mục ${c} với giá trị ${v}`);
-            await saveEntry(c, v);
-          } else {
-            console.ui(`Bỏ qua vì giá trị không hợp lệ: ${inp.value}`);
-          }
-          inp.value = '';
-        }
-      });
-    });
-    console.ui('Đã hoàn thành thiết lập các hàng nhập liệu và sự kiện');
-  }
-
-  function getCurrentMonth(){ const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'); return `${y}-${m}`; }
-
-  auth.onAuthStateChanged(async user => {
-    if(user) {
-      console.auth(`User đăng nhập thành công - UID: ${user.uid}, Email: ${user.email}`);
-      const w = document.getElementById('welcomeMsg'), lo = document.getElementById('btnLogout');
-      const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
-      
-      lo.style.display = 'inline-block';
-      au.style.display = 'none';
-      ma.style.display = 'block';
-      w.innerText = `Chào bạn: ${user.email}`;
-      console.ui('Đã chuyển sang giao diện đã đăng nhập');
-      
-      buildEntryRows();
-      document.getElementById('monthPicker').value = getCurrentMonth();
-      console.ui(`Đã thiết lập tháng hiện tại: ${getCurrentMonth()}`);
-      
-      console.process('Đang tải thông tin lần nhập cuối');
-      await loadLastEntry(user.uid);
-      
-      console.process('Đang tải tổng hợp theo ngày');
-      await loadDailySummary();
-      
-      console.process('Đang tải thống kê');
-      await loadStats();
-      
-      console.process('Khởi tạo hoàn tất cho người dùng đã đăng nhập');
-    } else {
-      console.auth('Không có user đăng nhập');
-      const lo = document.getElementById('btnLogout'), w = document.getElementById('welcomeMsg');
-      const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
-      
-      lo.style.display = 'none';
-      w.innerText = '';
-      au.style.display = 'block';
-      ma.style.display = 'none';
-      console.ui('Đã chuyển sang giao diện đăng nhập');
+    // ------------------ MODE 1: Compress & Padding (JSON - AES) ------------------
+    async function zipData(data) {
+      return pako.gzip(data);
     }
-  });
-
-  document.getElementById('btnLogin').onclick = async () => {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('password').value;
-    console.auth(`Đang thử đăng nhập với email: ${e}`);
-    
-    try {
-      console.auth('Gửi yêu cầu xác thực đến Firebase');
-      await auth.signInWithEmailAndPassword(e, p);
-      localStorage.setItem('lastLoginDate', new Date().toISOString().slice(0, 10));
-      console.auth(`Đăng nhập thành công với email: ${e}`);
-    } catch(err) {
-      console.error('Lỗi đăng nhập:', err.message);
-      document.getElementById('authMsg').innerText = err.message;
-      console.ui('Hiển thị thông báo lỗi đăng nhập trên UI');
+    async function unzipData(data) {
+      return pako.ungzip(data, { to: 'string' });
     }
-  };
-
-  document.getElementById('btnLogout').onclick = async () => {
-    console.auth('Đang thực hiện đăng xuất');
-    await auth.signOut();
-    localStorage.removeItem('lastLoginDate');
-    console.auth('Đã đăng xuất thành công');
-  };
-
-  async function loadLastEntry(uid) {
-    console.db(`Đang tải thông tin lần nhập cuối của user UID: ${uid}`);
-    const snap = await db.ref(`users/${uid}/lastEntry`).once('value');
-    const ts = snap.val();
-    console.db(`Lần nhập cuối: ${ts || 'chưa có'}`);
-    
-    document.getElementById('lastEntryLog').innerText = ts ? `Lần nhập cuối: ${ts}` : '';
-    console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
-  }
-
-  async function loadDailySummary() {
-    console.process('Bắt đầu tải tổng hợp theo ngày');
-    
-    // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const today = `${y}-${m}-${d}`;
-    console.db(`Ngày hiện tại: ${today}`);
-
-    // Lấy dữ liệu tổng theo ngày từ Firebase
-    console.db(`Đang truy vấn dữ liệu dailySummary cho user: ${auth.currentUser.uid}`);
-    const snap = await db.ref(`users/${auth.currentUser.uid}/dailySummary`).once('value');
-    const obj = snap.val() || {};
-    console.db(`Nhận được dữ liệu dailySummary:`, obj);
-
-    // Chỉ hiển thị dữ liệu của ngày hiện tại
-    let h = '<table><tr><th>Ngày</th><th>Tổng</th></tr>';
-    
-    // Kiểm tra xem có dữ liệu cho ngày hiện tại không
-    if (obj[today]) {
-      console.db(`Có dữ liệu cho ngày hôm nay: ${obj[today]}`);
-      h += `<tr><td>${today}</td><td>${obj[today]}</td></tr>`;
-    } else {
-      console.db('Không có dữ liệu cho ngày hôm nay, hiển thị 0');
-      h += `<tr><td>${today}</td><td>0</td></tr>`;
+    function addPadding(data) {
+      const blockSize = 16;
+      const paddingLength = blockSize - (data.length % blockSize);
+      const paddedData = new Uint8Array(data.length + paddingLength);
+      paddedData.set(data);
+      paddedData.fill(paddingLength, data.length);
+      return paddedData;
+    }
+    function removePadding(data) {
+      const paddingLength = data[data.length - 1];
+      return data.slice(0, data.length - paddingLength);
+    }
+    async function encryptDataMode1(data, key, iv) {
+      const paddedData = addPadding(data);
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt']);
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, paddedData);
+      return toBase64(new Uint8Array(encrypted));
+    }
+    async function decryptDataMode1(encryptedData, key, iv) {
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']);
+      const buffer = fromBase64(encryptedData);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, buffer);
+      const unpadded = removePadding(new Uint8Array(decrypted));
+      return unpadded;
     }
     
-    h += '</table>';
-    document.getElementById('dailySummary').innerHTML = h;
-    console.ui('Đã cập nhật bảng tổng hợp theo ngày trên UI');
-  }
-
-  document.getElementById('btnSaveAll').onclick = async () => {
-    console.process('Đang thực hiện lưu tất cả các mục nhập');
-    let total = 0;
+    // ------------------ MODE 2: Plain Text (BEPOS) ------------------
+    async function encryptDataMode2(data, key, iv) {
+      const encodedData = new TextEncoder().encode(data);
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt']);
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, encodedData);
+      return toBase64(new Uint8Array(encrypted));
+    }
+    async function decryptDataMode2(encryptedData, key, iv) {
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']);
+      const buffer = fromBase64(encryptedData);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, buffer);
+      return new TextDecoder().decode(new Uint8Array(decrypted));
+    }
     
-    for(const c of categories) {
-      const inp = document.getElementById(`in-${c}`);
-      const v = parseInt(inp.value) || 0;
-      
-      if(v > 0) {
-        console.process(`Đang lưu danh mục ${c} với giá trị ${v}`);
-        await saveEntry(c, v);
-        total += v;
+    // ------------------ MODE 3: XML (Zip & Escape - AES) ------------------
+    function escapeInnerXML(xml) {
+      if (xml.indexOf('<CommandObject') !== -1) {
+        return xml.replace(/<CommandObject([^>]*)>([\s\S]*?)<\/CommandObject>/g, function(match, attrs, innerContent) {
+          const escapedContent = innerContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<CommandObject${attrs}>` + escapedContent + `</CommandObject>`;
+        });
+      } else {
+        xml = xml.replace(/<\?xml.*?\?>\s*/g, "");
+        return xml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
       }
-      inp.value = '';
+    }
+    async function encryptDataMode3(xmlData, key, iv) {
+      const processedXML = escapeInnerXML(xmlData);
+      const zippedData = new Uint8Array(await zipData(processedXML));
+      return encryptDataMode1(zippedData, key, iv);
+    }
+    async function decryptDataMode3(encryptedData, key, iv) {
+      const decryptedBytes = await decryptDataMode1(encryptedData, key, iv);
+      return await unzipData(decryptedBytes);
     }
     
-    const msg = total > 0 ? 'Lưu xong!' : 'Chưa nhập giá trị.';
-    document.getElementById('saveAllMsg').innerText = msg;
-    console.ui(`Hiển thị thông báo: ${msg}`);
+    // ------------------ MODE 4: JSON (Chỉ Base64) ------------------
+    async function encryptDataMode4(data) {
+      try {
+        const jsonData = JSON.stringify(JSON.parse(data));
+        const encoded = new TextEncoder().encode(jsonData);
+        return toBase64(encoded);
+      } catch {
+        throw new Error('Dữ liệu không phải là JSON hợp lệ.');
+      }
+    }
+    async function decryptDataMode4(encodedData) {
+      const decodedBytes = fromBase64(encodedData);
+      const decodedText = new TextDecoder().decode(decodedBytes);
+      try {
+        const result = JSON.parse(decodedText);
+        return JSON.stringify(result, null, 2);
+      } catch {
+        return decodedText;
+      }
+    }
     
-    setTimeout(() => {
-      document.getElementById('saveAllMsg').innerText = '';
-      console.ui('Đã xóa thông báo');
-    }, 2000);
+    // ------------------ MODE 5: XML (Escape & Base64) ------------------
+    async function encryptDataMode5(xmlData) {
+      if (!validateXML(xmlData)) {
+        throw new Error('Dữ liệu đầu vào không phải là XML hợp lệ.');
+      }
+      const processedXML = escapeInnerXML(xmlData);
+      const encoded = new TextEncoder().encode(processedXML);
+      return toBase64(encoded);
+    }
+    async function decryptDataMode5(encodedData) {
+      const decodedBytes = fromBase64(encodedData);
+      return new TextDecoder().decode(decodedBytes);
+    }
     
-    console.process(`Hoàn thành lưu tất cả với tổng số: ${total}`);
-  };
-
-  let chart;
-  function initChart(){ 
-    const c=document.getElementById('statsChart').getContext('2d'); 
-    chart=new Chart(c,{
-      type:'bar',
-      data:{
-        labels:categories,
-        datasets:[{
-          label:'Giá trị',
-          data:[],
-          backgroundColor:'#3498db'
-        }]
-      },
-      options:{
-        scales:{
-          y:{beginAtZero:true}
+    // ------------------ Validate ------------------
+    function validateJSON(data) {
+      try { JSON.parse(data); return true; }
+      catch { return false; }
+    }
+    function validateXML(data) {
+      try {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data, "application/xml");
+        return !xmlDoc.getElementsByTagName("parsererror").length;
+      } catch { return false; }
+    }
+    
+    // ------------------ Copy to Clipboard ------------------
+    function copyToClipboard(textAreaId, button) {
+      const textarea = document.getElementById(textAreaId);
+      if (!textarea.value) return;
+      textarea.select();
+      document.execCommand('copy');
+      const originalText = button.textContent;
+      button.textContent = 'Đã copy!';
+      setTimeout(() => button.textContent = originalText, 1500);
+    }
+    document.getElementById('copyEncryptedBtn').addEventListener('click', function() {
+      copyToClipboard('encryptedData', this);
+    });
+    document.getElementById('copyDecryptedBtn').addEventListener('click', function() {
+      copyToClipboard('responseOutput', this);
+    });
+    
+    // ------------------ Xử lý sự kiện Encrypt/Decrypt ------------------
+    document.getElementById('encryptBtn').addEventListener('click', async () => {
+      const inputData = document.getElementById('inputData').value.trim();
+      const partnerToken = document.getElementById('partnerToken').value.trim();
+      const mode = document.getElementById('modeSelect').value;
+      const encryptError = document.getElementById('encryptError');
+      encryptError.textContent = '';
+      if (!inputData) {
+        encryptError.textContent = 'Vui lòng nhập dữ liệu.';
+        return;
+      }
+      if ((mode === 'mode1' || mode === 'mode4') && !validateJSON(inputData)) {
+        encryptError.textContent = 'Dữ liệu đầu vào không phải là JSON hợp lệ.';
+        return;
+      }
+      if ((mode === 'mode3' || mode === 'mode5') && !validateXML(inputData)) {
+        encryptError.textContent = 'Dữ liệu đầu vào không phải là XML hợp lệ.';
+        return;
+      }
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!partnerToken) {
+          encryptError.textContent = 'Vui lòng nhập Partner Token hợp lệ.';
+          return;
+        }
+        try {
+          const [k, i] = partnerToken.split(':');
+          if (!k||!i) throw '';
+          key = fromBase64(k);
+          iv  = fromBase64(i);
+        } catch {
+          encryptError.textContent = 'Định dạng Partner Token không hợp lệ. Yêu cầu "Base64Key:Base64IV".';
+          return;
         }
       }
-    }); 
-    console.ui('Biểu đồ đã được khởi tạo'); 
-  }
-
-  async function loadStats() {
-    const mk = document.getElementById('monthPicker').value;
-    console.process(`Bắt đầu tải thống kê cho tháng: ${mk}`);
-    
-    console.db(`Đang truy vấn dữ liệu monthly cho user: ${auth.currentUser.uid}, tháng: ${mk}`);
-    const snap = await db.ref(`users/${auth.currentUser.uid}/monthly/${mk}`).once('value');
-    const obj = snap.val() || {};
-    console.db(`Nhận được dữ liệu thống kê thô:`, obj);
-    
-    const raw = categories.map(n => ({name: n, value: obj[n] || 0}));
-    const tot = raw.reduce((s, r) => s + r.value, 0);
-    console.process(`Tổng giá trị của tất cả danh mục: ${tot}`);
-    
-    let list = raw.map(r => ({
-      name: r.name, 
-      value: r.value, 
-      pct: tot > 0 ? Math.round(r.value / tot * 10000) / 100 : 0
-    }));
-    
-    if(tot > 0) {
-      const mi = list.reduce((i, c, j, a) => c.pct > a[i].pct ? j : i, 0);
-      const sum = list.reduce((s, i) => s + i.pct, 0);
-      const d = Math.round((100 - sum) * 100) / 100;
-      list[mi].pct += d;
-      console.process(`Điều chỉnh phần trăm cho danh mục ${list[mi].name}: +${d}% (tổng mới: ${list[mi].pct}%)`);
-    }
-    
-    console.db('Dữ liệu thống kê đã xử lý:', list);
-    
-    const vals = list.map(i => i.value);
-    
-    if(!chart) {
-      console.ui('Khởi tạo biểu đồ');
-      initChart();
-    }
-    
-    chart.data.datasets[0].data = vals;
-    chart.update();
-    console.ui('Đã cập nhật biểu đồ');
-    
-    const sorted = [...list].sort((a, b) => b.pct - a.pct);
-    let h = '<h4>Thống kê Giá trị</h4><table><tr><th>#</th><th>Nội dung</th><th>Giá trị</th><th>Tỷ lệ %</th></tr>';
-    
-    sorted.forEach((i, j) => h += `<tr><td>${j+1}</td><td>${i.name}</td><td>${i.value}</td><td>${i.pct.toFixed(2)}%</td></tr>`);
-    h += '</table>';
-    
-    document.getElementById('statsOutput').innerHTML = h;
-    console.ui('Đã cập nhật bảng thống kê trên UI');
-    
-    window.pctOriginalCopy = list;
-    console.process('Hoàn thành tải thống kê');
-  }
-  document.getElementById('btnLoadStats').onclick = loadStats;
-  document.getElementById('btnCopyMonthly').onclick = () => {
-    const arr = window.pctOriginalCopy || []; 
-    if(!arr.length) {
-      console.ui('Không có dữ liệu thống kê để sao chép');
-      return alert('Chưa có thống kê');
-    }
-    const lines = arr.map((i, j) => `${j+1}. ${i.name}: ${i.pct.toFixed(2)}%`);
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-      console.ui('Đã sao chép phần trăm thống kê vào clipboard');
+      try {
+        let encrypted;
+        if (mode === 'mode1') {
+          const jsonData = JSON.stringify(JSON.parse(inputData));
+          const zippedData = new Uint8Array(await zipData(jsonData));
+          encrypted = await encryptDataMode1(zippedData, key, iv);
+        } else if (mode === 'mode2') {
+          encrypted = await encryptDataMode2(inputData, key, iv);
+        } else if (mode === 'mode3') {
+          encrypted = await encryptDataMode3(inputData, key, iv);
+        } else if (mode === 'mode4') {
+          encrypted = await encryptDataMode4(inputData);
+        } else if (mode === 'mode5') {
+          encrypted = await encryptDataMode5(inputData);
+        }
+        document.getElementById('encryptedData').value = encrypted;
+      } catch (error) {
+        encryptError.textContent = error.message || 'Mã hóa thất bại. Vui lòng kiểm tra lại dữ liệu và token.';
+      }
     });
-  };
-</script>
+
+    document.getElementById('decryptResponseBtn').addEventListener('click', async () => {
+      const encryptedData = document.getElementById('responseData').value.trim();
+      const partnerToken  = document.getElementById('partnerToken').value.trim();
+      const mode          = document.getElementById('modeSelect').value;
+      const decryptError  = document.getElementById('decryptError');
+      decryptError.textContent = '';
+      if (!encryptedData) {
+        decryptError.textContent = 'Vui lòng nhập dữ liệu mã hóa.';
+        return;
+      }
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!partnerToken) {
+          decryptError.textContent = 'Vui lòng nhập Partner Token hợp lệ.';
+          return;
+        }
+        try {
+          const [k, i] = partnerToken.split(':');
+          if (!k||!i) throw '';
+          key = fromBase64(k);
+          iv  = fromBase64(i);
+        } catch {
+          decryptError.textContent = 'Định dạng Partner Token không hợp lệ. Yêu cầu "Base64Key:Base64IV".';
+          return;
+        }
+      }
+      try {
+        let result;
+        if (mode === 'mode1') {
+          const decryptedBytes = await decryptDataMode1(encryptedData, key, iv);
+          const unzippedData   = await unzipData(decryptedBytes);
+          result = JSON.stringify(JSON.parse(unzippedData), null, 2);
+        } else if (mode === 'mode2') {
+          result = await decryptDataMode2(encryptedData, key, iv);
+        } else if (mode === 'mode3') {
+          result = await decryptDataMode3(encryptedData, key, iv);
+        } else if (mode === 'mode4') {
+          result = await decryptDataMode4(encryptedData);
+        } else if (mode === 'mode5') {
+          result = await decryptDataMode5(encryptedData);
+        }
+        document.getElementById('responseOutput').value = result;
+      } catch (error) {
+        decryptError.textContent = error.message || 'Giải mã thất bại. Vui lòng kiểm tra lại dữ liệu và token.';
+      }
+    });
+  </script>
 </body>
 </html>
