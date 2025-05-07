@@ -41,11 +41,16 @@
     button.primary:hover { background: #2980b9; }
     button.success { background: #27ae60; color: #fff; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
     button.success:hover { background: #219150; }
+    button.secondary { background: #7f8c8d; color: #fff; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
+    button.secondary:hover { background: #6d7676; }
     .console { background: #222; color: #0f0; padding: 10px; border-radius: 4px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; }
     .msg { color: #27ae60; text-align: center; font-size: 0.9rem; margin-top: 6px; }
     #lastEntryLog { text-align: center; font-style: italic; margin: 10px 0; }
     #authSection { padding: 20px; }
     #authSection input, #authSection button { max-width: 300px; margin: 8px auto; display: block; }
+    .auth-links { text-align: center; margin-top: 12px; }
+    .auth-links a { color: #3498db; text-decoration: none; margin: 0 10px; }
+    .auth-links a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -58,11 +63,37 @@
       </div>
     </div>
     <div id="authSection">
-      <h3 style="text-align:center; margin-bottom:12px;">Đăng nhập hệ thống</h3>
-      <input id="email" type="email" placeholder="Email" />
-      <input id="password" type="password" placeholder="Mật khẩu" />
-      <button id="btnLogin" class="primary full">Đăng nhập</button>
-      <div class="msg" id="authMsg"></div>
+      <div id="loginForm">
+        <h3 style="text-align:center; margin-bottom:12px;">Đăng nhập hệ thống</h3>
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Mật khẩu" />
+        <button id="btnLogin" class="primary full">Đăng nhập</button>
+        <div class="auth-links">
+          <a href="#" id="showRegister">Đăng ký</a>
+          <a href="#" id="showForgotPassword">Quên mật khẩu?</a>
+        </div>
+        <div class="msg" id="authMsg"></div>
+      </div>
+      <div id="registerForm" style="display: none;">
+        <h3 style="text-align:center; margin-bottom:12px;">Đăng ký tài khoản</h3>
+        <input id="regEmail" type="email" placeholder="Email" />
+        <input id="regPassword" type="password" placeholder="Mật khẩu" />
+        <input id="regConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" />
+        <button id="btnRegister" class="primary full">Đăng ký</button>
+        <div class="auth-links">
+          <a href="#" id="showLoginFromRegister">Quay lại đăng nhập</a>
+        </div>
+        <div class="msg" id="registerMsg"></div>
+      </div>
+      <div id="forgotPasswordForm" style="display: none;">
+        <h3 style="text-align:center; margin-bottom:12px;">Quên mật khẩu</h3>
+        <input id="forgotEmail" type="email" placeholder="Email" />
+        <button id="btnResetPassword" class="primary full">Gửi email đặt lại mật khẩu</button>
+        <div class="auth-links">
+          <a href="#" id="showLoginFromForgot">Quay lại đăng nhập</a>
+        </div>
+        <div class="msg" id="forgotMsg"></div>
+      </div>
     </div>
     <div id="mainSection">
       <div class="layout">
@@ -118,14 +149,13 @@
       };
     });
     
-    // Thêm các log helper functions
     console.auth = (...args) => console.log('📲 AUTH:', ...args);
     console.db = (...args) => console.log('💾 DB:', ...args);
     console.ui = (...args) => console.log('🖥️ UI:', ...args);
     console.process = (...args) => console.log('⚙️ PROCESS:', ...args);
     
     console.log('=== Hệ thống log mở rộng đã khởi tạo ===');
-    window.addEventListener('error', e => console.error('ERROR:', e.message));
+    window.addEventListener('error', e => console.error(`Global Error: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`));
   })();
 
   // Firebase
@@ -136,308 +166,466 @@
 
   // Hàm lưu đơn lẻ
   async function saveEntry(category, val) {
-    const u = auth.currentUser; 
-    if(!u) {
-      console.auth('Không tìm thấy user đăng nhập, hủy thao tác lưu');
-      return;
+    try {
+      const u = auth.currentUser; 
+      if(!u) {
+        console.auth('Không tìm thấy user đăng nhập, hủy thao tác lưu');
+        return;
+      }
+      
+      console.process(`Bắt đầu lưu dữ liệu cho user UID: ${u.uid}, email: ${u.email}`);
+      console.process(`Lưu dữ liệu cho danh mục: ${category}, giá trị: ${val}`);
+      
+      const now = new Date();
+      const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+      const mk = `${y}-${m}`, dk = `${y}-${m}-${d}`;
+      
+      console.db(`Khóa monthly: ${mk}, khóa daily: ${dk}`);
+      
+      // monthly
+      console.db(`Đang truy vấn dữ liệu tháng hiện tại cho user: ${u.uid}, danh mục: ${category}`);
+      const refM = db.ref(`users/${u.uid}/monthly/${mk}/${category}`);
+      const snapM = await refM.once('value');
+      const prevM = snapM.val() || 0;
+      console.db(`Giá trị hiện tại của danh mục ${category} trong tháng: ${prevM}`);
+      await refM.set(prevM + val);
+      console.db(`Đã lưu ${category}: +${val} (tổng tháng hiện tại: ${prevM+val})`);
+      
+      // daily summary
+      console.db(`Đang truy vấn dữ liệu ngày hiện tại cho user: ${u.uid}`);
+      const dRef = db.ref(`users/${u.uid}/dailySummary/${dk}`);
+      const snapD = await dRef.once('value');
+      const prevD = snapD.val() || 0;
+      console.db(`Giá trị hiện tại của ngày ${dk}: ${prevD}`);
+      await dRef.set(prevD + val);
+      console.db(`Đã cập nhật tổng ngày ${dk}: +${val} (tổng hiện tại: ${prevD+val})`);
+      
+      // last entry timestamp
+      const ts = new Date().toLocaleString('vi-VN');
+      console.db(`Cập nhật timestamp lần nhập cuối: ${ts}`);
+      await db.ref(`users/${u.uid}/lastEntry`).set(ts);
+      console.db(`Đã lưu timestamp lần nhập cuối`);
+      
+      document.getElementById('lastEntryLog').innerText = `Lần nhập cuối: ${ts}`;
+      console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
+      
+      console.process('Đang tải lại tổng hợp theo ngày');
+      await loadDailySummary();
+      console.process('Đang tải lại thống kê');
+      await loadStats();
+      console.process('Hoàn thành quá trình lưu trữ và cập nhật');
+    } catch (err) {
+      console.error(`Lỗi trong saveEntry (${category}, ${val}): ${err.message}`);
     }
-    
-    console.process(`Bắt đầu lưu dữ liệu cho user UID: ${u.uid}, email: ${u.email}`);
-    console.process(`Lưu dữ liệu cho danh mục: ${category}, giá trị: ${val}`);
-    
-    const now = new Date();
-    const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
-    const mk = `${y}-${m}`, dk = `${y}-${m}-${d}`;
-    
-    console.db(`Khóa monthly: ${mk}, khóa daily: ${dk}`);
-    
-    // monthly
-    console.db(`Đang truy vấn dữ liệu tháng hiện tại cho user: ${u.uid}, danh mục: ${category}`);
-    const refM = db.ref(`users/${u.uid}/monthly/${mk}/${category}`);
-    const prevM = (await refM.once('value')).val() || 0;
-    console.db(`Giá trị hiện tại của danh mục ${category} trong tháng: ${prevM}`);
-    await refM.set(prevM + val);
-    console.db(`Đã lưu ${category}: +${val} (tổng tháng hiện tại: ${prevM+val})`);
-    
-    // daily summary
-    console.db(`Đang truy vấn dữ liệu ngày hiện tại cho user: ${u.uid}`);
-    const dRef = db.ref(`users/${u.uid}/dailySummary/${dk}`);
-    const prevD = (await dRef.once('value')).val() || 0;
-    console.db(`Giá trị hiện tại của ngày ${dk}: ${prevD}`);
-    await dRef.set(prevD + val);
-    console.db(`Đã cập nhật tổng ngày ${dk}: +${val} (tổng hiện tại: ${prevD+val})`);
-    
-    // last entry timestamp
-    const ts = new Date().toLocaleString('vi-VN');
-    console.db(`Cập nhật timestamp lần nhập cuối: ${ts}`);
-    await db.ref(`users/${u.uid}/lastEntry`).set(ts);
-    console.db(`Đã lưu timestamp lần nhập cuối`);
-    
-    document.getElementById('lastEntryLog').innerText = `Lần nhập cuối: ${ts}`;
-    console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
-    
-    console.process('Đang tải lại tổng hợp theo ngày');
-    await loadDailySummary();
-    console.process('Đang tải lại thống kê');
-    await loadStats();
-    console.process('Hoàn thành quá trình lưu trữ và cập nhật');
   }
 
   function buildEntryRows() {
-    console.ui('Đang tạo các hàng nhập liệu');
-    const tbody = document.getElementById('entryRows');
-    tbody.innerHTML = categories.map(c => 
-      `<tr><td>${c}</td><td><input id="in-${c}" type="number" min="0" /></td></tr>`
-    ).join('');
-    
-    // thêm sự kiện Enter
-    categories.forEach(c => {
-      const inp = document.getElementById(`in-${c}`);
-      inp.addEventListener('keypress', async e => {
-        if(e.key === 'Enter') {
-          const v = parseInt(inp.value) || 0;
-          if(v > 0) {
-            console.ui(`Người dùng nhấn Enter tại danh mục ${c} với giá trị ${v}`);
-            await saveEntry(c, v);
-          } else {
-            console.ui(`Bỏ qua vì giá trị không hợp lệ: ${inp.value}`);
+    try {
+      console.ui('Đang tạo các hàng nhập liệu');
+      const tbody = document.getElementById('entryRows');
+      if (!tbody) throw new Error('Không tìm thấy entryRows element');
+      tbody.innerHTML = categories.map(c => 
+        `<tr><td>${c}</td><td><input id="in-${c}" type="number" min="0" /></td></tr>`
+      ).join('');
+      
+      categories.forEach(c => {
+        const inp = document.getElementById(`in-${c}`);
+        if (!inp) throw new Error(`Không tìm thấy input cho danh mục ${c}`);
+        inp.addEventListener('keypress', async e => {
+          if(e.key === 'Enter') {
+            const v = parseInt(inp.value) || 0;
+            if(v > 0) {
+              console.ui(`Người dùng nhấn Enter tại danh mục ${c} với giá trị ${v}`);
+              await saveEntry(c, v);
+            } else {
+              console.ui(`Bỏ qua vì giá trị không hợp lệ: ${inp.value}`);
+            }
+            inp.value = '';
           }
-          inp.value = '';
-        }
+        });
       });
-    });
-    console.ui('Đã hoàn thành thiết lập các hàng nhập liệu và sự kiện');
+      console.ui('Đã hoàn thành thiết lập các hàng nhập liệu và sự kiện');
+    } catch (err) {
+      console.error(`Lỗi trong buildEntryRows: ${err.message}`);
+    }
   }
 
-  function getCurrentMonth(){ const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'); return `${y}-${m}`; }
+  function getCurrentMonth() {
+    const d = new Date(), y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0');
+    return `${y}-${m}`;
+  }
 
   auth.onAuthStateChanged(async user => {
-    if(user) {
-      console.auth(`User đăng nhập thành công - UID: ${user.uid}, Email: ${user.email}`);
-      const w = document.getElementById('welcomeMsg'), lo = document.getElementById('btnLogout');
-      const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
-      
-      lo.style.display = 'inline-block';
-      au.style.display = 'none';
-      ma.style.display = 'block';
-      w.innerText = `Chào bạn: ${user.email}`;
-      console.ui('Đã chuyển sang giao diện đã đăng nhập');
-      
-      buildEntryRows();
-      document.getElementById('monthPicker').value = getCurrentMonth();
-      console.ui(`Đã thiết lập tháng hiện tại: ${getCurrentMonth()}`);
-      
-      console.process('Đang tải thông tin lần nhập cuối');
-      await loadLastEntry(user.uid);
-      
-      console.process('Đang tải tổng hợp theo ngày');
-      await loadDailySummary();
-      
-      console.process('Đang tải thống kê');
-      await loadStats();
-      
-      console.process('Khởi tạo hoàn tất cho người dùng đã đăng nhập');
-    } else {
-      console.auth('Không có user đăng nhập');
-      const lo = document.getElementById('btnLogout'), w = document.getElementById('welcomeMsg');
-      const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
-      
-      lo.style.display = 'none';
-      w.innerText = '';
-      au.style.display = 'block';
-      ma.style.display = 'none';
-      console.ui('Đã chuyển sang giao diện đăng nhập');
+    try {
+      if(user) {
+        console.auth(`User đăng nhập thành công - UID: ${user.uid}, Email: ${user.email}`);
+        const w = document.getElementById('welcomeMsg'), lo = document.getElementById('btnLogout');
+        const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
+        
+        if (!w || !lo || !au || !ma) throw new Error('Không tìm thấy các phần tử UI cần thiết');
+        
+        lo.style.display = 'inline-block';
+        au.style.display = 'none';
+        ma.style.display = 'block';
+        w.innerText = `Chào bạn: ${user.email}`;
+        console.ui('Đã chuyển sang giao diện đã đăng nhập');
+        
+        buildEntryRows();
+        const monthPicker = document.getElementById('monthPicker');
+        if (!monthPicker) throw new Error('Không tìm thấy monthPicker element');
+        monthPicker.value = getCurrentMonth();
+        console.ui(`Đã thiết lập tháng hiện tại: ${getCurrentMonth()}`);
+        
+        console.process('Đang tải thông tin lần nhập cuối');
+        await loadLastEntry(user.uid);
+        
+        console.process('Đang tải tổng hợp theo ngày');
+        await loadDailySummary();
+        
+        console.process('Đang tải thống kê');
+        await loadStats();
+        
+        console.process('Khởi tạo hoàn tất cho người dùng đã đăng nhập');
+      } else {
+        console.auth('Không có user đăng nhập');
+        const lo = document.getElementById('btnLogout'), w = document.getElementById('welcomeMsg');
+        const au = document.getElementById('authSection'), ma = document.getElementById('mainSection');
+        
+        if (!lo || !w || !au || !ma) throw new Error('Không tìm thấy các phần tử UI cần thiết');
+        
+        lo.style.display = 'none';
+        w.innerText = '';
+        au.style.display = 'block';
+        ma.style.display = 'none';
+        console.ui('Đã chuyển sang giao diện đăng nhập');
+      }
+    } catch (err) {
+      console.error(`Lỗi trong onAuthStateChanged: ${err.message}`);
     }
   });
 
+  // Login
   document.getElementById('btnLogin').onclick = async () => {
-    const e = document.getElementById('email').value;
-    const p = document.getElementById('password').value;
-    console.auth(`Đang thử đăng nhập với email: ${e}`);
-    
     try {
+      const e = document.getElementById('email').value;
+      const p = document.getElementById('password').value;
+      console.auth(`Đang thử đăng nhập với email: ${e}`);
+      
+      if (!e || !p) throw new Error('Email hoặc mật khẩu không được để trống');
+      
       console.auth('Gửi yêu cầu xác thực đến Firebase');
       await auth.signInWithEmailAndPassword(e, p);
       localStorage.setItem('lastLoginDate', new Date().toISOString().slice(0, 10));
       console.auth(`Đăng nhập thành công với email: ${e}`);
     } catch(err) {
-      console.error('Lỗi đăng nhập:', err.message);
-      document.getElementById('authMsg').innerText = err.message;
+      console.error(`Lỗi đăng nhập: ${err.message}`);
+      const authMsg = document.getElementById('authMsg');
+      if (authMsg) authMsg.innerText = err.message;
       console.ui('Hiển thị thông báo lỗi đăng nhập trên UI');
     }
   };
 
+  // Register
+  document.getElementById('btnRegister').onclick = async () => {
+    try {
+      const e = document.getElementById('regEmail').value;
+      const p = document.getElementById('regPassword').value;
+      const cp = document.getElementById('regConfirmPassword').value;
+      const msg = document.getElementById('registerMsg');
+      
+      if (!e || !p || !cp) throw new Error('Vui lòng điền đầy đủ thông tin');
+      if (p !== cp) throw new Error('Mật khẩu xác nhận không khớp');
+      
+      console.auth(`Kiểm tra email đã tồn tại: ${e}`);
+      const signInMethods = await auth.fetchSignInMethodsForEmail(e);
+      if (signInMethods.length > 0) {
+        throw new Error('Email này đã được đăng ký. Vui lòng sử dụng email khác hoặc đăng nhập.');
+      }
+      
+      console.auth(`Đang thử đăng ký với email: ${e}`);
+      console.auth('Gửi yêu cầu đăng ký đến Firebase');
+      await auth.createUserWithEmailAndPassword(e, p);
+      console.auth(`Đăng ký thành công với email: ${e}`);
+      msg.innerText = 'Đăng ký thành công! Đang chuyển về đăng nhập...';
+      setTimeout(() => {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+        msg.innerText = '';
+      }, 2000);
+    } catch(err) {
+      console.error(`Lỗi đăng ký: ${err.message}`);
+      const msg = document.getElementById('registerMsg');
+      if (msg) msg.innerText = err.message;
+      console.ui('Hiển thị thông báo lỗi đăng ký trên UI');
+    }
+  };
+
+  // Forgot Password
+  document.getElementById('btnResetPassword').onclick = async () => {
+    try {
+      const e = document.getElementById('forgotEmail').value;
+      const msg = document.getElementById('forgotMsg');
+      
+      if (!e) throw new Error('Vui lòng nhập email');
+      
+      console.auth(`Kiểm tra email tồn tại: ${e}`);
+      const signInMethods = await auth.fetchSignInMethodsForEmail(e);
+      if (signInMethods.length === 0) {
+        throw new Error('Email này chưa được đăng ký. Vui lòng kiểm tra lại hoặc đăng ký tài khoản mới.');
+      }
+      
+      console.auth(`Đang gửi yêu cầu đặt lại mật khẩu cho email: ${e}`);
+      console.auth('Gửi email đặt lại mật khẩu qua Firebase');
+      await auth.sendPasswordResetEmail(e);
+      console.auth(`Đã gửi email đặt lại mật khẩu cho: ${e}`);
+      msg.innerText = 'Email đặt lại mật khẩu đã được gửi! Kiểm tra hộp thư của bạn.';
+      setTimeout(() => {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('forgotPasswordForm').style.display = 'none';
+        msg.innerText = '';
+      }, 3000);
+    } catch(err) {
+      console.error(`Lỗi gửi email đặt lại mật khẩu: ${err.message}`);
+      const msg = document.getElementById('forgotMsg');
+      if (msg) msg.innerText = err.message;
+      console.ui('Hiển thị thông báo lỗi gửi email đặt lại mật khẩu trên UI');
+    }
+  };
+
+  // Form switching
+  document.getElementById('showRegister').onclick = () => {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    console.ui('Chuyển sang giao diện đăng ký');
+  };
+
+  document.getElementById('showForgotPassword').onclick = () => {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'block';
+    console.ui('Chuyển sang giao diện quên mật khẩu');
+  };
+
+  document.getElementById('showLoginFromRegister').onclick = () => {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    console.ui('Chuyển về giao diện đăng nhập từ đăng ký');
+  };
+
+  document.getElementById('showLoginFromForgot').onclick = () => {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('forgotPasswordForm').style.display = 'none';
+    console.ui('Chuyển về giao diện đăng nhập từ quên mật khẩu');
+  };
+
+  // Logout
   document.getElementById('btnLogout').onclick = async () => {
-    console.auth('Đang thực hiện đăng xuất');
-    await auth.signOut();
-    localStorage.removeItem('lastLoginDate');
-    console.auth('Đã đăng xuất thành công');
+    try {
+      console.auth('Đang thực hiện đăng xuất');
+      await auth.signOut();
+      localStorage.removeItem('lastLoginDate');
+      console.auth('Đã đăng xuất thành công');
+    } catch (err) {
+      console.error(`Lỗi đăng xuất: ${err.message}`);
+    }
   };
 
   async function loadLastEntry(uid) {
-    console.db(`Đang tải thông tin lần nhập cuối của user UID: ${uid}`);
-    const snap = await db.ref(`users/${uid}/lastEntry`).once('value');
-    const ts = snap.val();
-    console.db(`Lần nhập cuối: ${ts || 'chưa có'}`);
-    
-    document.getElementById('lastEntryLog').innerText = ts ? `Lần nhập cuối: ${ts}` : '';
-    console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
+    try {
+      console.db(`Đang tải thông tin lần nhập cuối của user UID: ${uid}`);
+      const snap = await db.ref(`users/${uid}/lastEntry`).once('value');
+      const ts = snap.val();
+      console.db(`Lần nhập cuối: ${ts || 'chưa có'}`);
+      
+      const lastEntryLog = document.getElementById('lastEntryLog');
+      if (!lastEntryLog) throw new Error('Không tìm thấy lastEntryLog element');
+      lastEntryLog.innerText = ts ? `Lần nhập cuối: ${ts}` : '';
+      console.ui('Đã cập nhật thông tin lần nhập cuối trên UI');
+    } catch (err) {
+      console.error(`Lỗi trong loadLastEntry: ${err.message}`);
+    }
   }
 
   async function loadDailySummary() {
-    console.process('Bắt đầu tải tổng hợp theo ngày');
-    
-    // Lấy ngày hiện tại theo định dạng YYYY-MM-DD
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const today = `${y}-${m}-${d}`;
-    console.db(`Ngày hiện tại: ${today}`);
+    try {
+      console.process('Bắt đầu tải tổng hợp theo ngày');
+      
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const today = `${y}-${m}-${d}`;
+      console.db(`Ngày hiện tại: ${today}`);
 
-    // Lấy dữ liệu tổng theo ngày từ Firebase
-    console.db(`Đang truy vấn dữ liệu dailySummary cho user: ${auth.currentUser.uid}`);
-    const snap = await db.ref(`users/${auth.currentUser.uid}/dailySummary`).once('value');
-    const obj = snap.val() || {};
-    console.db(`Nhận được dữ liệu dailySummary:`, obj);
+      if (!auth.currentUser) throw new Error('Không có user đăng nhập');
+      console.db(`Đang truy vấn dữ liệu dailySummary cho user: ${auth.currentUser.uid}`);
+      const snap = await db.ref(`users/${auth.currentUser.uid}/dailySummary`).once('value');
+      const obj = snap.val() || {};
+      console.db(`Nhận được dữ liệu dailySummary:`, obj);
 
-    // Chỉ hiển thị dữ liệu của ngày hiện tại
-    let h = '<table><tr><th>Ngày</th><th>Tổng</th></tr>';
-    
-    // Kiểm tra xem có dữ liệu cho ngày hiện tại không
-    if (obj[today]) {
-      console.db(`Có dữ liệu cho ngày hôm nay: ${obj[today]}`);
-      h += `<tr><td>${today}</td><td>${obj[today]}</td></tr>`;
-    } else {
-      console.db('Không có dữ liệu cho ngày hôm nay, hiển thị 0');
-      h += `<tr><td>${today}</td><td>0</td></tr>`;
+      let h = '<table><tr><th>Ngày</th><th>Tổng</th></tr>';
+      
+      if (obj[today]) {
+        console.db(`Có dữ liệu cho ngày hôm nay: ${obj[today]}`);
+        h += `<tr><td>${today}</td><td>${obj[today]}</td></tr>`;
+      } else {
+        console.db('Không có dữ liệu cho ngày hôm nay, hiển thị 0');
+        h += `<tr><td>${today}</td><td>0</td></tr>`;
+      }
+      
+      h += '</table>';
+      const dailySummary = document.getElementById('dailySummary');
+      if (!dailySummary) throw new Error('Không tìm thấy dailySummary element');
+      dailySummary.innerHTML = h;
+      console.ui('Đã cập nhật bảng tổng hợp theo ngày trên UI');
+    } catch (err) {
+      console.error(`Lỗi trong loadDailySummary: ${err.message}`);
     }
-    
-    h += '</table>';
-    document.getElementById('dailySummary').innerHTML = h;
-    console.ui('Đã cập nhật bảng tổng hợp theo ngày trên UI');
   }
 
   document.getElementById('btnSaveAll').onclick = async () => {
-    console.process('Đang thực hiện lưu tất cả các mục nhập');
-    let total = 0;
-    
-    for(const c of categories) {
-      const inp = document.getElementById(`in-${c}`);
-      const v = parseInt(inp.value) || 0;
+    try {
+      console.process('Đang thực hiện lưu tất cả các mục nhập');
+      let total = 0;
       
-      if(v > 0) {
-        console.process(`Đang lưu danh mục ${c} với giá trị ${v}`);
-        await saveEntry(c, v);
-        total += v;
+      for(const c of categories) {
+        const inp = document.getElementById(`in-${c}`);
+        if (!inp) throw new Error(`Không tìm thấy input cho danh mục ${c}`);
+        const v = parseInt(inp.value) || 0;
+        
+        if(v > 0) {
+          console.process(`Đang lưu danh mục ${c} với giá trị ${v}`);
+          await saveEntry(c, v);
+          total += v;
+        }
+        inp.value = '';
       }
-      inp.value = '';
+      
+      const msg = total > 0 ? 'Lưu xong!' : 'Chưa nhập giá trị.';
+      const saveAllMsg = document.getElementById('saveAllMsg');
+      if (!saveAllMsg) throw new Error('Không tìm thấy saveAllMsg element');
+      saveAllMsg.innerText = msg;
+      console.ui(`Hiển thị thông báo: ${msg}`);
+      
+      setTimeout(() => {
+        saveAllMsg.innerText = '';
+        console.ui('Đã xóa thông báo');
+      }, 2000);
+      
+      console.process(`Hoàn thành lưu tất cả với tổng số: ${total}`);
+    } catch (err) {
+      console.error(`Lỗi trong btnSaveAll: ${err.message}`);
     }
-    
-    const msg = total > 0 ? 'Lưu xong!' : 'Chưa nhập giá trị.';
-    document.getElementById('saveAllMsg').innerText = msg;
-    console.ui(`Hiển thị thông báo: ${msg}`);
-    
-    setTimeout(() => {
-      document.getElementById('saveAllMsg').innerText = '';
-      console.ui('Đã xóa thông báo');
-    }, 2000);
-    
-    console.process(`Hoàn thành lưu tất cả với tổng số: ${total}`);
   };
 
   let chart;
   function initChart(){ 
-    const c=document.getElementById('statsChart').getContext('2d'); 
-    chart=new Chart(c,{
-      type:'bar',
-      data:{
-        labels:categories,
-        datasets:[{
-          label:'Giá trị',
-          data:[],
-          backgroundColor:'#3498db'
-        }]
-      },
-      options:{
-        scales:{
-          y:{beginAtZero:true}
+    try {
+      const canvas = document.getElementById('statsChart');
+      if (!canvas) throw new Error('Không tìm thấy statsChart element');
+      const c = canvas.getContext('2d'); 
+      chart = new Chart(c, {
+        type: 'bar',
+        data: {
+          labels: categories,
+          datasets: [{
+            label: 'Giá trị',
+            data: [],
+            backgroundColor: '#3498db'
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
         }
+      }); 
+      console.ui('Biểu đồ đã được khởi tạo'); 
+    } catch (err) {
+      console.error(`Lỗi trong initChart: ${err.message}`);
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const mk = document.getElementById('monthPicker').value;
+      console.process(`Bắt đầu tải thống kê cho tháng: ${mk}`);
+      
+      if (!auth.currentUser) throw new Error('Không có user đăng nhập');
+      console.db(`Đang truy vấn dữ liệu monthly cho user: ${auth.currentUser.uid}, tháng: ${mk}`);
+      const snap = await db.ref(`users/${auth.currentUser.uid}/monthly/${mk}`).once('value');
+      const obj = snap.val() || {};
+      console.db(`Nhận được dữ liệu thống kê thô:`, obj);
+      
+      const raw = categories.map(n => ({name: n, value: obj[n] || 0}));
+      const tot = raw.reduce((s, r) => s + r.value, 0);
+      console.process(`Tổng giá trị của tất cả danh mục: ${tot}`);
+      
+      let list = raw.map(r => ({
+        name: r.name, 
+        value: r.value, 
+        pct: tot > 0 ? Math.round(r.value / tot * 10000) / 100 : 0
+      }));
+      
+      if(tot > 0) {
+        const mi = list.reduce((i, c, j, a) => c.pct > a[i].pct ? j : i, 0);
+        const sum = list.reduce((s, i) => s + i.pct, 0);
+        const d = Math.round((100 - sum) * 100) / 100;
+        list[mi].pct += d;
+        console.process(`Điều chỉnh phần trăm cho danh mục ${list[mi].name}: +${d}% (tổng mới: ${list[mi].pct}%)`);
       }
-    }); 
-    console.ui('Biểu đồ đã được khởi tạo'); 
+      
+      console.db('Dữ liệu thống kê đã xử lý:', list);
+      
+      const vals = list.map(i => i.value);
+      
+      if(!chart) {
+        console.ui('Khởi tạo biểu đồ');
+        initChart();
+      }
+      
+      chart.data.datasets[0].data = vals;
+      chart.update();
+      console.ui('Đã cập nhật biểu đồ');
+      
+      const sorted = [...list].sort((a, b) => b.pct - a.pct);
+      let h = '<h4>Thống kê Giá trị</h4><table><tr><th>#</th><th>Nội dung</th><th>Giá trị</th><th>Tỷ lệ %</th></tr>';
+      
+      sorted.forEach((i, j) => h += `<tr><td>${j+1}</td><td>${i.name}</td><td>${i.value}</td><td>${i.pct.toFixed(2)}%</td></tr>`);
+      
+      h += `<tr style="font-weight: bold; background-color: #f2f2f2;"><td colspan="2">TỔNG CỘNG</td><td>${tot}</td><td>100.00%</td></tr>`;
+      
+      h += '</table>';
+      
+      const statsOutput = document.getElementById('statsOutput');
+      if (!statsOutput) throw new Error('Không tìm thấy statsOutput element');
+      statsOutput.innerHTML = h;
+      console.ui('Đã cập nhật bảng thống kê trên UI với dòng tổng cộng');
+      
+      window.pctOriginalCopy = list;
+      console.process('Hoàn thành tải thống kê');
+    } catch (err) {
+      console.error(`Lỗi trong loadStats: ${err.message}`);
+    }
   }
 
-
-async function loadStats() {
-  const mk = document.getElementById('monthPicker').value;
-  console.process(`Bắt đầu tải thống kê cho tháng: ${mk}`);
-  
-  console.db(`Đang truy vấn dữ liệu monthly cho user: ${auth.currentUser.uid}, tháng: ${mk}`);
-  const snap = await db.ref(`users/${auth.currentUser.uid}/monthly/${mk}`).once('value');
-  const obj = snap.val() || {};
-  console.db(`Nhận được dữ liệu thống kê thô:`, obj);
-  
-  const raw = categories.map(n => ({name: n, value: obj[n] || 0}));
-  const tot = raw.reduce((s, r) => s + r.value, 0);
-  console.process(`Tổng giá trị của tất cả danh mục: ${tot}`);
-  
-  let list = raw.map(r => ({
-    name: r.name, 
-    value: r.value, 
-    pct: tot > 0 ? Math.round(r.value / tot * 10000) / 100 : 0
-  }));
-  
-  if(tot > 0) {
-    const mi = list.reduce((i, c, j, a) => c.pct > a[i].pct ? j : i, 0);
-    const sum = list.reduce((s, i) => s + i.pct, 0);
-    const d = Math.round((100 - sum) * 100) / 100;
-    list[mi].pct += d;
-    console.process(`Điều chỉnh phần trăm cho danh mục ${list[mi].name}: +${d}% (tổng mới: ${list[mi].pct}%)`);
-  }
-  
-  console.db('Dữ liệu thống kê đã xử lý:', list);
-  
-  const vals = list.map(i => i.value);
-  
-  if(!chart) {
-    console.ui('Khởi tạo biểu đồ');
-    initChart();
-  }
-  
-  chart.data.datasets[0].data = vals;
-  chart.update();
-  console.ui('Đã cập nhật biểu đồ');
-  
-  const sorted = [...list].sort((a, b) => b.pct - a.pct);
-  let h = '<h4>Thống kê Giá trị</h4><table><tr><th>#</th><th>Nội dung</th><th>Giá trị</th><th>Tỷ lệ %</th></tr>';
-  
-  // Thêm các hàng dữ liệu
-  sorted.forEach((i, j) => h += `<tr><td>${j+1}</td><td>${i.name}</td><td>${i.value}</td><td>${i.pct.toFixed(2)}%</td></tr>`);
-  
-  // Thêm dòng tổng cộng với định dạng đậm
-  h += `<tr style="font-weight: bold; background-color: #f2f2f2;"><td colspan="2">TỔNG CỘNG</td><td>${tot}</td><td>100.00%</td></tr>`;
-  
-  h += '</table>';
-  
-  document.getElementById('statsOutput').innerHTML = h;
-  console.ui('Đã cập nhật bảng thống kê trên UI với dòng tổng cộng');
-  
-  window.pctOriginalCopy = list;
-  console.process('Hoàn thành tải thống kê');
-}
   document.getElementById('btnLoadStats').onclick = loadStats;
   document.getElementById('btnCopyMonthly').onclick = () => {
-    const arr = window.pctOriginalCopy || []; 
-    if(!arr.length) {
-      console.ui('Không có dữ liệu thống kê để sao chép');
-      return alert('Chưa có thống kê');
+    try {
+      const arr = window.pctOriginalCopy || []; 
+      if(!arr.length) {
+        console.ui('Không có dữ liệu thống kê để sao chép');
+        return alert('Chưa có thống kê');
+      }
+      const lines = arr.map((i, j) => `${j+1}. ${i.name}: ${i.pct.toFixed(2)}%`);
+      navigator.clipboard.writeText(lines.join('\n')).then(() => {
+        console.ui('Đã sao chép phần trăm thống kê vào clipboard');
+      });
+    } catch (err) {
+      console.error(`Lỗi trong btnCopyMonthly: ${err.message}`);
     }
-    const lines = arr.map((i, j) => `${j+1}. ${i.name}: ${i.pct.toFixed(2)}%`);
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-      console.ui('Đã sao chép phần trăm thống kê vào clipboard');
-    });
   };
-</script>
-</body>
-</html>
+  </script>
