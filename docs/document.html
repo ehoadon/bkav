@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Tài Liệu Dự Án</title>
     <style>
-        /* Reset CSS */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f9fafb;
             color: #333;
             line-height: 1.6;
         }
-
         .container {
             max-width: 900px;
             margin: 30px auto;
@@ -27,44 +24,53 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
-
         .header {
             background: #007bff;
             color: white;
             padding: 20px;
             text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-
         .header h1 {
             font-size: 24px;
         }
-
+        .user-controls span {
+            font-size: 16px;
+        }
+        .user-controls button {
+            background: #0056b3;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .user-controls button:hover {
+            background: #003d82;
+        }
         .form-container, .import-export-container {
             padding: 20px;
             border-bottom: 1px solid #ddd;
         }
-
         .form-group {
             margin-bottom: 15px;
         }
-
         .form-group label {
             font-weight: bold;
             margin-bottom: 5px;
             display: block;
         }
-
         .form-group input, .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-
         .form-group textarea {
             resize: none;
         }
-
         .button {
             background: #007bff;
             color: white;
@@ -74,33 +80,27 @@
             cursor: pointer;
             font-size: 16px;
         }
-
         .button:hover {
             background: #0056b3;
         }
-
         .search-container {
             padding: 20px;
             background: #f4f4f9;
         }
-
         .search-container input {
             width: calc(100% - 20px);
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-
         .search-results {
             display: none;
             padding: 20px;
         }
-
         .search-results h2 {
             font-size: 18px;
             margin-bottom: 15px;
         }
-
         .project {
             padding: 15px;
             background: #f9f9f9;
@@ -111,148 +111,363 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .project-details {
             flex: 1;
         }
-
         .project-details a {
             color: #007bff;
             text-decoration: none;
         }
-
         .project-details a:hover {
             text-decoration: underline;
         }
         .project-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.button-delete {
-    background: #f44336; /* Màu đỏ cho nút Xóa */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.project-button:hover {
-    background: #e53935;
-}
-
-.button-edit {
-    background: #4caf50; /* Màu xanh lá cho nút Sửa */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.button-edit:hover {
-    background: #388e3c;
-}
-
-.project-button:disabled {
-    background: #ddd;
-    cursor: not-allowed;
-}
-.small-error {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-    display: none;
-}
-
-
+            display: flex;
+            gap: 10px;
+        }
+        .button-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button-delete:hover {
+            background: #e53935;
+        }
+        .button-edit {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button-edit:hover {
+            background: #388e3c;
+        }
+        .project-button:disabled {
+            background: #ddd;
+            cursor: not-allowed;
+        }
+        .small-error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .auth-section {
+            padding: 20px;
+            text-align: center;
+        }
+        .auth-section input {
+            width: calc(100% - 20px);
+            max-width: 300px;
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+        }
+        .auth-links {
+            margin-top: 10px;
+        }
+        .auth-links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+        .msg {
+            color: #f44336;
+            font-size: 14px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Quản Lý Tài Liệu Dự Án</h1>
+            <div class="user-controls">
+                <span id="user-email"></span>
+                <button id="logout-btn" style="display: none;" onclick="logout()">Đăng xuất</button>
+            </div>
         </div>
-        <div class="form-container" id="form-container">
+        <div class="auth-section" id="auth-section">
+            <div id="login-form">
+                <h2>Đăng nhập</h2>
+                <input type="email" id="email" placeholder="Email">
+                <input type="password" id="password" placeholder="Mật khẩu">
+                <button class="button" onclick="login()">Đăng nhập</button>
+                <div class="auth-links">
+                    <a href="#" onclick="showRegister()">Đăng ký</a>
+                    <a href="#" onclick="showForgotPassword()">Quên mật khẩu?</a>
+                </div>
+                <div class="msg" id="auth-msg"></div>
+            </div>
+            <div id="register-form" style="display: none;">
+                <h2>Đăng ký</h2>
+                <input type="email" id="reg-email" placeholder="Email">
+                <input type="password" id="reg-password" placeholder="Mật khẩu">
+                <input type="password" id="reg-confirm-password" placeholder="Xác nhận mật khẩu">
+                <button class="button" onclick="register()">Đăng ký</button>
+                <div class="auth-links">
+                    <a href="#" onclick="showLogin()">Quay lại đăng nhập</a>
+                </div>
+                <div class="msg" id="register-msg"></div>
+            </div>
+            <div id="forgot-password-form" style="display: none;">
+                <h2>Quên mật khẩu</h2>
+                <input type="email" id="forgot-email" placeholder="Email">
+                <button class="button" onclick="resetPassword()">Gửi email đặt lại</button>
+                <div class="auth-links">
+                    <a href="#" onclick="showLogin()">Quay lại đăng nhập</a>
+                </div>
+                <div class="msg" id="forgot-msg"></div>
+            </div>
+        </div>
+        <div class="form-container" id="form-container" style="display: none;">
             <div class="form-group">
                 <label for="project-name">Tên Dự Án</label>
                 <input type="text" id="project-name" placeholder="Nhập tên dự án">
             </div>
-        <div class="form-group">
-            <label for="project-link">Link Dự Án</label>
-            <input type="text" id="project-link" placeholder="Nhập link Google Docs" oninput="validateLink()">
-            <small id="link-error" style="color: red; display: none;">Link không hợp lệ! Vui lòng kiểm tra lại.</small>
-        </div>
-
+            <div class="form-group">
+                <label for="project-link">Link Dự Án</label>
+                <input type="text" id="project-link" placeholder="Nhập link Google Docs" oninput="validateLink()">
+                <small id="link-error" class="small-error">Link không hợp lệ! Vui lòng kiểm tra lại.</small>
+            </div>
             <div class="form-group">
                 <label for="project-notes">Ghi Chú (tùy chọn)</label>
                 <textarea id="project-notes" placeholder="Nhập ghi chú"></textarea>
             </div>
             <button class="button" onclick="addProject()">Thêm Dự Án</button>
         </div>
-        <div class="import-export-container">
+        <div class="import-export-container" id="import-export-container" style="display: none;">
             <button class="button" onclick="importData()">Tải Dữ Liệu</button>
             <button class="button" onclick="exportData()">Kết Xuất Dữ Liệu</button>
             <input type="file" id="file-input" style="display: none;" accept=".json">
         </div>
-        <div class="search-container">
+        <div class="search-container" id="search-container" style="display: none;">
             <input type="text" id="search-query" placeholder="Tìm kiếm dự án..." oninput="searchProjects()">
         </div>
-        <div class="search-results" id="search-results">
+        <div class="search-results" id="search-results" style="display: none;">
             <h2>Kết Quả Tìm Kiếm</h2>
             <div id="project-container"></div>
         </div>
     </div>
-
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        let editIndex = -1;
-        const projects = JSON.parse(localStorage.getItem('projects')) || [];
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: 'AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU',
+            authDomain: 'ehoadon-bkav.firebaseapp.com',
+            databaseURL: 'https://ehoadon-bkav-default-rtdb.firebaseio.com',
+            projectId: 'ehoadon-bkav',
+            storageBucket: 'ehoadon-bkav.appspot.com', // Optional, update if available
+            messagingSenderId: 'YOUR_MESSAGING_SENDER_ID', // Optional, update if available
+            appId: 'YOUR_APP_ID' // Optional, update if available
+        };
 
-        function addProject() {
-            const name = document.getElementById('project-name').value.trim();
-            const link = document.getElementById('project-link').value.trim();
-            const notes = document.getElementById('project-notes').value.trim();
-
-            if (!name || !link) {
-                alert('Tên dự án và link không được để trống!');
-                return;
-            }
-
-            const isDuplicate = projects.some(project => project.name.toLowerCase() === name.toLowerCase() && editIndex === -1);
-            if (isDuplicate) {
-                alert('Tên dự án đã tồn tại! Vui lòng chọn tên khác.');
-                return;
-            }
-
-            const project = { id: Date.now(), name, link, notes };
-
-            if (editIndex === -1) {
-                projects.push(project);
-                alert('Dự án đã được thêm!');
-            } else {
-                const indexToUpdate = projects.findIndex(p => p.id === editIndex);
-                projects[indexToUpdate] = project;
-                editIndex = -1;
-                alert('Dự án đã được cập nhật!');
-                document.querySelector('.button').textContent = 'Thêm Dự Án';
-            }
-
-            localStorage.setItem('projects', JSON.stringify(projects));
-
-            document.getElementById('project-name').value = '';
-            document.getElementById('project-link').value = '';
-            document.getElementById('project-notes').value = '';
-
-            displayProjects();
+        // Check if Firebase configuration is valid
+        if (!firebaseConfig.apiKey || !firebaseConfig.databaseURL || !firebaseConfig.projectId) {
+            alert('Firebase configuration is incomplete. Please check firebaseConfig.');
+            throw new Error('Invalid Firebase configuration');
         }
-                function validateLink() {
+
+        // Initialize Firebase
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch (error) {
+            console.error('Lỗi khởi tạo Firebase:', error.message);
+            alert('Không thể khởi tạo Firebase. Vui lòng kiểm tra cấu hình.');
+            throw error;
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let projects = [];
+        let editIndex = null;
+
+        // Authentication state handler
+        auth.onAuthStateChanged(user => {
+            const authSection = document.getElementById('auth-section');
+            const formContainer = document.getElementById('form-container');
+            const importExportContainer = document.getElementById('import-export-container');
+            const searchContainer = document.getElementById('search-container');
+            const searchResults = document.getElementById('search-results');
+            const userEmail = document.getElementById('user-email');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            try {
+                if (user) {
+                    authSection.style.display = 'none';
+                    formContainer.style.display = 'block';
+                    importExportContainer.style.display = 'block';
+                    searchContainer.style.display = 'block';
+                    userEmail.textContent = user.email;
+                    logoutBtn.style.display = 'inline-block';
+                    loadProjects(user.uid);
+                } else {
+                    authSection.style.display = 'block';
+                    formContainer.style.display = 'none';
+                    importExportContainer.style.display = 'none';
+                    searchContainer.style.display = 'none';
+                    searchResults.style.display = 'none';
+                    userEmail.textContent = '';
+                    logoutBtn.style.display = 'none';
+                    projects = [];
+                    document.getElementById('project-container').innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Lỗi xử lý trạng thái xác thực:', error.message);
+                alert('Đã xảy ra lỗi khi xử lý trạng thái đăng nhập. Vui lòng thử lại.');
+            }
+        });
+
+        // Login
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const authMsg = document.getElementById('auth-msg');
+
+            try {
+                if (!email || !password) {
+                    authMsg.textContent = 'Vui lòng nhập email và mật khẩu!';
+                    return;
+                }
+
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        authMsg.textContent = '';
+                    })
+                    .catch(error => {
+                        authMsg.textContent = error.message;
+                    });
+            } catch (error) {
+                console.error('Lỗi đăng nhập:', error.message);
+                authMsg.textContent = 'Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.';
+            }
+        }
+
+        // Register
+        function register() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const registerMsg = document.getElementById('register-msg');
+
+            try {
+                if (!email || !password || !confirmPassword) {
+                    registerMsg.textContent = 'Vui lòng điền đầy đủ thông tin!';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    registerMsg.textContent = 'Mật khẩu xác nhận không khớp!';
+                    return;
+                }
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => {
+                        registerMsg.textContent = 'Đăng ký thành công! Đang chuyển về đăng nhập...';
+                        setTimeout(showLogin, 2000);
+                    })
+                    .catch(error => {
+                        registerMsg.textContent = error.message;
+                    });
+            } catch (error) {
+                console.error('Lỗi đăng ký:', error.message);
+                registerMsg.textContent = 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.';
+            }
+        }
+
+        // Reset Password
+        function resetPassword() {
+            const email = document.getElementById('forgot-email').value;
+            const forgotMsg = document.getElementById('forgot-msg');
+
+            try {
+                if (!email) {
+                    forgotMsg.textContent = 'Vui lòng nhập email!';
+                    return;
+                }
+
+                auth.sendPasswordResetEmail(email)
+                    .then(() => {
+                        forgotMsg.textContent = 'Email đặt lại mật khẩu đã được gửi!';
+                        setTimeout(showLogin, 3000);
+                    })
+                    .catch(error => {
+                        forgotMsg.textContent = error.message;
+                    });
+            } catch (error) {
+                console.error('Lỗi gửi email đặt lại mật khẩu:', error.message);
+                forgotMsg.textContent = 'Đã xảy ra lỗi. Vui lòng thử lại.';
+            }
+        }
+
+        // Logout
+        function logout() {
+            try {
+                auth.signOut().catch(error => {
+                    console.error('Lỗi đăng xuất:', error.message);
+                    alert('Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại.');
+                });
+            } catch (error) {
+                console.error('Lỗi đăng xuất:', error.message);
+                alert('Đã xảy ra lỗi khi đăng xuất. Vui lòng thử lại.');
+            }
+        }
+
+        // Form switching
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+            document.getElementById('forgot-password-form').style.display = 'none';
+        }
+
+        function showForgotPassword() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('forgot-password-form').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('forgot-password-form').style.display = 'none';
+        }
+
+        // Load projects from Firebase
+        function loadProjects(uid) {
+            try {
+                db.ref(`projects/${uid}`).on('value', snapshot => {
+                    projects = [];
+                    const data = snapshot.val();
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            projects.push({ ...data[key], id: key });
+                        });
+                    }
+                    displayProjects();
+                });
+            } catch (error) {
+                console.error('Lỗi khi tải dự án:', error.message);
+                alert('Không thể tải danh sách dự án. Vui lòng kiểm tra kết nối hoặc cấu hình Firebase.');
+            }
+        }
+
+        // Validate link
+        function validateLink() {
             const linkInput = document.getElementById('project-link');
             const linkError = document.getElementById('link-error');
-
-           const linkRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
+            const linkRegex = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/;
 
             if (linkRegex.test(linkInput.value.trim())) {
                 linkError.style.display = 'none';
@@ -263,20 +478,119 @@
             }
         }
 
-        function searchProjects() {
-            const query = document.getElementById('search-query').value.toLowerCase();
-            const searchResults = document.getElementById('search-results');
-            const projectContainer = document.getElementById('project-container');
+        // Add or update project
+        function addProject() {
+            const name = document.getElementById('project-name').value.trim();
+            const link = document.getElementById('project-link').value.trim();
+            const notes = document.getElementById('project-notes').value.trim();
+            const user = auth.currentUser;
 
-            projectContainer.innerHTML = '';
+            try {
+                if (!user) {
+                    alert('Vui lòng đăng nhập để thêm dự án!');
+                    return;
+                }
 
-            if (query.length >= 2) {
-                const filteredProjects = projects.filter(project =>
-                    project.name.toLowerCase().includes(query) ||
-                    (project.notes && project.notes.toLowerCase().includes(query))
-                );
+                if (!name || !link) {
+                    alert('Tên dự án và link không được để trống!');
+                    return;
+                }
 
-                filteredProjects.forEach(project => {
+                if (!validateLink()) {
+                    return;
+                }
+
+                const isDuplicate = projects.some(project => project.name.toLowerCase() === name.toLowerCase() && (!editIndex || project.id !== editIndex));
+                if (isDuplicate) {
+                    alert('Tên dự án đã tồn tại! Vui lòng chọn tên khác.');
+                    return;
+                }
+
+                const project = { name, link, notes };
+
+                if (!editIndex) {
+                    db.ref(`projects/${user.uid}`).push(project)
+                        .then(() => {
+                            alert('Dự án đã được thêm!');
+                            clearForm();
+                        })
+                        .catch(error => {
+                            alert('Lỗi khi thêm dự án: ' + error.message);
+                        });
+                } else {
+                    db.ref(`projects/${user.uid}/${editIndex}`).set(project)
+                        .then(() => {
+                            alert('Dự án đã được cập nhật!');
+                            clearForm();
+                            editIndex = null;
+                            document.querySelector('.button').textContent = 'Thêm Dự Án';
+                        })
+                        .catch(error => {
+                            alert('Lỗi khi cập nhật dự án: ' + error.message);
+                        });
+                }
+            } catch (error) {
+                console.error('Lỗi khi thêm/cập nhật dự án:', error.message);
+                alert('Đã xảy ra lỗi. Vui lòng thử lại.');
+            }
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-link').value = '';
+            document.getElementById('project-notes').value = '';
+        }
+
+        // Edit project
+        function editProject(id) {
+            try {
+                const project = projects.find(p => p.id === id);
+                if (!project) return;
+                document.getElementById('project-name').value = project.name;
+                document.getElementById('project-link').value = project.link;
+                document.getElementById('project-notes').value = project.notes;
+
+                editIndex = id;
+                document.querySelector('.button').textContent = 'Cập Nhật';
+                window.scrollTo(0, 0);
+            } catch (error) {
+                console.error('Lỗi khi chỉnh sửa dự án:', error.message);
+                alert('Không thể chỉnh sửa dự án. Vui lòng thử lại.');
+            }
+        }
+
+        // Delete project
+        function deleteProject(id) {
+            const user = auth.currentUser;
+            try {
+                if (!user) {
+                    alert('Vui lòng đăng nhập để xóa dự án!');
+                    return;
+                }
+
+                if (confirm('Bạn có chắc muốn xóa dự án này?')) {
+                    db.ref(`projects/${user.uid}/${id}`).remove()
+                        .then(() => {
+                            alert('Dự án đã được xóa!');
+                        })
+                        .catch(error => {
+                            alert('Lỗi khi xóa dự án: ' + error.message);
+                        });
+                }
+            } catch (error) {
+                console.error('Lỗi khi xóa dự án:', error.message);
+                alert('Không thể xóa dự án. Vui lòng thử lại.');
+            }
+        }
+
+        // Display projects
+        function displayProjects() {
+            try {
+                const projectContainer = document.getElementById('project-container');
+                projectContainer.innerHTML = '';
+
+                projects.forEach(project => {
                     const projectDiv = document.createElement('div');
                     projectDiv.className = 'project';
                     projectDiv.innerHTML = `
@@ -285,66 +599,71 @@
                             <a href="${project.link}" target="_blank">Mở tài liệu</a><br>
                             <small>${project.notes || 'Không có ghi chú'}</small>
                         </div>
-                        <div class="buttons">
-                            <button class="button-edit" onclick="editProject(${project.id})">Sửa</button>
-                            <button class="button-delete" onclick="deleteProject(${project.id})">Xóa</button>
+                        <div class="project-buttons">
+                            <button class="button-edit" onclick="editProject('${project.id}')">Sửa</button>
+                            <button class="button-delete" onclick="deleteProject('${project.id}')">Xóa</button>
                         </div>
                     `;
                     projectContainer.appendChild(projectDiv);
                 });
-
-                searchResults.style.display = 'block';
-            } else {
-                searchResults.style.display = 'none';
+            } catch (error) {
+                console.error('Lỗi khi hiển thị dự án:', error.message);
+                alert('Không thể hiển thị danh sách dự án. Vui lòng thử lại.');
             }
         }
 
-        function editProject(id) {
-            const project = projects.find(p => p.id === id);
-            if (!project) return;
-            document.getElementById('project-name').value = project.name;
-            document.getElementById('project-link').value = project.link;
-            document.getElementById('project-notes').value = project.notes;
+        // Search projects
+        function searchProjects() {
+            try {
+                const query = document.getElementById('search-query').value.toLowerCase();
+                const searchResults = document.getElementById('search-results');
+                const projectContainer = document.getElementById('project-container');
 
-            editIndex = id;
-            document.querySelector('.button').textContent = 'Cập Nhật';
-            window.scrollTo(0, 0);
-        }
+                projectContainer.innerHTML = '';
 
-        function deleteProject(id) {
-            if (confirm('Bạn có chắc muốn xóa dự án này?')) {
-                const indexToDelete = projects.findIndex(p => p.id === id);
-                if (indexToDelete !== -1) {
-                    projects.splice(indexToDelete, 1);
-                    localStorage.setItem('projects', JSON.stringify(projects));
-                    searchProjects();
+                if (query.length >= 2) {
+                    const filteredProjects = projects.filter(project =>
+                        project.name.toLowerCase().includes(query) ||
+                        (project.notes && project.notes.toLowerCase().includes(query))
+                    );
+
+                    filteredProjects.forEach(project => {
+                        const projectDiv = document.createElement('div');
+                        projectDiv.className = 'project';
+                        projectDiv.innerHTML = `
+                            <div class="project-details">
+                                <strong>${project.name}</strong><br>
+                                <a href="${project.link}" target="_blank">Mở tài liệu</a><br>
+                                <small>${project.notes || 'Không có ghi chú'}</small>
+                            </div>
+                            <div class="project-buttons">
+                                <button class="button-edit" onclick="editProject('${project.id}')">Sửa</button>
+                                <button class="button-delete" onclick="deleteProject('${project.id}')">Xóa</button>
+                            </div>
+                        `;
+                        projectContainer.appendChild(projectDiv);
+                    });
+
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                    displayProjects();
                 }
+            } catch (error) {
+                console.error('Lỗi khi tìm kiếm dự án:', error.message);
+                alert('Không thể tìm kiếm dự án. Vui lòng thử lại.');
             }
         }
 
-        function displayProjects() {
-            const projectContainer = document.getElementById('project-container');
-            projectContainer.innerHTML = '';
+        // Import data
+        function importData() {
+            const user = auth.currentUser;
+            try {
+                if (!user) {
+                    alert('Vui lòng đăng nhập để tải dữ liệu!');
+                    return;
+                }
 
-            projects.forEach(project => {
-                const projectDiv = document.createElement('div');
-                projectDiv.className = 'project';
-                projectDiv.innerHTML = `
-                    <div class="project-details">
-                        <strong>${project.name}</strong><br>
-                        <a href="${project.link}" target="_blank">Mở tài liệu</a><br>
-                        <small>${project.notes || 'Không có ghi chú'}</small>
-                    </div>
-                    <div class="buttons">
-                        <button class="button-edit" onclick="editProject(${project.id})">Sửa</button>
-                        <button class="button-delete" onclick="deleteProject(${project.id})">Xóa</button>
-                    </div>
-                `;
-                projectContainer.appendChild(projectDiv);
-            });
-        }
-
-            function importData() {
                 const fileInput = document.getElementById('file-input');
                 fileInput.click();
                 fileInput.addEventListener('change', function(event) {
@@ -352,41 +671,60 @@
                     if (file && file.type === 'application/json') {
                         const reader = new FileReader();
                         reader.onload = function(e) {
-                            const data = JSON.parse(e.target.result);
-                            if (Array.isArray(data)) {
-                                // Gán id duy nhất cho các dự án nếu không có id
-                                data.forEach(project => {
-                                    if (!project.id) {
-                                        project.id = Date.now() + Math.random();
-                                    }
-                                });
-
-                                localStorage.setItem('projects', JSON.stringify(data));
-                                projects.length = 0;
-                                projects.push(...data);
-                                displayProjects();
-                            } else {
-                                alert('Dữ liệu không hợp lệ.');
+                            try {
+                                const data = JSON.parse(e.target.result);
+                                if (Array.isArray(data)) {
+                                    const updates = {};
+                                    data.forEach(project => {
+                                        const id = db.ref(`projects/${user.uid}`).push().key;
+                                        updates[id] = { ...project, id };
+                                    });
+                                    db.ref(`projects/${user.uid}`).set(updates)
+                                        .then(() => {
+                                            alert('Dữ liệu đã được tải lên Firebase!');
+                                        })
+                                        .catch(error => {
+                                            alert('Lỗi khi tải dữ liệu: ' + error.message);
+                                        });
+                                } else {
+                                    alert('Dữ liệu không hợp lệ.');
+                                }
+                            } catch (error) {
+                                alert('Lỗi khi xử lý tệp JSON: ' + error.message);
                             }
                         };
                         reader.readAsText(file);
                     } else {
                         alert('Vui lòng chọn một tệp JSON.');
                     }
-                });
+                    fileInput.value = ''; // Reset file input
+                }, { once: true });
+            } catch (error) {
+                console.error('Lỗi khi nhập dữ liệu:', error.message);
+                alert('Không thể nhập dữ liệu. Vui lòng thử lại.');
             }
-
-
-        function exportData() {
-            const dataStr = JSON.stringify(projects);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'projects.json';
-            link.click();
         }
 
-        window.onload = displayProjects;
+        // Export data
+        function exportData() {
+            const user = auth.currentUser;
+            try {
+                if (!user) {
+                    alert('Vui lòng đăng nhập để kết xuất dữ liệu!');
+                    return;
+                }
+
+                const dataStr = JSON.stringify(projects);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'projects.json';
+                link.click();
+            } catch (error) {
+                console.error('Lỗi khi xuất dữ liệu:', error.message);
+                alert('Không thể xuất dữ liệu. Vui lòng thử lại.');
+            }
+        }
     </script>
 </body>
 </html>
