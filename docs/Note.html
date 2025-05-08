@@ -4,476 +4,337 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý công việc</title>
- <!--    <style type="text/css">
-        /* Reset mặc định */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
-    color: #333;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.container {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 90%;
-    max-width: 700px;
-}
-
-h1 {
-    text-align: center;
-    color: #388e3c;
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-}
-
-.action-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.action-buttons button {
-    background-color: #388e3c;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    flex: 1;
-}
-
-.action-buttons button:hover {
-    background-color: #2e7d32;
-    transform: translateY(-2px);
-}
-
-.note-input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-#noteInput {
-    flex: 1;
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: border-color 0.3s;
-}
-
-#noteInput:focus {
-    border-color: #388e3c;
-    outline: none;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #388e3c;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-button:hover {
-    background-color: #2e7d32;
-    transform: translateY(-2px);
-}
-
-.notes-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-ul {
-    list-style: none;
-    padding: 0;
-    flex: 1;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    max-height: 350px;
-    transition: transform 0.3s ease;
-}
-
-ul:hover {
-    transform: scale(1.02);
-}
-
-ul::-webkit-scrollbar {
-    width: 8px;
-}
-
-ul::-webkit-scrollbar-thumb {
-    background-color: #388e3c;
-    border-radius: 4px;
-}
-
-ul::-webkit-scrollbar-track {
-    background-color: #e0e0e0;
-}
-
-ul h3 {
-    background-color: #388e3c;
-    color: white;
-    margin: 0;
-    padding: 12px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 8px 8px 0 0;
-}
-
-li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    transition: background-color 0.3s ease-in-out;
-}
-
-li:last-child {
-    border-bottom: none;
-}
-
-li:hover {
-    background-color: #f1f1f1;
-}
-
-.note-text {
-    flex: 1;
-    margin-left: 10px;
-    font-size: 14px;
-}
-
-.completed {
-    text-decoration: line-through;
-    color: gray;
-}
-
-input[type="checkbox"] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    accent-color: #388e3c;
-}
-ul {
-    list-style: none;
-    padding: 0;
-    flex: 1;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    max-height: 350px;
-    position: relative;
-}
-
-ul h3 {
-    position: sticky;
-    top: 0;
-    background-color: #388e3c;
-    color: white;
-    margin: 0;
-    padding: 12px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 8px 8px 0 0;
-    z-index: 1;
-}
-
-    </style> -->
-
     <style type="text/css">
         /* Reset mặc định */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
-    color: #333;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.container {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 90%;
-    max-width: 700px;
-}
-
-/* Tiêu đề chính */
-h1 {
-    text-align: center;
-    color: #388e3c;
-    font-size: 24px;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-}
-
-/* Các nút hành động */
-.action-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.action-buttons button {
-    background-color: #388e3c;
-    color: #ffffff;
-    border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    flex: 1;
-}
-
-.action-buttons button:hover {
-    background-color: #2e7d32;
-    transform: translateY(-2px);
-}
-
-/* Nhập ghi chú */
-.note-input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-#noteInput {
-    flex: 1;
-    padding: 12px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    transition: border-color 0.3s;
-}
-
-#noteInput:focus {
-    border-color: #388e3c;
-    outline: none;
-}
-
-/* Các nút thêm ghi chú */
-button {
-    padding: 10px 20px;
-    background-color: #388e3c;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-}
-
-button:hover {
-    background-color: #2e7d32;
-    transform: translateY(-2px);
-}
-
-/* Phần danh sách ghi chú */
-.notes-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-/* Danh sách ghi chú */
-/*ul {
-    list-style: none;
-    padding: 0;
-    flex: 1;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    max-height: 350px;
-    position: relative;
-    transition: transform 0.3s ease;
-}*/
-ul {
-    list-style: none;
-    padding: 0;
-    flex: 1;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    max-height: 350px;
-    position: relative; /* Đảm bảo ul có position relative */
-}
-
-ul:hover {
-    transform: scale(1.02);
-}
-
-ul::-webkit-scrollbar {
-    width: 8px;
-}
-
-ul::-webkit-scrollbar-thumb {
-    background-color: #388e3c;
-    border-radius: 4px;
-}
-
-ul::-webkit-scrollbar-track {
-    background-color: #e0e0e0;
-}
-
-/*ul h3 {
-    position: sticky;
-    top: 0;
-    background-color: #388e3c;
-    color: white;
-    margin: 0;
-    padding: 12px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 8px 8px 0 0;
-    z-index: 1;
-}*/
-
-ul h3 {
-    position: sticky;
-    top: 0;
-    background-color: #388e3c;
-    color: white;
-    margin: 0;
-    padding: 12px;
-    text-align: center;
-    font-size: 16px;
-    border-radius: 8px 8px 0 0;
-    z-index: 2; /* Tăng z-index để đảm bảo tiêu đề không bị che khuất */
-}
-/* Các mục ghi chú trong danh sách */
-li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    transition: background-color 0.3s ease-in-out;
-}
-
-li:last-child {
-    border-bottom: none;
-}
-
-li:hover {
-    background-color: #f1f1f1;
-}
-
-.note-text {
-    flex: 1;
-    margin-left: 10px;
-    font-size: 14px;
-}
-
-/* Định dạng cho ghi chú hoàn thành */
-.completed {
-    text-decoration: line-through;
-    color: gray;
-}
-
-/* Checkbox */
-input[type="checkbox"] {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    accent-color: #388e3c;
-}
-
-/* Nút xóa */
-.delete-button {
-    padding: 5px 10px;
-    background-color: transparent;
-    color: red;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    transition: color 0.3s ease;
-}
-
-.delete-button:hover {
-    color: darkred;
-}
-#fileInput {
-    display: none;
-}
-        /* Hướng dẫn sử dụng */
-        footer {
-            margin-top: 30px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
-            padding: 15px;
-            font-size: 0.95em;
-            color: #333;
-            text-align: left;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        footer h3 { margin-bottom: 10px; color: #388e3c; }
-        footer ul { list-style: disc inside; padding-left: 20px; margin: 0; }
-        footer em { color: #555; }
 
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
 
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 90%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
 
+        /* Header với thông tin người dùng */
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #388e3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .welcome-message {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .user-header button {
+            background: #ffffff;
+            color: #388e3c;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .user-header button:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+        }
+
+        /* Tiêu đề chính */
+        h1 {
+            text-align: center;
+            color: #388e3c;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* Phần nhập liệu */
+        .input-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .input-section h2 {
+            font-size: 18px;
+            color: #388e3c;
+            margin-bottom: 15px;
+        }
+
+        .note-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #noteInput {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+
+        #noteInput:focus {
+            border-color: #388e3c;
+            outline: none;
+        }
+
+        /* Các nút thêm ghi chú */
+        button {
+            padding: 10px 20px;
+            background-color: #388e3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        /* Các nút hành động */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        /* Phần danh sách ghi chú */
+        .notes-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            flex: 1;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 350px;
+            position: relative;
+        }
+
+        ul:hover {
+            transform: scale(1.02);
+        }
+
+        ul::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ul::-webkit-scrollbar-thumb {
+            background-color: #388e3c;
+            border-radius: 4px;
+        }
+
+        ul::-webkit-scrollbar-track {
+            background-color: #e0e0e0;
+        }
+
+        ul h3 {
+            position: sticky;
+            top: 0;
+            background-color: #388e3c;
+            color: white;
+            margin: 0;
+            padding: 12px;
+            text-align: center;
+            font-size: 16px;
+            border-radius: 8px 8px 0 0;
+            z-index: 2;
+        }
+
+        li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        li:hover {
+            background-color: #f1f1f1;
+        }
+
+        .note-text {
+            flex: 1;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        /* Định dạng cho ghi chú hoàn thành */
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        /* Checkbox */
+        input[type="checkbox"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #388e3c;
+        }
+
+        /* Nút xóa */
+        .delete-button {
+            padding: 5px 10px;
+            background-color: transparent;
+            color: red;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .delete-button:hover {
+            color: darkred;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* Auth Section */
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .auth-box {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .auth-box:hover {
+            transform: scale(1.02);
+        }
+
+        .auth-box h2 {
+            color: #388e3c;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .auth-box input:focus {
+            border-color: #388e3c;
+            outline: none;
+        }
+
+        .auth-box button {
+            width: 100%;
+            margin: 15px 0;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        .auth-box a {
+            color: #388e3c;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .auth-box a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Quản lý công việc</h1>
-        <div class="action-buttons">
-            <button onclick="loadNotes()">Tải lại dữ liệu</button>
-            <button onclick="document.getElementById('fileInput').click()">Tải từ file JSON</button>
-<input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadFromFile(event)">
-            <button onclick="clearAllNotes()">Xóa tất cả dữ liệu</button>
-            <button onclick="exportData()">Xuất dữ liệu</button>
+    <div class="container" id="mainContainer" style="display: none;">
+        <div class="user-header">
+            <div class="welcome-message" id="welcomeMessage"></div>
+            <button onclick="signOut()">Đăng xuất</button>
         </div>
-        <div class="note-input">
-            <input type="text" id="noteInput" placeholder="Nhập công việc thực hiện...">
-            <button onclick="addNote()">Thêm</button>
+        <h1>Quản lý công việc</h1>
+        <div class="input-section">
+            <h2>Nhập công việc</h2>
+            <div class="note-input">
+                <input type="text" id="noteInput" placeholder="Nhập công việc thực hiện...">
+                <button onclick="addNote()">Thêm</button>
+            </div>
+            <div class="action-buttons">
+                <button onclick="document.getElementById('fileInput').click()">Tải từ file JSON</button>
+                <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadFromFile(event)">
+                <button onclick="clearAllNotes()">Xóa tất cả dữ liệu</button>
+                <button onclick="exportData()">Xuất dữ liệu</button>
+            </div>
         </div>
         <div class="notes-section">
             <ul id="inProgressList">
@@ -485,310 +346,256 @@ input[type="checkbox"] {
         </div>
     </div>
 
+    <!-- Authentication UI -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <h2 id="authTitle">Đăng nhập</h2>
+            <input type="email" id="emailInput" placeholder="Email">
+            <input type="password" id="passwordInput" placeholder="Mật khẩu">
+            <button onclick="handleAuth()">Đăng nhập</button>
+            <a href="#" onclick="toggleAuthMode()">Chưa có tài khoản? Đăng ký</a>
+            <a href="#" onclick="showForgotPassword()">Quên mật khẩu?</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-database-compat.js"></script>
     <script>
-        // Tải ghi chú từ Local Storage khi nhấn "Tải lại dữ liệu" hoặc khi mở trang
-        function loadNotes() {
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDsdrQakeA8iZ3iVerSNRvXC9bneyzluSU",
+            authDomain: "ehoadon-bkav.firebaseapp.com",
+            databaseURL: "https://ehoadon-bkav-default-rtdb.firebaseio.com",
+            projectId: "ehoadon-bkav",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Check auth state
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                const displayName = user.displayName || user.email.split('@')[0];
+                document.getElementById('welcomeMessage').textContent = `Chào mừng ${displayName}!`;
+                loadNotes(user.uid);
+            } else {
+                document.getElementById('authContainer').style.display = 'flex';
+                document.getElementById('mainContainer').style.display = 'none';
+                document.getElementById('authTitle').textContent = 'Đăng nhập';
+                document.getElementById('emailInput').value = '';
+                document.getElementById('passwordInput').value = '';
+            }
+        });
+
+        // Handle login, signup, and password reset
+        function handleAuth() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const authTitle = document.getElementById('authTitle').textContent;
+
+            if (authTitle === 'Đăng nhập') {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => alert('Đăng nhập thành công!'))
+                    .catch(error => alert('Lỗi đăng nhập: ' + error.message));
+            } else if (authTitle === 'Đăng ký') {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then(() => alert('Đăng ký thành công! Vui lòng đăng nhập.'))
+                    .catch(error => alert('Lỗi đăng ký: ' + error.message));
+            } else if (authTitle === 'Quên mật khẩu') {
+                auth.sendPasswordResetEmail(email)
+                    .then(() => alert('Email khôi phục mật khẩu đã được gửi!'))
+                    .catch(error => alert('Lỗi: ' + error.message));
+            }
+        }
+
+        // Toggle between login and signup
+        function toggleAuthMode() {
+            const authTitle = document.getElementById('authTitle');
+            const toggleLink = document.querySelector('a[onclick="toggleAuthMode()"]');
+            if (authTitle.textContent === 'Đăng nhập') {
+                authTitle.textContent = 'Đăng ký';
+                toggleLink.textContent = 'Đã có tài khoản? Đăng nhập';
+            } else {
+                authTitle.textContent = 'Đăng nhập';
+                toggleLink.textContent = 'Chưa có tài khoản? Đăng ký';
+            }
+            document.getElementById('emailInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').style.display = 'block';
+        }
+
+        // Show forgot password
+        function showForgotPassword() {
+            document.getElementById('authTitle').textContent = 'Quên mật khẩu';
+            document.getElementById('passwordInput').style.display = 'none';
+            document.querySelector('a[onclick="toggleAuthMode()"]').textContent = 'Quay lại đăng nhập';
+        }
+
+        // Sign out
+        function signOut() {
+            auth.signOut()
+                .then(() => alert('Đăng xuất thành công!'))
+                .catch(error => alert('Lỗi đăng xuất: ' + error.message));
+        }
+
+        // Load notes from Firebase
+        function loadNotes(uid) {
             document.getElementById('inProgressList').innerHTML = '<h3>Đang xử lý</h3>';
             document.getElementById('completedList').innerHTML = '<h3>Đã hoàn thành</h3>';
 
-            const storedNotes = JSON.parse(localStorage.getItem('notes')) || { inProgress: [], completed: [] };
-
-            storedNotes.inProgress.filter(note => note).forEach(note => addNoteElement(note, false));
-            storedNotes.completed.filter(note => note).forEach(note => addNoteElement(note, true));
+            database.ref('notes/' + uid).once('value').then(snapshot => {
+                const data = snapshot.val() || { inProgress: [], completed: [] };
+                if (data.inProgress) {
+                    data.inProgress.forEach(note => note && addNoteElement(note, false));
+                }
+                if (data.completed) {
+                    data.completed.forEach(note => note && addNoteElement(note, true));
+                }
+            }).catch(error => alert('Lỗi tải dữ liệu: ' + error.message));
         }
 
-        // Lưu ghi chú vào Local Storage
-        function saveNotes() {
+        // Save notes to Firebase
+        function saveNotes(uid) {
             const inProgress = Array.from(document.getElementById('inProgressList').children)
+                .slice(1) // Skip header
                 .map(item => item.querySelector('.note-text')?.textContent)
-                .filter(note => note); // Loại bỏ giá trị null hoặc rỗng
+                .filter(note => note);
             const completed = Array.from(document.getElementById('completedList').children)
+                .slice(1) // Skip header
                 .map(item => item.querySelector('.note-text')?.textContent)
-                .filter(note => note); // Loại bỏ giá trị null hoặc rỗng
+                .filter(note => note);
 
-            localStorage.setItem('notes', JSON.stringify({ inProgress, completed }));
+            database.ref('notes/' + uid).set({ inProgress, completed })
+                .catch(error => alert('Lỗi lưu dữ liệu: ' + error.message));
         }
 
-        // Thêm ghi chú mới
+        // Add new note
         function addNote() {
             const noteInput = document.getElementById('noteInput');
             const note = noteInput.value.trim();
             if (note === '') return alert('Vui lòng nhập nội dung ghi chú!');
             addNoteElement(note, false);
             noteInput.value = '';
-            saveNotes();
-        }
-            document.getElementById('noteInput').addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            addNote();
-        }
-    });
-
-        // Thêm ghi chú vào giao diện
-        // function addNoteElement(text, completed) {
-        //     const li = document.createElement('li');
-        //     const checkbox = document.createElement('input');
-        //     checkbox.type = 'checkbox';
-        //     checkbox.checked = completed;
-
-        //     const span = document.createElement('span');
-        //     span.textContent = text;
-        //     span.className = 'note-text';
-        //     if (completed) span.classList.add('completed');
-
-        //     checkbox.addEventListener('change', () => {
-        //         (checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList'))
-        //             .appendChild(li);
-        //         span.classList.toggle('completed');
-        //         saveNotes();
-        //     });
-
-        //     li.appendChild(checkbox);
-        //     li.appendChild(span);
-        //     document.getElementById(completed ? 'completedList' : 'inProgressList').appendChild(li);
-        // }
-//             function addNoteElement(text, completed) {
-//     const li = document.createElement('li');
-//     const checkbox = document.createElement('input');
-//     checkbox.type = 'checkbox';
-//     checkbox.checked = completed;
-
-//     const span = document.createElement('span');
-//     span.textContent = text;
-//     span.className = 'note-text';
-//     if (completed) span.classList.add('completed');
-
-//     checkbox.addEventListener('change', () => {
-//         const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
-
-//         // Nếu công việc được hoàn thành, thêm vào đầu danh sách "Đã hoàn thành"
-//         if (checkbox.checked) {
-//             span.classList.add('completed');
-//             targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
-//         } else {
-//             span.classList.remove('completed');
-//             targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
-//         }
-
-//         saveNotes();
-//     });
-
-//     li.appendChild(checkbox);
-//     li.appendChild(span);
-
-//     // Khi thêm mới, các ghi chú hoàn thành sẽ thêm vào đầu, các ghi chú đang xử lý thêm vào cuối
-//     const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
-//     if (completed) {
-//         targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
-//     } else {
-//         targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
-//     }
-// }
-
-function addNoteElement(text, completed) {
-    const li = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.checked = completed;
-
-    const span = document.createElement('span');
-    span.textContent = text;
-    span.className = 'note-text';
-    if (completed) span.classList.add('completed');
-
-    // Thêm nút xóa
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'X';
-    deleteButton.className = 'delete-button';
-    deleteButton.style.color = 'red';
-    deleteButton.style.fontWeight = 'bold';
-    deleteButton.style.cursor = 'pointer';
-    deleteButton.style.border = 'none';
-    deleteButton.style.background = 'transparent';
-
-    // Sự kiện xóa ghi chú
-    deleteButton.addEventListener('click', () => {
-        li.remove(); // Xóa phần tử khỏi giao diện
-        saveNotes(); // Cập nhật Local Storage
-    });
-
-    // Sự kiện chuyển trạng thái (checkbox)
-    checkbox.addEventListener('change', () => {
-        const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
-
-        if (checkbox.checked) {
-            span.classList.add('completed');
-            targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
-        } else {
-            span.classList.remove('completed');
-            targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
+            saveNotes(auth.currentUser.uid);
         }
 
-        saveNotes();
-    });
-
-    // Gắn các phần tử vào li
-    li.appendChild(checkbox);
-    li.appendChild(span);
-    li.appendChild(deleteButton);
-
-    // Khi thêm mới, các ghi chú hoàn thành sẽ thêm vào đầu, các ghi chú đang xử lý thêm vào cuối
-    const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
-    if (completed) {
-        targetList.insertBefore(li, targetList.children[1]); // Chèn sau tiêu đề
-    } else {
-        targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
-    }
-}
-
-
-// function addNoteElement(text, completed) {
-//     const li = document.createElement('li');
-//     const checkbox = document.createElement('input');
-//     checkbox.type = 'checkbox';
-//     checkbox.checked = completed;
-
-//     const span = document.createElement('span');
-//     span.textContent = text;
-//     span.className = 'note-text';
-//     if (completed) span.classList.add('completed');
-
-//     // Thêm nút xóa
-//     const deleteButton = document.createElement('button');
-//     deleteButton.textContent = 'X';
-//     deleteButton.className = 'delete-button';
-//     deleteButton.style.color = 'red';
-//     deleteButton.style.fontWeight = 'bold';
-//     deleteButton.style.cursor = 'pointer';
-//     deleteButton.style.border = 'none';
-//     deleteButton.style.background = 'transparent';
-
-//     // Sự kiện xóa ghi chú
-//     deleteButton.addEventListener('click', () => {
-//         li.remove(); // Xóa phần tử khỏi giao diện
-//         saveNotes(); // Cập nhật Local Storage
-//     });
-
-//     // Sự kiện chuyển trạng thái (checkbox)
-//     checkbox.addEventListener('change', () => {
-//         const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
-
-//         if (checkbox.checked) {
-//             span.classList.add('completed');
-//             // Thêm ghi chú vào đầu danh sách "Đã hoàn thành" hoặc cuối "Đang xử lý"
-//             targetList.insertBefore(li, targetList.firstChild);  // Thêm vào đầu danh sách
-//             const firstItem = targetList.querySelector('li:not(h3)');
-// if (firstItem) {
-//     targetList.insertBefore(li, firstItem);
-// } else {
-//     targetList.appendChild(li);
-// }
-
-//         } else {
-//             span.classList.remove('completed');
-//             targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
-//         }
-
-//         saveNotes();
-//     });
-
-//     // Gắn các phần tử vào li
-//     li.appendChild(checkbox);
-//     li.appendChild(span);
-//     li.appendChild(deleteButton);
-
-//     // Chọn danh sách đích (hoàn thành hoặc đang xử lý)
-//     const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
-//     if (completed) {
-//         targetList.insertBefore(li, targetList.firstChild); // Chèn vào đầu danh sách "Đã hoàn thành"
-//     } else {
-//         targetList.appendChild(li); // Thêm vào cuối danh sách "Đang xử lý"
-//     }
-// }
-
-// Hàm xử lý khi người dùng chọn file
-function loadFromFile(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        try {
-            const jsonData = JSON.parse(e.target.result);
-
-            // Kiểm tra cấu trúc dữ liệu
-            if (!jsonData.inProgress || !jsonData.completed) {
-                return alert('Dữ liệu không hợp lệ! Vui lòng chọn file JSON đúng định dạng.');
+        document.getElementById('noteInput').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                addNote();
             }
+        });
 
-            // Cập nhật giao diện
-            document.getElementById('inProgressList').innerHTML = '<h3>Đang xử lý</h3>';
-            document.getElementById('completedList').innerHTML = '<h3>Đã hoàn thành</h3>';
+        function addNoteElement(text, completed) {
+            const li = document.createElement('li');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = completed;
 
-            jsonData.inProgress.forEach(note => addNoteElement(note, false));
-            jsonData.completed.forEach(note => addNoteElement(note, true));
+            const span = document.createElement('span');
+            span.textContent = text;
+            span.className = 'note-text';
+            if (completed) span.classList.add('completed');
 
-            // Lưu vào Local Storage
-            localStorage.setItem('notes', JSON.stringify(jsonData));
-            alert('Dữ liệu đã được tải thành công!');
-        } catch (error) {
-            alert('Lỗi khi xử lý file JSON: ' + error.message);
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'X';
+            deleteButton.className = 'delete-button';
+            deleteButton.style.color = 'red';
+            deleteButton.style.fontWeight = 'bold';
+            deleteButton.style.cursor = 'pointer';
+            deleteButton.style.border = 'none';
+            deleteButton.style.background = 'transparent';
+
+            deleteButton.addEventListener('click', () => {
+                li.remove();
+                saveNotes(auth.currentUser.uid);
+            });
+
+            checkbox.addEventListener('change', () => {
+                const targetList = checkbox.checked ? document.getElementById('completedList') : document.getElementById('inProgressList');
+                if (checkbox.checked) {
+                    span.classList.add('completed');
+                    targetList.insertBefore(li, targetList.children[1]);
+                } else {
+                    span.classList.remove('completed');
+                    targetList.appendChild(li);
+                }
+                saveNotes(auth.currentUser.uid);
+            });
+
+            li.appendChild(checkbox);
+            li.appendChild(span);
+            li.appendChild(deleteButton);
+
+            const targetList = completed ? document.getElementById('completedList') : document.getElementById('inProgressList');
+            if (completed) {
+                targetList.insertBefore(li, targetList.children[1]);
+            } else {
+                targetList.appendChild(li);
+            }
         }
-    };
 
-    reader.readAsText(file);
-}
+        // Load from JSON file
+        function loadFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    if (!jsonData.inProgress || !jsonData.completed) {
+                        return alert('Dữ liệu không hợp lệ! Vui lòng chọn file JSON đúng định dạng.');
+                    }
 
-        // Xóa tất cả ghi chú
+                    document.getElementById('inProgressList').innerHTML = '<h3>Đang xử lý</h3>';
+                    document.getElementById('completedList').innerHTML = '<h3>Đã hoàn thành</h3>';
+
+                    jsonData.inProgress.forEach(note => addNoteElement(note, false));
+                    jsonData.completed.forEach(note => addNoteElement(note, true));
+
+                    database.ref('notes/' + auth.currentUser.uid).set(jsonData)
+                        .then(() => alert('Dữ liệu đã được tải thành công!'))
+                        .catch(error => alert('Lỗi lưu dữ liệu: ' + error.message));
+                } catch (error) {
+                    alert('Lỗi khi xử lý file JSON: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Clear all notes
         function clearAllNotes() {
             if (confirm('Bạn có chắc chắn muốn xóa tất cả ghi chú?')) {
-                localStorage.removeItem('notes');
-                loadNotes();
+                database.ref('notes/' + auth.currentUser.uid).remove()
+                    .then(() => loadNotes(auth.currentUser.uid))
+                    .catch(error => alert('Lỗi xóa dữ liệu: ' + error.message));
             }
         }
 
-        // Xuất dữ liệu ra file JSON
+        // Export data to JSON
         function exportData() {
-            // Lấy dữ liệu từ Local Storage
-            const storedNotes = localStorage.getItem('notes');
-            if (!storedNotes) {
-                alert('Không có dữ liệu để xuất!');
-                return;
-            }
-
-            // Lấy thời gian hiện tại
-            const now = new Date();
-            const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
-
-            // Tạo tên file dựa trên thời gian
-            const fileName = `notes_${timestamp}.json`;
-
-            // Tạo một file blob từ dữ liệu
-            const blob = new Blob([storedNotes], { type: 'application/json' });
-
-            // Tạo liên kết tải xuống
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName; // Tên file sẽ được tải về
-            link.click();
-
-            // Giải phóng tài nguyên
-            URL.revokeObjectURL(link.href);
+            database.ref('notes/' + auth.currentUser.uid).once('value').then(snapshot => {
+                const data = snapshot.val() || { inProgress: [], completed: [] };
+                const now = new Date();
+                const timestamp = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+                const fileName = `notes_${timestamp}.json`;
+                const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(error => alert('Lỗi xuất dữ liệu: ' + error.message));
         }
-        // Tải ghi chú khi trang được load
-        window.onload = loadNotes;
     </script>
-    <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    fetch('https://api.countapi.xyz/hit/thanghdb/notes')
-      .then(res => res.json())
-      .then(data => {
-        console.log('Ghi nhận truy cập trang notes:', data.value);
-      })
-      .catch(console.error);
-  });
-</script>
-
 </body>
 </html>
