@@ -26,8 +26,8 @@ A Firebase project for authentication and database.
 Setup
 
 Clone the Repository:
-git clone https://github.com/your-username/project-hub.git
-cd project-hub
+git clone https://github.com/ehoadon/bkav.git
+cd bkav
 
 
 Configure Firebase:
@@ -110,7 +110,7 @@ View sample statistics and reports powered by Chart.js.
 
 
 📂 Project Structure
-project-hub/
+docs/
 ├── index.html           # Homepage with tool grid and auth overlay
 ├── auth.js             # Firebase authentication logic
 ├── document.html       # Project Statistics tool
