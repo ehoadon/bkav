@@ -68,7 +68,7 @@
         mainContent.style.display    = 'block';
         // Greeting + logout + dashboard
         const name = user.email.split('@')[0];
-        let html = `👋 <strong>${name}</strong> <button id="btnLogout">Đăng xuất</button>`;
+        let html = `👋 Chào mừng: <strong>${name}!</strong> <button id="btnLogout">Đăng xuất</button>`;
         if (user.email === 'thanghdb@bkav.com') {
           html += ` <a href="#" id="linkDashboard">Dashboard</a>`;
         }
