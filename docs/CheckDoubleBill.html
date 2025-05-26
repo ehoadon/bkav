@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billcode Comparator Tool</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f4f4f4; color: #333; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #0066cc; margin-bottom: 20px; }
+        .section { margin-bottom: 20px; }
+        .section label { font-weight: bold; display: block; margin-bottom: 5px; }
+        .section textarea { width: 100%; height: 150px; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; resize: vertical; }
+        .button { background: #0066cc; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        .button:hover { background: #004b99; }
+        .result { margin-top: 20px; padding: 10px; background: #e9f3ff; border-radius: 4px; display: none; }
+        .result h3 { color: #0066cc; margin-bottom: 10px; }
+        .result ul { margin-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Billcode Comparator Tool</h1>
+        <p style="text-align: center;">So sánh Billcode giữa Bảng A và Bảng B.</p>
+
+        <div class="section">
+            <label for="tableA">Bảng A (Dữ liệu A)</label>
+            <textarea id="tableA" placeholder="Nhập Billcode (cách nhau bằng phẩy hoặc xuống dòng, ví dụ: 123, 124, 1345)"></textarea>
+        </div>
+
+        <div class="section">
+            <label for="tableB">Bảng B (Dữ liệu B)</label>
+            <textarea id="tableB" placeholder="Nhập Billcode (cách nhau bằng phẩy hoặc xuống dòng, ví dụ: 123, 124, 1345)"></textarea>
+        </div>
+
+        <div class="section">
+            <button class="button" onclick="compareBillcodes()">So sánh</button>
+        </div>
+
+        <div class="result" id="result">
+            <h3>Kết quả so sánh</h3>
+            <p>Billcode khác biệt:</p>
+            <ul id="resultList"></ul>
+        </div>
+    </div>
+
+    <script>
+        function compareBillcodes() {
+            // Lấy dữ liệu từ textarea
+            const tableAInput = document.getElementById('tableA').value.trim();
+            const tableBInput = document.getElementById('tableB').value.trim();
+
+            // Kiểm tra nếu không nhập dữ liệu
+            if (!tableAInput && !tableBInput) {
+                alert('Vui lòng nhập dữ liệu cho ít nhất một bảng!');
+                return;
+            }
+
+            // Tách chuỗi thành mảng, xử lý cả phẩy và xuống dòng
+            const extractNumbers = (str) => {
+                if (!str) return [];
+                return str.split(/[,|\n]+/).map(item => item.trim()).filter(item => {
+                    // Lọc ra số nguyên bằng regex
+                    const num = item.match(/^-?\d+$/);
+                    return num ? parseInt(num[0]) : null;
+                }).filter(num => num !== null);
+            };
+
+            const billcodesA = extractNumbers(tableAInput);
+            const billcodesB = extractNumbers(tableBInput);
+
+            // Chuyển mảng thành Set để so sánh
+            const setA = new Set(billcodesA);
+            const setB = new Set(billcodesB);
+
+            // Tìm Billcode khác biệt
+            const diffA = billcodesA.filter(code => !setB.has(code));
+            const diffB = billcodesB.filter(code => !setA.has(code));
+
+            // Hiển thị kết quả
+            const resultDiv = document.getElementById('result');
+            const resultList = document.getElementById('resultList');
+            resultList.innerHTML = '';
+
+            if (diffA.length === 0 && diffB.length === 0) {
+                resultList.innerHTML = '<li>Không có Billcode nào khác biệt giữa Bảng A và Bảng B.</li>';
+            } else {
+                if (diffA.length > 0) {
+                    resultList.innerHTML += `<li>Các Billcode chỉ có ở Bảng A: ${diffA.join(', ')}</li>`;
+                }
+                if (diffB.length > 0) {
+                    resultList.innerHTML += `<li>Các Billcode chỉ có ở Bảng B: ${diffB.join(', ')}</li>`;
+                }
+            }
+
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
