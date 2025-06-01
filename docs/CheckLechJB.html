@@ -5,26 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công cụ So sánh File Excel</title>
     <style>
-        body {
+body {
             font-family: Arial, sans-serif;
             margin: 20px;
             background-color: #f4f4f9;
+            color: #222;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
+
         .container {
-            max-width: 1000px;
-            margin: auto;
+            max-width: 90%;
+            width: 1000px; /* Giới hạn tối đa để giữ cân đối */
+            margin: 0 auto;
+            padding: 0 15px;
+            text-align: center;
         }
+
         h1, h2, h3 {
             text-align: center;
-            color: #333;
+            color: #222;
+            margin-bottom: 10px;
         }
+
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin: 10px 0 5px;
+            font-weight: bold;
         }
+
         input[type="file"] {
             padding: 8px;
             width: 100%;
@@ -32,7 +48,13 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #fff;
+            transition: border-color 0.3s;
         }
+
+        input[type="file"]:hover {
+            border-color: #007bff;
+        }
+
         button {
             padding: 12px 24px;
             background-color: #007bff;
@@ -40,46 +62,133 @@
             border: none;
             cursor: pointer;
             border-radius: 5px;
-            display: block;
-            margin: 0 auto;
+            display: inline-block;
+            margin: 10px 0;
+            transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #0056b3;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+
         .result {
-            margin-top: 20px;
+            margin-top: 15px;
             background: #fff;
             padding: 15px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-in;
+            text-align: center;
+            width: 100%;
+            max-width: 800px; /* Giới hạn chiều rộng bảng */
+            margin-left: auto;
+            margin-right: auto;
         }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            margin: 10px auto; /* Căn giữa bảng */
+            background-color: #fff;
+            overflow-x: auto;
+            display: table; /* Đảm bảo bảng hiển thị đúng */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
         .error {
-            color: red;
+            color: #d32f2f;
             font-weight: bold;
             text-align: center;
         }
+
         .success {
-            color: green;
+            color: #2e7d32;
             font-weight: bold;
             text-align: center;
+        }
+
+        .filter-section {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .filter-section select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-section select:hover,
+        .filter-section select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .valid {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .invalid {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .result p {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            input[type="file"] {
+                max-width: 100%;
+            }
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            table {
+                font-size: 14px;
+            }
+            .container {
+                padding: 0 5px;
+            }
+            .result {
+                max-width: 100%;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -90,14 +199,14 @@
 
         <div class="section">
             <h2>1. Tải file Excel</h2>
-            <label for="file1">Chọn File 1:</label>
+            <label for="file1">Chọn File 1: Excel POS Jollibee</label>
             <input type="file" id="file1" accept=".xlsx, .xls">
-            <label for="file2">Chọn File 2:</label>
+            <label for="file2">Chọn File 2: Excel DLBH Bkav</label>
             <input type="file" id="file2" accept=".xlsx, .xls">
         </div>
 
         <button onclick="compareFiles()">So sánh</button>
-
+        <button onclick="refreshPage()">Refresh</button>
         <div class="result" id="result"></div>
     </div>
 
@@ -114,7 +223,7 @@
                 const workbook = XLSX.read(event.target.result, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
                 console.log(`Data from ${e.target.id}:`, jsonData);
                 if (e.target.id === 'file1') {
                     data1 = jsonData;
@@ -137,72 +246,98 @@
                 return;
             }
 
-            const headers1 = data1[0] || [];
-            const headers2 = data2[0] || [];
+            // Danh sách cột mặc định cho File 1 (từ A đến BD)
+            const defaultHeaders1 = [
+                "chk_seq", "emp_seq", "trans_type_seq", "id", "chk_num", "chk_open", "tbl_seq", "grp", "rvc_seq",
+                "chk_open_date_time", "chk_clsd_date_time", "tbl_open_date_time", "subttl_date_time", "drawer_time",
+                "pc_seq", "standalone_check", "summ_ttl_prntd", "fast_trans_chk", "chk_cancelled", "chk_edited",
+                "training", "xfer_chk_num", "sub_ttl", "tax_ttl", "auto_svc_ttl", "other_svc_ttl", "pymnt_ttl",
+                "amt_due_ttl", "chk_prntd_cnt", "pg_num", "line_find_line_num", "cov_cnt", "status", "last_pc_seq",
+                "last_svc_time", "remark", "custid", "riderid", "outtime", "intime", "emplname", "deltime",
+                "memberid", "bpoint", "undeliveryremark", "misc", "seatprinted", "seatpaid", "memcard", "cc_id",
+                "survey_code", "survey_code_generate", "survey_prt_str", "survey_voucher_code", "sc_cnt", "MYEG_RefID"
+            ];
+
+            // Danh sách cột mặc định cho File 2 (từ A đến K)
+            const defaultHeaders2 = [
+                "STT", "Mã bill", "Mã CH", "Tên CH", "Ngày bán", "Tiền trước thuế", "Tiền thuế", "Thành tiền",
+                "Số hóa đơn", "Trạng thái", "Ghi chú"
+            ];
+
+            // Kiểm tra xem có hàng tiêu đề không
+            const hasHeaders1 = data1.length > 0 && data1[0].some(header => typeof header === 'string' && header.trim().match(/chk_num|sub_ttl/i));
+            const hasHeaders2 = data2.length > 0 && data2[0].some(header => typeof header === 'string' && header.trim().match(/mã bill|thành tiền/i));
+
+            let startRow1 = hasHeaders1 ? 1 : 0; // Nếu không có header, bắt đầu từ hàng 0
+            let startRow2 = hasHeaders2 ? 1 : 0;
+
+            const headers1 = hasHeaders1 ? data1[0] : defaultHeaders1.slice(0, data1[0].length); // Gán header mặc định nếu không có
+            const headers2 = hasHeaders2 ? data2[0] : defaultHeaders2.slice(0, data2[0].length); // Gán header mặc định cho File 2
+
             console.log('Headers in File 1:', headers1);
             console.log('Headers in File 2:', headers2);
 
-            const billcodeCol1 = findColumnIndex(headers1, 'chk_num');
-            const valueCol1 = findColumnIndex(headers1, 'sub_ttl');
-            const otherSvcCol = findColumnIndex(headers1, 'other_svc_ttl');
+            const billcodeCol1 = hasHeaders1 ? findColumnIndex(headers1, 'chk_num') : defaultHeaders1.indexOf('chk_num');
+            const valueCol1 = hasHeaders1 ? findColumnIndex(headers1, 'sub_ttl') : defaultHeaders1.indexOf('sub_ttl');
+            const otherSvcCol = hasHeaders1 ? findColumnIndex(headers1, 'other_svc_ttl') : defaultHeaders1.indexOf('other_svc_ttl');
             const conditionCols = {
-                standaloneCheck: findColumnIndex(headers1, 'standalone_check'),
-                summTtlPrntd: findColumnIndex(headers1, 'summ_ttl_prntd'),
-                fastTransChk: findColumnIndex(headers1, 'fast_trans_chk'),
-                chkCancelled: findColumnIndex(headers1, 'chk_cancelled'),
-                chkEdited: findColumnIndex(headers1, 'chk_edited'),
-                training: findColumnIndex(headers1, 'training')
+                standaloneCheck: hasHeaders1 ? findColumnIndex(headers1, 'standalone_check') : defaultHeaders1.indexOf('standalone_check'),
+                summTtlPrntd: hasHeaders1 ? findColumnIndex(headers1, 'summ_ttl_prntd') : defaultHeaders1.indexOf('summ_ttl_prntd'),
+                fastTransChk: hasHeaders1 ? findColumnIndex(headers1, 'fast_trans_chk') : defaultHeaders1.indexOf('fast_trans_chk'),
+                chkCancelled: hasHeaders1 ? findColumnIndex(headers1, 'chk_cancelled') : defaultHeaders1.indexOf('chk_cancelled'),
+                chkEdited: hasHeaders1 ? findColumnIndex(headers1, 'chk_edited') : defaultHeaders1.indexOf('chk_edited'),
+                training: hasHeaders1 ? findColumnIndex(headers1, 'training') : defaultHeaders1.indexOf('training')
             };
             console.log('Condition Columns:', conditionCols);
 
-            const billcodeCol2 = findColumnIndex(headers2, 'mã bill');
-            const valueCol2 = findColumnIndex(headers2, 'thành tiền');
+            const billcodeCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Mã bill') : defaultHeaders2.indexOf('Mã bill'); // Cột 1
+            const valueCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Thành tiền') : defaultHeaders2.indexOf('Thành tiền'); // Cột 7
 
-            if (billcodeCol1 === -1 || valueCol1 === -1) {
+            if (billcodeCol1 < 0 || valueCol1 < 0) {
                 document.getElementById('result').innerHTML = '<p class="error">File 1 thiếu cột chk_num hoặc sub_ttl!</p>';
                 return;
             }
-            if (billcodeCol2 === -1 || valueCol2 === -1) {
+            if (billcodeCol2 < 0 || valueCol2 < 0) {
                 document.getElementById('result').innerHTML = '<p class="error">File 2 thiếu cột Mã bill hoặc Thành tiền!</p>';
                 return;
             }
 
             const excludedBills = [];
-            const validRows1 = data1.slice(1).filter(row => {
+            const validRows1 = data1.slice(startRow1).filter(row => {
                 const reasons = [];
                 const billcode = String(row[billcodeCol1]).trim();
                 console.log(`Row data for billcode ${billcode}:`, row);
-                if (conditionCols.standaloneCheck !== -1 && row[conditionCols.standaloneCheck] != null) {
+                if (conditionCols.standaloneCheck >= 0 && row[conditionCols.standaloneCheck] != null) {
                     const rawVal = row[conditionCols.standaloneCheck];
                     const val = parseInt(rawVal, 10);
                     console.log(`standalone_check raw: ${rawVal}, parsed: ${val}`);
                     if (!isNaN(val) && val === 1) reasons.push('standalone_check = 1');
                 }
-                if (conditionCols.summTtlPrntd !== -1 && row[conditionCols.summTtlPrntd] != null) {
+                if (conditionCols.summTtlPrntd >= 0 && row[conditionCols.summTtlPrntd] != null) {
                     const rawVal = row[conditionCols.summTtlPrntd];
                     const val = parseInt(rawVal, 10);
                     console.log(`summ_ttl_prntd raw: ${rawVal}, parsed: ${val}`);
                     if (!isNaN(val) && val === 1) reasons.push('summ_ttl_prntd = 1');
                 }
-                if (conditionCols.fastTransChk !== -1 && row[conditionCols.fastTransChk] != null) {
+                if (conditionCols.fastTransChk >= 0 && row[conditionCols.fastTransChk] != null) {
                     const rawVal = row[conditionCols.fastTransChk];
                     const val = parseInt(rawVal, 10);
                     console.log(`fast_trans_chk raw: ${rawVal}, parsed: ${val}`);
                     if (!isNaN(val) && val === 1) reasons.push('fast_trans_chk = 1');
                 }
-                if (conditionCols.chkCancelled !== -1 && row[conditionCols.chkCancelled] != null) {
+                if (conditionCols.chkCancelled >= 0 && row[conditionCols.chkCancelled] != null) {
                     const rawVal = row[conditionCols.chkCancelled];
                     const val = parseInt(rawVal, 10);
                     console.log(`chk_cancelled raw: ${rawVal}, parsed: ${val}`);
                     if (!isNaN(val) && val === 1) reasons.push('chk_cancelled = 1');
                 }
-                if (conditionCols.chkEdited !== -1 && row[conditionCols.chkEdited] != null) {
+                if (conditionCols.chkEdited >= 0 && row[conditionCols.chkEdited] != null) {
                     const rawVal = row[conditionCols.chkEdited];
                     const val = parseInt(rawVal, 10);
                     console.log(`chk_edited raw: ${rawVal}, parsed: ${val}`);
                     if (!isNaN(val) && val === 1) reasons.push('chk_edited = 1');
                 }
-                if (conditionCols.training !== -1 && row[conditionCols.training] != null) {
+                if (conditionCols.training >= 0 && row[conditionCols.training] != null) {
                     const rawVal = row[conditionCols.training];
                     const val = parseInt(rawVal, 10);
                     console.log(`training raw: ${rawVal}, parsed: ${val}`);
@@ -217,15 +352,16 @@
             });
             console.log('Excluded Bills:', excludedBills);
 
-            const billcodes1 = data1.slice(1).map(row => String(row[billcodeCol1]).trim()).filter(b => b);
-            const billcodes2 = data2.slice(1).map(row => String(row[billcodeCol2]).trim()).filter(b => b);
+            const billcodes1 = data1.slice(startRow1).map(row => String(row[billcodeCol1]).trim()).filter(b => b);
+            const billcodes2 = data2.slice(startRow2).map(row => String(row[billcodeCol2]).trim()).filter(b => b);
             console.log('Billcodes in File 1:', billcodes1);
             console.log('Billcodes in File 2:', billcodes2);
 
+            // Kiểm tra billcode có trong File 1 nhưng không có trong File 2
             const missingInFile2 = [];
             billcodes1.forEach(bill => {
                 if (!billcodes2.includes(bill)) {
-                    const row = data1.slice(1).find(r => String(r[billcodeCol1]).trim() === bill);
+                    const row = data1.slice(startRow1).find(r => String(r[billcodeCol1]).trim() === bill);
                     const excluded = excludedBills.find(e => e.billcode === bill);
                     if (excluded) {
                         missingInFile2.push({ billcode: bill, reason: excluded.reason, valid: true });
@@ -237,16 +373,24 @@
                 }
             });
 
+            // Kiểm tra billcode có trong File 2 nhưng không có trong File 1 (billcode lạ)
+            const missingInFile1 = [];
+            billcodes2.forEach(bill => {
+                if (!billcodes1.includes(bill)) {
+                    missingInFile1.push({ billcode: bill, reason: 'Không có trong File 1' });
+                }
+            });
+
             const valueDiffs = [];
             validRows1.forEach(row1 => {
                 const billcode = String(row1[billcodeCol1]).trim();
-                const row2 = data2.slice(1).find(r => String(r[billcodeCol2]).trim() === billcode);
+                const row2 = data2.slice(startRow2).find(r => String(r[billcodeCol2]).trim() === billcode);
                 if (row2) {
                     const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
                     const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
                     const diff = val2 - val1;
                     if (diff !== 0) {
-                        const otherSvc = otherSvcCol !== -1 && row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
+                        const otherSvc = otherSvcCol >= 0 && row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
                         const isValidDiff = diff === otherSvc;
                         valueDiffs.push({ billcode, diff, isValidDiff, otherSvc });
                     }
@@ -254,22 +398,38 @@
             });
 
             let resultHtml = '<h2>Kết quả so sánh</h2>';
+            resultHtml += '<div class="filter-section"><label for="validityFilter">Lọc theo tính hợp lệ:</label><select id="validityFilter" onchange="filterResults()"><option value="all">Tất cả</option><option value="valid">Hợp lệ</option><option value="invalid">Không hợp lệ</option></select></div>';
+
+            // Bảng billcode có trong File 1 nhưng không có trong File 2
             if (missingInFile2.length > 0) {
                 resultHtml += '<h3>Billcode có ở File 1 nhưng không có ở File 2:</h3>';
-                resultHtml += '<table><tr><th>Billcode</th><th>Lý do</th><th>Hợp lệ</th></tr>';
+                resultHtml += '<table class="result-table" id="missingTable"><tr><th>Billcode</th><th>Lý do</th><th class="validity">Hợp lệ</th></tr>';
                 missingInFile2.forEach(bill => {
-                    resultHtml += `<tr><td>${bill.billcode}</td><td>${bill.reason}</td><td>${bill.valid ? 'Có' : 'Không'}</td></tr>`;
+                    resultHtml += `<tr><td>${bill.billcode}</td><td>${bill.reason}</td><td class="validity ${bill.valid ? 'valid' : 'invalid'}" data-validity="${bill.valid ? 'Có' : 'Không'}">${bill.valid ? 'Có' : 'Không'}</td></tr>`;
                 });
                 resultHtml += '</table>';
             } else {
                 resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 1.</p>';
             }
 
+            // Bảng billcode có trong File 2 nhưng không có trong File 1 (billcode lạ)
+            if (missingInFile1.length > 0) {
+                resultHtml += '<h3>Billcode có ở File 2 nhưng không có ở File 1:</h3>';
+                resultHtml += '<table class="result-table" id="missingInFile1Table"><tr><th>Billcode</th><th>Lý do</th></tr>';
+                missingInFile1.forEach(bill => {
+                    resultHtml += `<tr><td>${bill.billcode}</td><td>${bill.reason}</td></tr>`;
+                });
+                resultHtml += '</table>';
+            } else {
+                resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 2.</p>';
+            }
+
+            // Bảng chênh lệch giá trị
             if (valueDiffs.length > 0) {
                 resultHtml += '<h3>Billcode có giá trị chênh lệch:</h3>';
-                resultHtml += '<table><tr><th>Billcode</th><th>Chênh lệch (Thành tiền - sub_ttl)</th><th>Hợp lệ (Bằng other_svc_ttl)</th></tr>';
+                resultHtml += '<table class="result-table" id="diffTable"><tr><th>Billcode</th><th>Chênh lệch (Thành tiền - sub_ttl)</th><th class="validity">Hợp lệ (Bằng other_svc_ttl)</th></tr>';
                 valueDiffs.forEach(diff => {
-                    resultHtml += `<tr><td>${diff.billcode}</td><td>${diff.diff}</td><td>${diff.isValidDiff ? `Có (other_svc_ttl = ${diff.otherSvc})` : 'Không'}</td></tr>`;
+                    resultHtml += `<tr><td>${diff.billcode}</td><td>${diff.diff}</td><td class="validity ${diff.isValidDiff ? 'valid' : 'invalid'}" data-validity="${diff.isValidDiff ? 'Có' : 'Không'}">${diff.isValidDiff ? `Có (other_svc_ttl = ${diff.otherSvc})` : 'Không'}</td></tr>`;
                 });
                 resultHtml += '</table>';
             } else {
@@ -277,8 +437,51 @@
             }
 
             document.getElementById('result').innerHTML = resultHtml;
+            filterResults(); // Áp dụng bộ lọc mặc định
+        }
+        function refreshPage() {
+            // Đặt lại dữ liệu
+            data1 = null;
+            data2 = null;
+            // Xóa nội dung kết quả
+            document.getElementById('result').innerHTML = '';
+            // Đặt lại giá trị của input file (xóa file đã chọn)
+            document.getElementById('file1').value = '';
+            document.getElementById('file2').value = '';
+            // Thông báo làm mới thành công
+            document.getElementById('result').innerHTML = '<p class="success">Đã làm mới! Vui lòng tải lại file để tiếp tục.</p>';
+        }
+
+        function filterResults() {
+            const filterValue = document.getElementById('validityFilter').value;
+            console.log('Filtering with value:', filterValue); // Debug
+            const tables = document.querySelectorAll('.result-table');
+
+            tables.forEach(table => {
+                const rows = table.getElementsByTagName('tr');
+                for (let i = 1; i < rows.length; i++) { // Bắt đầu từ 1 để bỏ qua hàng tiêu đề
+                    const validityCell = rows[i].querySelector('.validity');
+                    // Bảng "missingInFile1Table" không có cột Hợp lệ, nên bỏ qua lọc
+                    if (table.id === 'missingInFile1Table') {
+                        rows[i].style.display = ''; // Luôn hiển thị các hàng trong bảng này
+                        continue;
+                    }
+                    if (validityCell) {
+                        const validityText = validityCell.getAttribute('data-validity');
+                        console.log(`Row ${i} validity: ${validityText}`); // Debug
+                        if (filterValue === 'all') {
+                            rows[i].style.display = '';
+                        } else if (filterValue === 'valid' && validityText === 'Có') {
+                            rows[i].style.display = '';
+                        } else if (filterValue === 'invalid' && validityText === 'Không') {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+            });
         }
     </script>
 </body>
 </html>
-
