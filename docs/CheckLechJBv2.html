@@ -5,26 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Công cụ So sánh File Excel</title>
     <style>
-        body {
+body {
             font-family: Arial, sans-serif;
             margin: 20px;
             background-color: #f4f4f9;
+            color: #222;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
+
         .container {
-            max-width: 1000px;
-            margin: auto;
+            max-width: 90%;
+            width: 1000px; /* Giới hạn tối đa để giữ cân đối */
+            margin: 0 auto;
+            padding: 0 15px;
+            text-align: center;
         }
+
         h1, h2, h3 {
             text-align: center;
-            color: #333;
+            color: #222;
+            margin-bottom: 10px;
         }
+
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin: 10px 0 5px;
+            font-weight: bold;
         }
+
         input[type="file"] {
             padding: 8px;
             width: 100%;
@@ -32,7 +48,13 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             background-color: #fff;
+            transition: border-color 0.3s;
         }
+
+        input[type="file"]:hover {
+            border-color: #007bff;
+        }
+
         button {
             padding: 12px 24px;
             background-color: #007bff;
@@ -40,64 +62,133 @@
             border: none;
             cursor: pointer;
             border-radius: 5px;
-            display: block;
-            margin: 0 auto;
+            display: inline-block;
+            margin: 10px 0;
+            transition: background-color 0.3s;
         }
+
         button:hover {
             background-color: #0056b3;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+
         .result {
-            margin-top: 20px;
+            margin-top: 15px;
             background: #fff;
             padding: 15px;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.5s ease-in;
+            text-align: center;
+            width: 100%;
+            max-width: 800px; /* Giới hạn chiều rộng bảng */
+            margin-left: auto;
+            margin-right: auto;
         }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+            margin: 10px auto; /* Căn giữa bảng */
+            background-color: #fff;
+            overflow-x: auto;
+            display: table; /* Đảm bảo bảng hiển thị đúng */
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e0e0e0;
+            transition: background-color 0.2s;
+        }
+
         .error {
-            color: red;
+            color: #d32f2f;
             font-weight: bold;
             text-align: center;
         }
+
         .success {
-            color: green;
+            color: #2e7d32;
             font-weight: bold;
             text-align: center;
         }
+
         .filter-section {
             margin: 10px 0;
             text-align: center;
         }
+
         .filter-section select {
             padding: 8px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 16px;
+            transition: border-color 0.3s;
         }
+
+        .filter-section select:hover,
+        .filter-section select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
         .valid {
-            color: green;
+            color: #2e7d32;
             font-weight: bold;
         }
+
         .invalid {
-            color: red;
+            color: #d32f2f;
             font-weight: bold;
+        }
+
+        .result p {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            input[type="file"] {
+                max-width: 100%;
+            }
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            table {
+                font-size: 14px;
+            }
+            .container {
+                padding: 0 5px;
+            }
+            .result {
+                max-width: 100%;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -115,7 +206,7 @@
         </div>
 
         <button onclick="compareFiles()">So sánh</button>
-
+        <button onclick="refreshPage()">Refresh</button>
         <div class="result" id="result"></div>
     </div>
 
@@ -266,6 +357,7 @@
             console.log('Billcodes in File 1:', billcodes1);
             console.log('Billcodes in File 2:', billcodes2);
 
+            // Kiểm tra billcode có trong File 1 nhưng không có trong File 2
             const missingInFile2 = [];
             billcodes1.forEach(bill => {
                 if (!billcodes2.includes(bill)) {
@@ -278,6 +370,14 @@
                     } else {
                         missingInFile2.push({ billcode: bill, reason: 'Không có trong File 2', valid: false });
                     }
+                }
+            });
+
+            // Kiểm tra billcode có trong File 2 nhưng không có trong File 1 (billcode lạ)
+            const missingInFile1 = [];
+            billcodes2.forEach(bill => {
+                if (!billcodes1.includes(bill)) {
+                    missingInFile1.push({ billcode: bill, reason: 'Không có trong File 1' });
                 }
             });
 
@@ -300,6 +400,7 @@
             let resultHtml = '<h2>Kết quả so sánh</h2>';
             resultHtml += '<div class="filter-section"><label for="validityFilter">Lọc theo tính hợp lệ:</label><select id="validityFilter" onchange="filterResults()"><option value="all">Tất cả</option><option value="valid">Hợp lệ</option><option value="invalid">Không hợp lệ</option></select></div>';
 
+            // Bảng billcode có trong File 1 nhưng không có trong File 2
             if (missingInFile2.length > 0) {
                 resultHtml += '<h3>Billcode có ở File 1 nhưng không có ở File 2:</h3>';
                 resultHtml += '<table class="result-table" id="missingTable"><tr><th>Billcode</th><th>Lý do</th><th class="validity">Hợp lệ</th></tr>';
@@ -311,6 +412,19 @@
                 resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 1.</p>';
             }
 
+            // Bảng billcode có trong File 2 nhưng không có trong File 1 (billcode lạ)
+            if (missingInFile1.length > 0) {
+                resultHtml += '<h3>Billcode có ở File 2 nhưng không có ở File 1:</h3>';
+                resultHtml += '<table class="result-table" id="missingInFile1Table"><tr><th>Billcode</th><th>Lý do</th></tr>';
+                missingInFile1.forEach(bill => {
+                    resultHtml += `<tr><td>${bill.billcode}</td><td>${bill.reason}</td></tr>`;
+                });
+                resultHtml += '</table>';
+            } else {
+                resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 2.</p>';
+            }
+
+            // Bảng chênh lệch giá trị
             if (valueDiffs.length > 0) {
                 resultHtml += '<h3>Billcode có giá trị chênh lệch:</h3>';
                 resultHtml += '<table class="result-table" id="diffTable"><tr><th>Billcode</th><th>Chênh lệch (Thành tiền - sub_ttl)</th><th class="validity">Hợp lệ (Bằng other_svc_ttl)</th></tr>';
@@ -325,6 +439,18 @@
             document.getElementById('result').innerHTML = resultHtml;
             filterResults(); // Áp dụng bộ lọc mặc định
         }
+        function refreshPage() {
+            // Đặt lại dữ liệu
+            data1 = null;
+            data2 = null;
+            // Xóa nội dung kết quả
+            document.getElementById('result').innerHTML = '';
+            // Đặt lại giá trị của input file (xóa file đã chọn)
+            document.getElementById('file1').value = '';
+            document.getElementById('file2').value = '';
+            // Thông báo làm mới thành công
+            document.getElementById('result').innerHTML = '<p class="success">Đã làm mới! Vui lòng tải lại file để tiếp tục.</p>';
+        }
 
         function filterResults() {
             const filterValue = document.getElementById('validityFilter').value;
@@ -335,6 +461,11 @@
                 const rows = table.getElementsByTagName('tr');
                 for (let i = 1; i < rows.length; i++) { // Bắt đầu từ 1 để bỏ qua hàng tiêu đề
                     const validityCell = rows[i].querySelector('.validity');
+                    // Bảng "missingInFile1Table" không có cột Hợp lệ, nên bỏ qua lọc
+                    if (table.id === 'missingInFile1Table') {
+                        rows[i].style.display = ''; // Luôn hiển thị các hàng trong bảng này
+                        continue;
+                    }
                     if (validityCell) {
                         const validityText = validityCell.getAttribute('data-validity');
                         console.log(`Row ${i} validity: ${validityText}`); // Debug
