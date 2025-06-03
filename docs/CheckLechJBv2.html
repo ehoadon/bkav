@@ -268,11 +268,11 @@ body {
             const hasHeaders1 = data1.length > 0 && data1[0].some(header => typeof header === 'string' && header.trim().match(/chk_num|sub_ttl/i));
             const hasHeaders2 = data2.length > 0 && data2[0].some(header => typeof header === 'string' && header.trim().match(/mã bill|thành tiền/i));
 
-            let startRow1 = hasHeaders1 ? 1 : 0; // Nếu không có header, bắt đầu từ hàng 0
+            let startRow1 = hasHeaders1 ? 1 : 0;
             let startRow2 = hasHeaders2 ? 1 : 0;
 
-            const headers1 = hasHeaders1 ? data1[0] : defaultHeaders1.slice(0, data1[0].length); // Gán header mặc định nếu không có
-            const headers2 = hasHeaders2 ? data2[0] : defaultHeaders2.slice(0, data2[0].length); // Gán header mặc định cho File 2
+            const headers1 = hasHeaders1 ? data1[0] : defaultHeaders1.slice(0, data1[0].length);
+            const headers2 = hasHeaders2 ? data2[0] : defaultHeaders2.slice(0, data2[0].length);
 
             console.log('Headers in File 1:', headers1);
             console.log('Headers in File 2:', headers2);
@@ -290,8 +290,8 @@ body {
             };
             console.log('Condition Columns:', conditionCols);
 
-            const billcodeCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Mã bill') : defaultHeaders2.indexOf('Mã bill'); // Cột 1
-            const valueCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Thành tiền') : defaultHeaders2.indexOf('Thành tiền'); // Cột 7
+            const billcodeCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Mã bill') : defaultHeaders2.indexOf('Mã bill');
+            const valueCol2 = hasHeaders2 ? findColumnIndex(headers2, 'Thành tiền') : defaultHeaders2.indexOf('Thành tiền');
 
             if (billcodeCol1 < 0 || valueCol1 < 0) {
                 document.getElementById('result').innerHTML = '<p class="error">File 1 thiếu cột chk_num hoặc sub_ttl!</p>';
@@ -311,37 +311,37 @@ body {
                     const rawVal = row[conditionCols.standaloneCheck];
                     const val = parseInt(rawVal, 10);
                     console.log(`standalone_check raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('standalone_check = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('standalone_check = ' + val);
                 }
                 if (conditionCols.summTtlPrntd >= 0 && row[conditionCols.summTtlPrntd] != null) {
                     const rawVal = row[conditionCols.summTtlPrntd];
                     const val = parseInt(rawVal, 10);
                     console.log(`summ_ttl_prntd raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('summ_ttl_prntd = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('summ_ttl_prntd = ' + val);
                 }
                 if (conditionCols.fastTransChk >= 0 && row[conditionCols.fastTransChk] != null) {
                     const rawVal = row[conditionCols.fastTransChk];
                     const val = parseInt(rawVal, 10);
                     console.log(`fast_trans_chk raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('fast_trans_chk = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('fast_trans_chk = ' + val);
                 }
                 if (conditionCols.chkCancelled >= 0 && row[conditionCols.chkCancelled] != null) {
                     const rawVal = row[conditionCols.chkCancelled];
                     const val = parseInt(rawVal, 10);
                     console.log(`chk_cancelled raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('chk_cancelled = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('chk_cancelled = ' + val);
                 }
                 if (conditionCols.chkEdited >= 0 && row[conditionCols.chkEdited] != null) {
                     const rawVal = row[conditionCols.chkEdited];
                     const val = parseInt(rawVal, 10);
                     console.log(`chk_edited raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('chk_edited = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('chk_edited = ' + val);
                 }
                 if (conditionCols.training >= 0 && row[conditionCols.training] != null) {
                     const rawVal = row[conditionCols.training];
                     const val = parseInt(rawVal, 10);
                     console.log(`training raw: ${rawVal}, parsed: ${val}`);
-                    if (!isNaN(val) && val === 1) reasons.push('training = 1');
+                    if (!isNaN(val) && (val === 1 || val === -1)) reasons.push('training = ' + val);
                 }
 
                 if (reasons.length > 0) {
@@ -388,10 +388,11 @@ body {
                 if (row2) {
                     const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
                     const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
+                    const otherSvc = otherSvcCol >= 0 && row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
                     const diff = val2 - val1;
-                    if (diff !== 0) {
-                        const otherSvc = otherSvcCol >= 0 && row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
-                        const isValidDiff = diff === otherSvc;
+                    // Luôn ghi nhận nếu có other_svc_ttl, kể cả khi diff = 0
+                    if (otherSvc !== null && otherSvc !== undefined) {
+                        const isValidDiff = Math.abs(diff - otherSvc) < 0.01 || Math.abs(diff + otherSvc) < 0.01;
                         valueDiffs.push({ billcode, diff, isValidDiff, otherSvc });
                     }
                 }
@@ -400,7 +401,6 @@ body {
             let resultHtml = '<h2>Kết quả so sánh</h2>';
             resultHtml += '<div class="filter-section"><label for="validityFilter">Lọc theo tính hợp lệ:</label><select id="validityFilter" onchange="filterResults()"><option value="all">Tất cả</option><option value="valid">Hợp lệ</option><option value="invalid">Không hợp lệ</option></select></div>';
 
-            // Bảng billcode có trong File 1 nhưng không có trong File 2
             if (missingInFile2.length > 0) {
                 resultHtml += '<h3>Billcode có ở File 1 nhưng không có ở File 2:</h3>';
                 resultHtml += '<table class="result-table" id="missingTable"><tr><th>Billcode</th><th>Lý do</th><th class="validity">Hợp lệ</th></tr>';
@@ -412,7 +412,6 @@ body {
                 resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 1.</p>';
             }
 
-            // Bảng billcode có trong File 2 nhưng không có trong File 1 (billcode lạ)
             if (missingInFile1.length > 0) {
                 resultHtml += '<h3>Billcode có ở File 2 nhưng không có ở File 1:</h3>';
                 resultHtml += '<table class="result-table" id="missingInFile1Table"><tr><th>Billcode</th><th>Lý do</th></tr>';
@@ -424,12 +423,12 @@ body {
                 resultHtml += '<p>Không có Billcode nào chỉ xuất hiện ở File 2.</p>';
             }
 
-            // Bảng chênh lệch giá trị
             if (valueDiffs.length > 0) {
                 resultHtml += '<h3>Billcode có giá trị chênh lệch:</h3>';
-                resultHtml += '<table class="result-table" id="diffTable"><tr><th>Billcode</th><th>Chênh lệch (Thành tiền - sub_ttl)</th><th class="validity">Hợp lệ (Bằng other_svc_ttl)</th></tr>';
+                resultHtml += '<table class="result-table" id="diffTable"><tr><th>Billcode</th><th>Chênh lệch (Thành tiền - sub_ttl)</th><th class="validity">Hợp lệ</th><th>other_svc_ttl</th></tr>';
                 valueDiffs.forEach(diff => {
-                    resultHtml += `<tr><td>${diff.billcode}</td><td>${diff.diff}</td><td class="validity ${diff.isValidDiff ? 'valid' : 'invalid'}" data-validity="${diff.isValidDiff ? 'Có' : 'Không'}">${diff.isValidDiff ? `Có (other_svc_ttl = ${diff.otherSvc})` : 'Không'}</td></tr>`;
+                    const validityText = diff.isValidDiff ? `Có (other_svc_ttl = ${diff.otherSvc})` : `Không (other_svc_ttl = ${diff.otherSvc})`;
+                    resultHtml += `<tr><td>${diff.billcode}</td><td>${diff.diff.toFixed(2)}</td><td class="validity ${diff.isValidDiff ? 'valid' : 'invalid'}" data-validity="${diff.isValidDiff ? 'Có' : 'Không'}">${validityText}</td><td>${diff.otherSvc.toFixed(2)}</td></tr>`;
                 });
                 resultHtml += '</table>';
             } else {
@@ -437,7 +436,7 @@ body {
             }
 
             document.getElementById('result').innerHTML = resultHtml;
-            filterResults(); // Áp dụng bộ lọc mặc định
+            filterResults();
         }
         function refreshPage() {
             // Đặt lại dữ liệu
