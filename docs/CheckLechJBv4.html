@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ So sánh File Excel - Phiên bản Cải tiến</title>
+    <link rel="stylesheet" href="https://unpkg.com/filepond/dist/filepond.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons/css/flag-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/filepond/dist/filepond.min.js"></script>
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js"></script>
+    <script src="https://unpkg.com/papaparse/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #007bff;
+            --primary-hover: #0056b3;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa; /* Nền sáng */
+            --dark: #343a40; /* Văn bản tối */
+            --border: #dee2e6; /* Viền sáng */
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            --border-radius: 0.375rem;
+            --transition: all 0.15s ease-in-out;
+        }
+
+        [data-theme="dark"] {
+            --light: #212529; /* Nền tối đậm hơn */
+            --dark: #e0e0e0; /* Văn bản sáng hơn */
+            --border: #495057; /* Viền tối */
+            --primary: #4dabf7; /* Tông xanh nhạt hơn trong tối */
+            --primary-hover: #339af0;
+            --success: #20c997; /* Xanh lá nhạt hơn */
+            --danger: #e74c3c; /* Đỏ nhạt hơn */
+            --warning: #f1c40f; /* Vàng nhạt hơn */
+            --info: #1abc9c; /* Xanh ngọc nhạt hơn */
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2); /* Bóng tối hơn */
+            --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark); /* Màu chữ thay đổi theo chế độ */
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--light); /* Nền thay đổi theo chế độ */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--dark); /* Viền dựa trên màu chữ */
+            color: var(--dark);
+        }
+
+        .btn-outline:hover {
+            background: var(--dark);
+            color: var(--light);
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-box {
+            border: 2px dashed var(--border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            background: var(--light); /* Nền thay đổi theo chế độ */
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary);
+            background: color-mix(in srgb, var(--light) 90%, var(--primary) 10%);
+        }
+
+        .upload-box.dragover {
+            border-color: var(--success);
+            background: color-mix(in srgb, var(--light) 90%, var(--success) 10%);
+        }
+
+        .file-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--info);
+            color: var(--dark); /* Đảm bảo chữ trong file-info rõ nét */
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--info));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .language-selector select {
+            padding: 0.5rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            background: var(--light);
+            font-size: 0.875rem;
+            cursor: pointer;
+            color: var(--dark); /* Đảm bảo chữ trong select rõ nét */
+        }
+
+        .results {
+            margin-top: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Giảm minmax để vừa 5 cột */
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Tối ưu cho màn hình nhỏ */
+            }
+        }
+
+        .stat-card {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-left: 4px solid var(--primary);
+            color: var(--dark);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: color-mix(in srgb, var(--dark) 60%, var(--light) 40%); /* Màu nhãn nhạt hơn */
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .filters {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--dark); /* Đảm bảo nhãn rõ nét */
+        }
+
+        .form-control {
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            background: var(--light);
+            color: var(--dark); /* Đảm bảo chữ trong input rõ nét */
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .form-control::placeholder {
+            color: color-mix(in srgb, var(--dark) 40%, var(--light) 60%); /* Placeholder nhạt hơn */
+        }
+
+        .accordion {
+            margin-top: 1rem;
+        }
+
+        .accordion-item {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            background: color-mix(in srgb, var(--light) 90%, var(--primary) 10%);
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+            color: var(--dark); /* Đảm bảo tiêu đề accordion rõ nét */
+            transition: var(--transition);
+        }
+
+        .accordion-header:hover {
+            background: color-mix(in srgb, var(--light) 80%, var(--primary) 20%);
+        }
+
+        .accordion-content {
+            padding: 1.5rem;
+            color: var(--dark); /* Đảm bảo nội dung accordion rõ nét */
+        }
+
+        .accordion-item.active .accordion-content {
+            display: block;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .accordion-item.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--light);
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            color: var(--dark); /* Đảm bảo chữ trong bảng rõ nét */
+        }
+
+        th {
+            background: color-mix(in srgb, var(--light) 90%, var(--primary) 10%);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tr:hover {
+            background: color-mix(in srgb, var(--light) 90%, var(--primary) 10%);
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: white; /* Đảm bảo chữ trong badge rõ nét */
+        }
+
+        .badge-success {
+            background: var(--success);
+        }
+
+        .badge-danger {
+            background: var(--danger);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .pagination button {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            background: var(--light);
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            color: var(--dark); /* Đảm bảo chữ trong pagination rõ nét */
+            transition: var(--transition);
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary);
+            color: var(--light);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            color: var(--dark); /* Đảm bảo chữ trong span pagination rõ nét */
+        }
+
+        .chart-container {
+            max-width: 600px;
+            max-height: 300px;
+            margin: 1rem auto;
+            padding: 1.5rem;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            color: var(--dark); /* Đảm bảo chữ trong loading rõ nét */
+        }
+
+        .spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid var(--light);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            border: 1px solid;
+            color: var(--dark); /* Đảm bảo chữ trong alert rõ nét */
+        }
+
+        .alert-success {
+            background: color-mix(in srgb, #d4edda 90%, var(--light) 10%);
+            border-color: #c3e6cb;
+            color: var(--success);
+        }
+
+        .alert-danger {
+            background: color-mix(in srgb, #f8d7da 90%, var(--light) 10%);
+            border-color: #f5c6cb;
+            color: var(--danger);
+        }
+
+        .alert-warning {
+            background: color-mix(in srgb, #fff3cd 90%, var(--light) 10%);
+            border-color: #ffeaa7;
+            color: var(--warning);
+        }
+
+        .alert-info {
+            background: color-mix(in srgb, #d1ecf1 90%, var(--light) 10%);
+            border-color: #bee5eb;
+            color: var(--info);
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: var(--light); /* Đảm bảo chữ trong tooltip rõ nét */
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .controls {
+                position: static;
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <select id="langSelect">
+            <option value="vi">🇻🇳 Tiếng Việt</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="zh">🇨🇳 中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+            <option value="ru">🇷🇺 Русский</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="controls">
+                <button class="btn btn-outline" id="themeToggleBtn">
+                    <span id="themeIcon">🌙</span>
+                </button>
+                <button class="btn btn-outline" id="helpBtn">
+                    <span>❓</span>
+                </button>
+            </div>
+            <h1 id="title">Công cụ So sánh File Excel</h1>
+            <p id="subtitle">Phân tích và so sánh dữ liệu từ hai file Excel/CSV</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox1">
+                    <div class="upload-icon">📊</div>
+                    <h3 id="file1Title">File 1: Excel POS Jollibee</h3>
+                    <p id="file1Desc">Kéo thả file hoặc click để chọn</p>
+                    <input type="file" id="file1" accept=".xlsx,.xls,.csv" style="display: none">
+                    <button class="btn btn-primary" id="selectFile1Btn">Chọn File</button>
+                    <div id="file1Info" class="file-info" style="display: none"></div>
+                    <div id="progress1" class="progress-bar" style="display: none">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+
+                <div class="upload-box" id="uploadBox2">
+                    <div class="upload-icon">📈</div>
+                    <h3 id="file2Title">File 2: Excel DLBH Bkav</h3>
+                    <p id="file2Desc">Kéo thả file hoặc click để chọn</p>
+                    <input type="file" id="file2" accept=".xlsx,.xls,.csv" style="display: none">
+                    <button class="btn btn-primary" id="selectFile2Btn">Chọn File</button>
+                    <div id="file2Info" class="file-info" style="display: none"></div>
+                    <div id="progress2" class="progress-bar" style="display: none">
+                        <div class="progress"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="compareBtn" disabled>
+                    <span>🔍</span> So sánh
+                </button>
+                <button class="btn btn-success" id="exportBtn" disabled>
+                    <span>📤</span> Xuất Excel
+                </button>
+                <button class="btn btn-danger" id="refreshBtn">
+                    <span>🔄</span> Làm mới
+                </button>
+                <button class="btn btn-primary" id="saveTemplateBtn">
+                    <span>💾</span> Lưu mẫu
+                </button>
+            </div>
+
+            <div id="results" class="results" style="display: none">
+                <div class="stats-grid" id="statsGrid"></div>                
+                <div class="filters" id="filtersSection">
+                <h4 id="filtersTitle">🔧</h4>
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label for="validityFilter" id="validityFilterLabel"></label>
+                        <select id="validityFilter" class="form-control">
+                            <option value="all"></option>
+                            <option value="valid"></option>
+                            <option value="invalid"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="billcodeSearch" id="billcodeSearchLabel"></label>
+                        <input type="text" id="billcodeSearch" class="form-control" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="diffFilter" id="diffFilterLabel"></label>
+                        <input type="number" id="diffFilter" class="form-control" placeholder="0">
+                    </div>
+                    <div class="form-group">
+                        <label> </label>
+                        <button class="btn btn-primary" id="clearFiltersBtn"></button>
+                    </div>
+                </div>
+            </div>
+
+                <div class="chart-container">
+                    <canvas id="validityChart" width="300" height="150"></canvas>
+                </div>
+                <div class="accordion" id="resultsAccordion"></div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none">
+                <div class="spinner"></div>
+                <span style="margin-left: 1rem">Đang xử lý...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            const translations = {
+                vi: {
+                    title: 'Công cụ So sánh File Excel',
+                    subtitle: 'Phân tích và so sánh dữ liệu từ hai file Excel/CSV',
+                    file1Title: 'File 1: Excel POS Jollibee',
+                    file2Title: 'File 2: Excel DLBH Bkav',
+                    file1Desc: 'Kéo thả file hoặc click để chọn',
+                    file2Desc: 'Kéo thả file hoặc click để chọn',
+                    compare: 'So sánh',
+                    export: 'Xuất Excel',
+                    refresh: 'Làm mới',
+                    saveTemplate: 'Lưu mẫu',
+                    processing: 'Đang xử lý...',
+                    valid: 'Hợp lệ',
+                    invalid: 'Không hợp lệ',
+                    all: 'Tất cả',
+                    stats: {
+                        total: 'Tổng số bản ghi',
+                        matched: 'Khớp',
+                        unmatched: 'Không khớp',
+                        diffAmount: 'Chênh lệch tổng',
+                        notTaken: 'Không lấy',
+                        totalOtherSvc: 'Phí giao hàng',
+                        adjustedTotalDiff: 'Chênh lệch Không phí giao'
+                    },
+                    table: {
+                        billcode: 'Mã Billcode',
+                        amount1: 'Số tiền File 1',
+                        amount2: 'Số tiền File 2',
+                        difference: 'Chênh lệch',
+                        status: 'Trạng thái',
+                        reason: 'Lý do',
+                        other_svc_ttl: 'Dịch vụ khác'
+                    },
+                    filter: {
+                        validity: 'Tính hợp lệ',
+                        billcodeSearch: 'Tìm kiếm Billcode',
+                        diffFilter: 'Chênh lệch tối thiểu',
+                        clearFilters: 'Xóa bộ lọc'
+                    },
+                    accordion: {
+                        missingInFile2: 'Billcode có ở File 1 nhưng không có ở File 2',
+                        missingInFile1: 'Billcode có ở File 2 nhưng không có ở File 1',
+                        valueDiffs: 'Billcode có giá trị chênh lệch'
+                    },
+                    alert: {
+                        success: 'Thành công: %s',
+                        error: 'Lỗi: %s',
+                        warning: 'Cảnh báo: %s',
+                        info: 'Thông tin: %s'
+                    },
+                    fileInfo: {
+                        size: 'Kích thước',
+                        data: 'Dữ liệu',
+                        rows: 'hàng',
+                        columns: 'cột'
+                    },
+                    pagination: {
+                        page: 'Trang'
+                    }
+                },
+                en: {
+                    title: 'Excel File Comparison Tool',
+                    subtitle: 'Accurately analyze and compare data from two Excel/CSV files',
+                    file1Title: 'File 1: Jollibee POS Excel',
+                    file2Title: 'File 2: Bkav DLBH Excel',
+                    file1Desc: 'Drag and drop file or click to select',
+                    file2Desc: 'Drag and drop file or click to select',
+                    compare: 'Compare',
+                    export: 'Export to Excel',
+                    refresh: 'Refresh',
+                    saveTemplate: 'Save Template',
+                    processing: 'Processing...',
+                    valid: 'Valid',
+                    invalid: 'Invalid',
+                    all: 'All',
+                    stats: {
+                        total: 'Total Records',
+                        matched: 'Matched',
+                        unmatched: 'Unmatched',
+                        diffAmount: 'Total Difference',
+                        notTaken: 'Not Taken',
+                        totalOtherSvc: 'Delivery fee',
+                        adjustedTotalDiff: 'Shipping fee difference'
+                    },
+                    table: {
+                        billcode: 'Billcode',
+                        amount1: 'Amount File 1',
+                        amount2: 'Amount File 2',
+                        difference: 'Difference',
+                        status: 'Status',
+                        reason: 'Reason',
+                        other_svc_ttl: 'Other Service Total'
+                    },
+                    filter: {
+                        validity: 'Validity',
+                        billcodeSearch: 'Search Billcode',
+                        diffFilter: 'Minimum Difference',
+                        clearFilters: 'Clear Filters'
+                    },
+                    accordion: {
+                        missingInFile2: 'Billcodes in File 1 but not in File 2',
+                        missingInFile1: 'Billcodes in File 2 but not in File 1',
+                        valueDiffs: 'Billcodes with Value Differences'
+                    },
+                    alert: {
+                        success: 'Success: %s',
+                        error: 'Error: %s',
+                        warning: 'Warning: %s',
+                        info: 'Info: %s'
+                    },
+                    fileInfo: {
+                        size: 'Size',
+                        data: 'Data',
+                        rows: 'rows',
+                        columns: 'columns'
+                     },
+                     pagination: {
+                        page: 'Page'
+                    }
+                },
+                zh: {
+                    title: 'Excel文件比较工具',
+                    subtitle: '精确分析和比较两个Excel/CSV文件中的数据',
+                    file1Title: '文件1：Jollibee POS Excel',
+                    file2Title: '文件2：Bkav DLBH Excel',
+                    file1Desc: '拖放文件或点击选择',
+                    file2Desc: '拖放文件或点击选择',
+                    compare: '比较',
+                    export: '导出到Excel',
+                    refresh: '刷新',
+                    saveTemplate: '保存模板',
+                    processing: '处理中...',
+                    valid: '有效',
+                    invalid: '无效',
+                    all: '全部',
+                    stats: {
+                        total: '总记录数',
+                        matched: '匹配',
+                        unmatched: '不匹配',
+                        diffAmount: '总差额',
+                        notTaken: '未取',
+                        totalOtherSvc: '运费',
+                        adjustedTotalDiff: '运费差异'
+                    },
+                    table: {
+                        billcode: '账单代码',
+                        amount1: '文件1金额',
+                        amount2: '文件2金额',
+                        difference: '差额',
+                        status: '状态',
+                        reason: '原因',
+                        other_svc_ttl: '其他服务总额'
+                    },
+                    filter: {
+                        validity: '有效性',
+                        billcodeSearch: '搜索账单代码',
+                        diffFilter: '最小差额',
+                        clearFilters: '清除过滤器'
+                    },
+                    accordion: {
+                        missingInFile2: '文件1中有但文件2中没有的账单代码',
+                        missingInFile1: '文件2中有但文件1中没有的账单代码',
+                        valueDiffs: '具有价值差异的账单代码'
+                    },
+                    alert: {
+                        success: '成功：%s',
+                        error: '错误：%s',
+                        warning: '警告：%s',
+                        info: '信息：%s'
+                    },
+                    fileInfo: {
+                        size: '大小',
+                        data: '数据',
+                        rows: '行',
+                        columns: '列'
+                    },
+                    pagination: {
+                        page: '页'
+                    }
+                },
+                ja: {
+                    title: 'Excelファイル比較ツール',
+                    subtitle: '2つのExcel/CSVファイルのデータを正確に分析および比較します',
+                    file1Title: 'ファイル1：Jollibee POS Excel',
+                    file2Title: 'ファイル2：Bkav DLBH Excel',
+                    file1Desc: 'ファイルをドラッグ＆ドロップまたはクリックして選択',
+                    file2Desc: 'ファイルをドラッグ＆ドロップまたはクリックして選択',
+                    compare: '比較',
+                    export: 'Excelにエクスポート',
+                    refresh: 'リフレッシュ',
+                    saveTemplate: 'テンプレートを保存',
+                    processing: '処理中...',
+                    valid: '有効',
+                    invalid: '無効',
+                    all: 'すべて',
+                    stats: {
+                        total: '総レコード数',
+                        matched: '一致',
+                        unmatched: '不一致',
+                        diffAmount: '総差額',
+                        notTaken: '取得しない',
+                        totalOtherSvc: '配達料',
+                        adjustedTotalDiff: '送料の差'
+                    },
+                    table: {
+                        billcode: 'ビルコード',
+                        amount1: 'ファイル1の金額',
+                        amount2: 'ファイル2の金額',
+                        difference: '差額',
+                        status: 'ステータス',
+                        reason: '理由',
+                        other_svc_ttl: 'その他のサービス合計'
+                    },
+                    filter: {
+                        validity: '有効性',
+                        billcodeSearch: 'ビルコード検索',
+                        diffFilter: '最小差額',
+                        clearFilters: 'フィルターをクリア'
+                    },
+                    accordion: {
+                        missingInFile2: 'ファイル1にあり、ファイル2にないビルコード',
+                        missingInFile1: 'ファイル2にあり、ファイル1にないビルコード',
+                        valueDiffs: '価値の差があるビルコード'
+                    },
+                    alert: {
+                        success: '成功：%s',
+                        error: 'エラー：%s',
+                        warning: '警告：%s',
+                        info: '情報：%s'
+                    },
+                    fileInfo: {
+                        size: 'サイズ',
+                        data: 'データ',
+                        rows: '行',
+                        columns: '列'
+                    },
+                    pagination: {
+                        page: 'ページ'
+                    }
+                },
+                ko: {
+                    title: '엑셀 파일 비교 도구',
+                    subtitle: '두 개의 Excel/CSV 파일 데이터를 정확히 분석 및 비교',
+                    file1Title: '파일 1: Jollibee POS Excel',
+                    file2Title: '파일 2: Bkav DLBH Excel',
+                    file1Desc: '파일을 드래그 앤 드롭하거나 클릭하여 선택',
+                    file2Desc: '파일을 드래그 앤 드롭하거나 클릭하여 선택',
+                    compare: '비교',
+                    export: 'Excel로 내보내기',
+                    refresh: '새로고침',
+                    saveTemplate: '템플릿 저장',
+                    processing: '처리 중...',
+                    valid: '유효',
+                    invalid: '무효',
+                    all: '모두',
+                    stats: {
+                        total: '총 레코드 수',
+                        matched: '일치',
+                        unmatched: '불일치',
+                        diffAmount: '총 차액',
+                        notTaken: '취하지 않음',
+                        totalOtherSvc: '배송료',
+                        adjustedTotalDiff: '배송료 차이'
+                    },
+                    table: {
+                        billcode: '빌 코드',
+                        amount1: '파일 1 금액',
+                        amount2: '파일 2 금액',
+                        difference: '차액',
+                        status: '상태',
+                        reason: '이유',
+                        other_svc_ttl: '기타 서비스 합계'
+                    },
+                    filter: {
+                        validity: '유효성',
+                        billcodeSearch: '빌 코드 검색',
+                        diffFilter: '최소 차액',
+                        clearFilters: '필터 지우기'
+                    },
+                    accordion: {
+                        missingInFile2: '파일 1에 있지만 파일 2에 없는 빌 코드',
+                        missingInFile1: '파일 2에 있지만 파일 1에 없는 빌 코드',
+                        valueDiffs: '가치 차이가 있는 빌 코드'
+                    },
+                    alert: {
+                        success: '성공: %s',
+                        error: '오류: %s',
+                        warning: '경고: %s',
+                        info: '정보: %s'
+                    },
+                    fileInfo: {
+                        size: '크기',
+                        data: '데이터',
+                        rows: '행',
+                        columns: '열'
+                    },
+                    pagination: {
+                        page: '페이지'
+                    }
+                },
+                ru: {
+                    title: 'Инструмент сравнения файлов Excel',
+                    subtitle: 'Точно анализируйте и сравнивайте данные из двух файлов Excel/CSV',
+                    file1Title: 'Файл 1: Excel POS Jollibee',
+                    file2Title: 'Файл 2: Excel DLBH Bkav',
+                    file1Desc: 'Перетащите файл или нажмите для выбора',
+                    file2Desc: 'Перетащите файл или нажмите для выбора',
+                    compare: 'Сравнить',
+                    export: 'Экспорт в Excel',
+                    refresh: 'Обновить',
+                    saveTemplate: 'Сохранить шаблон',
+                    processing: 'Обработка...',
+                    valid: 'Действительный',
+                    invalid: 'Недействительный',
+                    all: 'Все',
+                    stats: {
+                        total: 'Всего записей',
+                        matched: 'Совпадения',
+                        unmatched: 'Несовпадения',
+                        diffAmount: 'Общая разница',
+                        notTaken: 'Не взято',
+                        totalOtherSvc: 'Стоимость доставки',
+                        adjustedTotalDiff: 'Разница в стоимости доставки'
+                    },
+                    table: {
+                        billcode: 'Код счета',
+                        amount1: 'Сумма файла 1',
+                        amount2: 'Сумма файла 2',
+                        difference: 'Разница',
+                        status: 'Статус',
+                        reason: 'Причина',
+                        other_svc_ttl: 'Итог других услуг'
+                    },
+                    filter: {
+                        validity: 'Действительность',
+                        billcodeSearch: 'Поиск кода счета',
+                        diffFilter: 'Минимальная разница',
+                        clearFilters: 'Очистить фильтры'
+                    },
+                    accordion: {
+                        missingInFile2: 'Коды счетов, присутствующие в файле 1, но отсутствующие в файле 2',
+                        missingInFile1: 'Коды счетов, присутствующие в файле 2, но отсутствующие в файле 1',
+                        valueDiffs: 'Коды счетов с различиями в значениях'
+                    },
+                    alert: {
+                        success: 'Успех: %s',
+                        error: 'Ошибка: %s',
+                        warning: 'Предупреждение: %s',
+                        info: 'Информация: %s'
+                    },
+                  fileInfo: {
+                        size: 'Размер',
+                        data: 'Данные',
+                        rows: 'строк',
+                        columns: 'столбцов'
+                    },
+                    pagination: {
+                        page: 'Страница'
+                    }
+                }
+            };
+
+        class ExcelCompareApp {
+            constructor() {
+                this.data1 = null;
+                this.data2 = null;
+                this.results = null;
+                this.chartInstance = null;
+                this.currentLang = localStorage.getItem('lang') || 'vi';
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.filters = {
+                    validity: 'all',
+                    billcode: '',
+                    minDiff: 0
+                };
+                this.pagination = {};
+            }
+
+            init() {
+                this.setLanguage(this.currentLang);
+                this.setTheme(this.theme);
+                this.setupEventListeners();
+                this.setupDragAndDrop();
+                this.setupEvents();
+                this.loadSavedData();
+                this.setupFilePond();
+            }
+
+            setupEventListeners() {
+                const file1Input = document.getElementById('file1');
+                const file2Input = document.getElementById('file2');
+                const selectFile1Btn = document.getElementById('selectFile1Btn');
+                const selectFile2Btn = document.getElementById('selectFile2Btn');
+                const compareBtn = document.getElementById('compareBtn');
+                const exportBtn = document.getElementById('exportBtn');
+                const refreshBtn = document.getElementById('refreshBtn');
+                const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+                const themeToggleBtn = document.getElementById('themeToggleBtn');
+                const helpBtn = document.getElementById('helpBtn');
+                const langSelect = document.getElementById('langSelect');
+                const validityFilter = document.getElementById('validityFilter');
+                const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
+                if (file1Input) file1Input.addEventListener('change', (e) => this.handleFileSelect(e, 'file1'));
+                if (file2Input) file2Input.addEventListener('change', (e) => this.handleFileSelect(e, 'file2'));
+                if (selectFile1Btn) selectFile1Btn.addEventListener('click', () => document.getElementById('file1').click());
+                if (selectFile2Btn) selectFile2Btn.addEventListener('click', () => document.getElementById('file2').click());
+                if (compareBtn) compareBtn.addEventListener('click', () => this.compareFiles());
+                if (exportBtn) exportBtn.addEventListener('click', () => this.exportToExcel());
+                if (refreshBtn) refreshBtn.addEventListener('click', () => this.refreshPage());
+                if (saveTemplateBtn) saveTemplateBtn.addEventListener('click', () => this.saveTemplate());
+                if (themeToggleBtn) themeToggleBtn.addEventListener('click', () => this.toggleTheme());
+                if (helpBtn) helpBtn.addEventListener('click', () => this.showHelp());
+                if (langSelect) langSelect.addEventListener('change', (e) => this.setLanguage(e.target.value));
+                if (validityFilter) validityFilter.addEventListener('change', () => this.applyFilters());
+                if (clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+
+                window.addEventListener('beforeunload', (e) => {
+                    if (this.data1 || this.data2) {
+                        e.preventDefault();
+                        e.returnValue = translations[this.currentLang]?.alert?.warning?.replace('%s', 'Dữ liệu sẽ bị mất nếu rời trang.') || 'Data will be lost if you leave the page.';
+                    }
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey) {
+                        switch(e.key) {
+                            case 'r':
+                                e.preventDefault();
+                                this.compareFiles();
+                                break;
+                            case 's':
+                                e.preventDefault();
+                                this.exportToExcel();
+                                break;
+                            case 'n':
+                                e.preventDefault();
+                                this.refreshPage();
+                                break;
+                        }
+                    }
+                });
+            }
+
+            setupDragAndDrop() {
+                ['uploadBox1', 'uploadBox2'].forEach(id => {
+                    const box = document.getElementById(id);
+                    if (!box) return;
+                    const fileInput = id === 'uploadBox1' ? 'file1' : 'file2';
+                    
+                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                        box.addEventListener(eventName, (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        });
+                    });
+
+                    ['dragenter', 'dragover'].forEach(eventName => {
+                        box.addEventListener(eventName, () => box.classList.add('dragover'));
+                    });
+
+                    ['dragleave', 'drop'].forEach(eventName => {
+                        box.addEventListener(eventName, () => box.classList.remove('dragover'));
+                    });
+
+                    box.addEventListener('drop', (e) => {
+                        const files = e.dataTransfer.files;
+                        if (files.length > 0) {
+                            const input = document.getElementById(fileInput);
+                            if (input) {
+                                input.files = files;
+                                this.handleFileSelect({ target: { files } }, fileInput);
+                            }
+                        }
+                    });
+                });
+            }
+
+            setupFilePond() {
+                if (typeof FilePond !== 'undefined') {
+                    FilePond.registerPlugin(FilePondPluginFileValidateType);
+                    ['file1', 'file2'].forEach(fileId => {
+                        const input = document.getElementById(fileId);
+                        if (input) {
+                            FilePond.create(input, {
+                                acceptedFileTypes: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
+                                allowMultiple: false,
+                                onaddfile: (error, file) => {
+                                    if (!error) {
+                                        this.handleFileSelect({ target: { files: [file.file] } }, fileId);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+
+            async handleFileSelect(event, fileId) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const progressId = fileId === 'file1' ? 'progress1' : 'progress2';
+                const infoId = fileId === 'file1' ? 'file1Info' : 'file2Info';
+                
+                this.showProgress(progressId, 0);
+                
+                try {
+                    await this.validateFile(file);
+                    this.showProgress(progressId, 30);
+                    
+                    const data = await this.processFile(file);
+                    this.showProgress(progressId, 70);
+                    
+                    if (fileId === 'file1') {
+                        this.data1 = { file, data };
+                    } else {
+                        this.data2 = { file, data };
+                    }
+                    
+                    this.updateFileInfo(infoId, file, data);
+                    this.showProgress(progressId, 100);
+                    setTimeout(() => this.hideProgress(progressId), 1000);
+                    this.updateCompareButton();
+                    this.saveData();
+                } catch (error) {
+                    this.showAlert('danger', translations[this.currentLang]?.alert?.error?.replace('%s', error.message) || `Error: ${error.message}`);
+                    this.hideProgress(progressId);
+                }
+            }
+
+            async validateFile(file) {
+                if (file.size > 50 * 1024 * 1024) {
+                    throw new Error('File quá lớn (tối đa 50MB)');
+                }
+
+                const validTypes = [
+                    'application/vnd.ms-excel',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'text/csv'
+                ];
+                
+                if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx?|csv)$/i)) {
+                    throw new Error('Định dạng file không hợp lệ');
+                }
+
+                if (file.name.endsWith('.xlsm')) {
+                    throw new Error('File chứa macro (.xlsm) không được hỗ trợ do lỗi bảo mật.');
+                }
+
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve();
+                    reader.onerror = () => reject(new Error('Không thể đọc file'));
+                    reader.readAsArrayBuffer(file.slice(0, 1024));
+                });
+            }
+
+            async processFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = async (event) => {
+                        try {
+                            let data;
+                            if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
+                                const text = new TextDecoder().decode(event.target.result);
+                                const result = Papa.parse(text, {
+                                    header: true,
+                                    skipEmptyLines: true,
+                                    dynamicTyping: true,
+                                    encoding: 'UTF-8'
+                                });
+                                data = result.data;
+                            } else {
+                                const workbook = XLSX.read(event.target.result, {
+                                    type: 'array',
+                                    cellDates: true,
+                                    cellNF: false,
+                                    cellText: false
+                                });
+                                const sheetName = workbook.SheetNames[0];
+                                data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+                                    header: true,
+                                    raw: false,
+                                    defval: null
+                                });
+                            }
+                            
+                            if (!data || data.length === 0) {
+                                throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'File rỗng hoặc không có dữ liệu') || 'File is empty or contains no data');
+                            }
+                            
+                            resolve(data);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'Lỗi đọc file') || 'Error reading file'));
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            updateFileInfo(infoId, file, data) {
+                const info = document.getElementById(infoId);
+                if (!info) return;
+                const rows = data.length;
+                const cols = Object.keys(data[0] || {}).length;
+                const size = this.formatFileSize(file.size);
+                
+                info.innerHTML = `
+                    <div><strong>${file.name}</strong></div>
+                    <div>${translations[this.currentLang]?.alert?.success?.replace('%s', `${translations[this.currentLang]?.fileInfo?.size || 'Size'}: ${size}`)}</div>
+                    <div>${translations[this.currentLang]?.alert?.success?.replace('%s', `${translations[this.currentLang]?.fileInfo?.data || 'Data'}: ${rows} ${translations[this.currentLang]?.fileInfo?.rows || 'rows'} × ${cols} ${translations[this.currentLang]?.fileInfo?.columns || 'columns'}`)}</div>
+                    <div class="badge badge-success">✓ ${translations[this.currentLang]?.valid || 'Valid'}</div>
+                `;
+                info.style.display = 'block';
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            showProgress(progressId, percentage) {
+                const progressBar = document.getElementById(progressId);
+                if (progressBar) {
+                    const progress = progressBar.querySelector('.progress');
+                    progressBar.style.display = 'block';
+                    progress.style.width = `${percentage}%`;
+                }
+            }
+
+            hideProgress(progressId) {
+                const progressBar = document.getElementById(progressId);
+                if (progressBar) {
+                    progressBar.style.display = 'none';
+                }
+            }
+
+            updateCompareButton() {
+                const compareBtn = document.getElementById('compareBtn');
+                if (compareBtn) {
+                    compareBtn.disabled = !(this.data1 && this.data2);
+                }
+            }
+
+            showAlert(type, message) {
+                const content = document.querySelector('.content');
+                if (!content) return;
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type}`;
+                alertDiv.textContent = message;
+                content.prepend(alertDiv);
+                setTimeout(() => alertDiv.remove(), 5000);
+            }
+
+            async compareFiles() {
+                if (!this.data1 || !this.data2) {
+                    this.showAlert('warning', translations[this.currentLang]?.alert?.warning?.replace('%s', 'Vui lòng tải cả hai file') || 'Please upload both files');
+                    return;
+                }
+
+                const loading = document.getElementById('loading');
+                if (loading) loading.style.display = 'flex';
+                
+                try {
+                    this.results = this.compareData(this.data1.data, this.data2.data);
+                    this.renderResults();
+                    const exportBtn = document.getElementById('exportBtn');
+                    if (exportBtn) exportBtn.disabled = false;
+                    const resultsDiv = document.getElementById('results');
+                    if (resultsDiv) resultsDiv.style.display = 'block';
+                    this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'So sánh hoàn tất') || 'Comparison completed');
+                } catch (error) {
+                    this.showAlert('danger', translations[this.currentLang]?.alert?.error?.replace('%s', error.message) || `Error: ${error.message}`);
+                } finally {
+                    if (loading) loading.style.display = 'none';
+                }
+            }
+            compareData(data1, data2) {
+                if (!data1 || !data2 || data1.length === 0 || data2.length === 0) {
+                    throw new Error('Dữ liệu không hợp lệ hoặc rỗng');
+                }
+                const defaultHeaders1 = [
+                    "chk_seq", "emp_seq", "trans_type_seq", "id", "chk_num", "chk_open", "tbl_seq", "grp", "rvc_seq",
+                    "chk_open_date_time", "chk_clsd_date_time", "tbl_open_date_time", "subttl_date_time", "drawer_time",
+                    "pc_seq", "standalone_check", "summ_ttl_prntd", "fast_trans_chk", "chk_cancelled", "chk_edited",
+                    "training", "xfer_chk_num", "sub_ttl", "tax_ttl", "auto_svc_ttl", "other_svc_ttl", "pymnt_ttl",
+                    "amt_due_ttl", "chk_prntd_cnt", "pg_num", "line_find_line_num", "cov_cnt", "status", "last_pc_seq",
+                    "last_svc_time", "remark", "custid", "riderid", "outtime", "intime", "emplname", "deltime",
+                    "memberid", "bpoint", "undeliveryremark", "misc", "seatprinted", "seatpaid", "memcard", "cc_id",
+                    "survey_code", "survey_code_generate", "survey_prt_str", "survey_voucher_code", "sc_cnt", "MYEG_RefID"
+                ];
+
+                const defaultHeaders2 = [
+                    "STT", "Mã bill", "Mã CH", "Tên CH", "Ngày bán", "Tiền trước thuế", "Tiền thuế", "Thành tiền",
+                    "Số hóa đơn", "Trạng thái", "Ghi chú"
+                ];
+
+                const hasHeaders1 = data1.length > 0 && data1[0] && Object.keys(data1[0]).some(key => key.match(/chk_num|sub_ttl/i));
+                const hasHeaders2 = data2.length > 0 && data2[0] && Object.keys(data2[0]).some(key => key.match(/Mã bill|Thành tiền/i));
+
+                const headers1 = hasHeaders1 ? Object.keys(data1[0]) : defaultHeaders1.slice(0, Object.keys(data1[0] || {}).length);
+                const headers2 = hasHeaders2 ? Object.keys(data2[0]) : defaultHeaders2.slice(0, Object.keys(data2[0] || {}).length);
+
+                const findColumnIndex = (headers, columnName) => {
+                    const index = headers.findIndex(header => header && header.toString().trim().toLowerCase() === columnName.toLowerCase());
+                    return index >= 0 ? headers[index] : columnName;
+                };
+
+                const billcodeCol1 = findColumnIndex(headers1, 'chk_num');
+                const valueCol1 = findColumnIndex(headers1, 'sub_ttl');
+                const otherSvcCol = findColumnIndex(headers1, 'other_svc_ttl');
+                const conditionCols = {
+                    standaloneCheck: findColumnIndex(headers1, 'standalone_check'),
+                    summTtlPrntd: findColumnIndex(headers1, 'summ_ttl_prntd'),
+                    fastTransChk: findColumnIndex(headers1, 'fast_trans_chk'),
+                    chkCancelled: findColumnIndex(headers1, 'chk_cancelled'),
+                    chkEdited: findColumnIndex(headers1, 'chk_edited'),
+                    training: findColumnIndex(headers1, 'training')
+                };
+
+                const billcodeCol2 = findColumnIndex(headers2, 'Mã bill');
+                const valueCol2 = findColumnIndex(headers2, 'Thành tiền');
+
+                if (!headers1.includes(billcodeCol1) || !headers1.includes(valueCol1)) {
+                    throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'File 1 thiếu cột chk_num hoặc sub_ttl') || 'File 1 missing chk_num or sub_ttl column');
+                }
+                if (!headers2.includes(billcodeCol2) || !headers2.includes(valueCol2)) {
+                    throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'File 2 thiếu cột Mã bill hoặc Thành tiền') || 'File 2 missing Mã bill or Thành tiền column');
+                }
+
+                const excludedBills = [];
+                const validRows1 = data1.filter(row => {
+                    const reasons = [];
+                    const billcode = String(row[billcodeCol1]).trim();
+                    const conditions = [
+                        { col: conditionCols.standaloneCheck, name: 'standalone_check' },
+                        { col: conditionCols.summTtlPrntd, name: 'summ_ttl_prntd' },
+                        { col: conditionCols.fastTransChk, name: 'fast_trans_chk' },
+                        { col: conditionCols.chkCancelled, name: 'chk_cancelled' },
+                        { col: conditionCols.chkEdited, name: 'chk_edited' },
+                        { col: conditionCols.training, name: 'training' }
+                    ];
+
+                    conditions.forEach(({ col, name }) => {
+                        if (row[col] != null) {
+                            const val = parseInt(row[col], 10);
+                            if (!isNaN(val) && (val === 1 || val === -1)) {
+                                reasons.push(`${name} = ${val}`);
+                            }
+                        }
+                    });
+
+                    if (reasons.length > 0) {
+                        excludedBills.push({ billcode, reason: reasons.join(', ') });
+                        return false;
+                    }
+                    return true;
+                });
+
+                const billcodes1 = data1.map(row => String(row[billcodeCol1]).trim()).filter(b => b);
+                const billcodes2 = data2.map(row => String(row[billcodeCol2]).trim()).filter(b => b);
+
+                const missingInFile2 = [];
+                let notTakenCount = excludedBills.length;
+
+                billcodes1.forEach(bill => {
+                    if (!billcodes2.includes(bill)) {
+                        const row = data1.find(r => String(r[billcodeCol1]).trim() === bill);
+                        const excluded = excludedBills.find(e => e.billcode === bill);
+                        if (excluded) {
+                            missingInFile2.push({ billcode: bill, reason: excluded.reason, status: 'valid' });
+                        } else if (row[valueCol1] != null && parseFloat(row[valueCol1]) <= 0) {
+                            missingInFile2.push({ billcode: bill, reason: 'sub_ttl <= 0', status: 'valid' });
+                            notTakenCount++;
+                        } else {
+                            missingInFile2.push({ billcode: bill, reason: 'Không có trong File 2', status: 'invalid' });
+                        }
+                    }
+                });
+
+                const missingInFile1 = [];
+                billcodes2.forEach(bill => {
+                    if (!billcodes1.includes(bill)) {
+                        missingInFile1.push({ billcode: bill, reason: 'Không có trong File 1', status: 'invalid' });
+                    }
+                });
+
+                const valueDiffs = [];
+                let totalDiff = 0;
+                let matched = 0;
+                let unmatched = 0;
+                let totalOtherSvc = 0; // Tổng phí "Dịch vụ khác"
+                let adjustedTotalDiff = 0; // Chênh lệch không tính "Dịch vụ khác"
+
+                validRows1.forEach(row1 => {
+                    const billcode = String(row1[billcodeCol1]).trim();
+                    const row2 = data2.find(r => String(r[billcodeCol2]).trim() === billcode);
+                    if (row2) {
+                        const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
+                        const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
+                        const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
+                        const diff = val2 - val1;
+                        const isValidDiff = Math.abs(diff - otherSvc) < 0.01 || Math.abs(diff + otherSvc) < 0.01;
+                        if (isValidDiff) matched++;
+                        else unmatched++;
+                        totalDiff += Math.abs(diff);
+                        totalOtherSvc += otherSvc; // Cộng dồn tổng phí "Dịch vụ khác"
+                        const adjustedDiff = diff - otherSvc; // Chênh lệch sau khi loại bỏ "Dịch vụ khác"
+                        adjustedTotalDiff += Math.abs(adjustedDiff);
+                        valueDiffs.push({
+                            billcode,
+                            amount1: val1,
+                            amount2: val2,
+                            difference: diff,
+                            status: isValidDiff ? 'valid' : 'invalid',
+                            otherSvc
+                        });
+                    }
+                });
+
+                return {
+                    data: {
+                        missingInFile2,
+                        missingInFile1,
+                        valueDiffs
+                    },
+                    stats: {
+                        total: billcodes1.length,
+                        matched,
+                        unmatched,
+                        notTaken: notTakenCount,
+                        totalDiff: totalDiff.toFixed(2),
+                        totalOtherSvc: totalOtherSvc.toFixed(2), // Tổng phí "Dịch vụ khác"
+                        adjustedTotalDiff: adjustedTotalDiff.toFixed(2) // Chênh lệch không tính "Dịch vụ khác"
+                    }
+                };
+            }
+            renderResults() {
+                const { data, stats } = this.results;
+                this.renderStats(stats);
+                this.renderTables(data);
+                this.setupAccordionEvents();
+                this.setupPaginationEvents();
+            }
+            renderTables(data) {
+                const filteredData = this.applyFiltersToData(data);
+                const accordion = document.getElementById('resultsAccordion');
+                if (!accordion) return;
+                accordion.innerHTML = `
+                    <div class="accordion-item active">
+                        <div class="accordion-header">
+                            ${translations[this.currentLang]?.accordion?.missingInFile2 || 'Billcodes in File 1 but not in File 2'}
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content" style="display: block;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
+                                            <th>${translations[this.currentLang]?.table?.reason || 'Reason'}</th>
+                                            <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${filteredData.missingInFile2.length > 0 ? this.paginateData(filteredData.missingInFile2, 'missingInFile2').map(row => `
+                                            <tr>
+                                                <td>${row.billcode || '-'}</td>
+                                                <td>${row.reason}</td>
+                                                <td><span class="badge badge-${row.status === 'valid' ? 'success' : 'danger'}">
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
+                                                </span></td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="3">Không có dữ liệu</td></tr>'}
+                                    </tbody>
+                                </table>
+                                ${this.renderPagination(filteredData.missingInFile2, 'missingInFile2')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item active">
+                        <div class="accordion-header">
+                            ${translations[this.currentLang]?.accordion?.missingInFile1 || 'Billcodes in File 2 but not in File 1'}
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content" style="display: block;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
+                                            <th>${translations[this.currentLang]?.table?.reason || 'Reason'}</th>
+                                            <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${filteredData.missingInFile1.length > 0 ? this.paginateData(filteredData.missingInFile1, 'missingInFile1').map(row => `
+                                            <tr>
+                                                <td>${row.billcode || '-'}</td>
+                                                <td>${row.reason}</td>
+                                                <td><span class="badge badge-${row.status === 'valid' ? 'success' : 'danger'}">
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
+                                                </span></td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="3">Không có dữ liệu</td></tr>'}
+                                    </tbody>
+                                </table>
+                                ${this.renderPagination(filteredData.missingInFile1, 'missingInFile1')}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item active">
+                        <div class="accordion-header">
+                            ${translations[this.currentLang]?.accordion?.valueDiffs || 'Billcodes with Value Differences'}
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content" style="display: block;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
+                                            <th>${translations[this.currentLang]?.table?.amount1 || 'Amount File 1'}</th>
+                                            <th>${translations[this.currentLang]?.table?.amount2 || 'Amount File 2'}</th>
+                                            <th>${translations[this.currentLang]?.table?.difference || 'Difference'}</th>
+                                            <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
+                                            <th>${translations[this.currentLang]?.table?.other_svc_ttl || 'Other Service Total'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${filteredData.valueDiffs.length > 0 ? this.paginateData(filteredData.valueDiffs, 'valueDiffs').map(row => `
+                                            <tr>
+                                                <td>${row.billcode || '-'}</td>
+                                                <td>${row.amount1 !== null ? row.amount1.toFixed(2) : '-'}</td>
+                                                <td>${row.amount2 !== null ? row.amount2.toFixed(2) : '-'}</td>
+                                                <td>${row.difference.toFixed(2)}</td>
+                                                <td><span class="badge badge-${row.status === 'valid' ? 'success' : 'danger'}">
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
+                                                </span></td>
+                                                <td>${row.otherSvc !== null ? row.otherSvc.toFixed(2) : '-'}</td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="6">Không có dữ liệu</td></tr>'}
+                                    </tbody>
+                                </table>
+                                ${this.renderPagination(filteredData.valueDiffs, 'valueDiffs')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            setupAccordionEvents() {
+                const headers = document.querySelectorAll('.accordion-header');
+                headers.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const parent = header.parentElement;
+                        parent.classList.toggle('active');
+                    });
+                });
+            }
+
+            setupPaginationEvents() {
+                const buttons = document.querySelectorAll('.pagination button');
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const tableId = button.getAttribute('data-table-id');
+                        const action = button.getAttribute('data-action');
+                        if (tableId && action) {
+                            if (action === 'prev') {
+                                this.pagination[tableId].currentPage--;
+                            } else if (action === 'next') {
+                                this.pagination[tableId].currentPage++;
+                            }
+                            this.renderResults();
+                        }
+                    });
+                });
+            }
+
+            renderStats(stats) {
+                const statsGrid = document.getElementById('statsGrid');
+                if (!statsGrid) return;
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.total}</div>
+                        <div class="stat-label">${translations[this.currentLang]?.stats?.total || 'Total Records'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.matched}</div>
+                        <div class="stat-label">${translations[this.currentLang]?.stats?.matched || 'Matched'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.unmatched}</div>
+                        <div class="stat-label">${translations[this.currentLang]?.stats?.unmatched || 'Unmatched'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.notTaken}</div>
+                        <div class="stat-label">${translations[this.currentLang]?.stats?.notTaken || 'Not Taken'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${stats.totalDiff}</div>
+                        <div class="stat-label">${translations[this.currentLang]?.stats?.diffAmount || 'Total Difference'}<br>
+                            (<b>${translations[this.currentLang]?.stats?.totalOtherSvc || 'Total Other Services'}: ${stats.totalOtherSvc}</b>, 
+                             <br><b>${translations[this.currentLang]?.stats?.adjustedTotalDiff || 'Difference without Other Services'}: ${stats.adjustedTotalDiff}</b>)</div>
+                    </div>
+                `;
+            }
+            applyFiltersToData(data) {
+                console.log('Input data for filtering:', data);
+                console.log('Current filters:', this.filters);
+
+                const filtered = {
+                    missingInFile2: data.missingInFile2.filter(row => {
+                        const validityMatch = this.filters.validity === 'all' || 
+                                            (this.filters.validity === 'invalid' && row.status === 'invalid') || 
+                                            (this.filters.validity === 'valid' && row.status === 'valid');
+                        const billcodeMatch = !this.filters.billcode || 
+                            (row.billcode && row.billcode.toString().toLowerCase().includes(this.filters.billcode.toLowerCase()));
+                        return validityMatch && billcodeMatch;
+                    }),
+                    missingInFile1: data.missingInFile1.filter(row => {
+                        const validityMatch = this.filters.validity === 'all' || 
+                                            (this.filters.validity === 'invalid' && row.status === 'invalid') || 
+                                            (this.filters.validity === 'valid' && row.status === 'valid');
+                        const billcodeMatch = !this.filters.billcode || 
+                            (row.billcode && row.billcode.toString().toLowerCase().includes(this.filters.billcode.toLowerCase()));
+                        return validityMatch && billcodeMatch;
+                    }),
+                    valueDiffs: data.valueDiffs.filter(row => {
+                        const validityMatch = this.filters.validity === 'all' || 
+                                            (this.filters.validity === 'invalid' && row.status === 'invalid') || 
+                                            (this.filters.validity === 'valid' && row.status === 'valid');
+                        const billcodeMatch = !this.filters.billcode || 
+                            (row.billcode && row.billcode.toString().toLowerCase().includes(this.filters.billcode.toLowerCase()));
+                        const diffMatch = !this.filters.minDiff || Math.abs(row.difference) >= this.filters.minDiff;
+                        return validityMatch && billcodeMatch && diffMatch;
+                    })
+                };
+
+                console.log('Filtered data:', filtered);
+                return filtered;
+            }
+
+            paginateData(data, tableId) {
+                if (!this.pagination[tableId]) {
+                    this.pagination[tableId] = { currentPage: 1, itemsPerPage: 20 };
+                }
+                const start = (this.pagination[tableId].currentPage - 1) * this.pagination[tableId].itemsPerPage;
+                const end = start + this.pagination[tableId].itemsPerPage;
+                return data.slice(start, end);
+            }
+            renderPagination(data, tableId) {
+                if (!this.pagination[tableId]) {
+                    this.pagination[tableId] = { currentPage: 1, itemsPerPage: 20 };
+                }
+                const totalPages = Math.ceil(data.length / this.pagination[tableId].itemsPerPage);
+                return `
+                    <div class="pagination">
+                        <button data-table-id="${tableId}" data-action="prev" 
+                                ${this.pagination[tableId].currentPage === 1 ? 'disabled' : ''}>←</button>
+                        <span>${translations[this.currentLang]?.pagination?.page || 'Page'} ${this.pagination[tableId].currentPage} / ${totalPages}</span>
+                        <button data-table-id="${tableId}" data-action="next" 
+                                ${this.pagination[tableId].currentPage === totalPages ? 'disabled' : ''}>→</button>
+                    </div>
+                `;
+            }
+            applyFilters() {
+                const validityFilter = document.getElementById('validityFilter');
+                const billcodeSearch = document.getElementById('billcodeSearch');
+                const diffFilter = document.getElementById('diffFilter');
+                if (validityFilter) {
+                    this.filters.validity = validityFilter.value;
+                    console.log('Updated validity filter:', this.filters.validity);
+                }
+                if (billcodeSearch) this.filters.billcode = billcodeSearch.value;
+                if (diffFilter) this.filters.minDiff = parseFloat(diffFilter.value) || 0;
+                Object.keys(this.pagination).forEach(tableId => {
+                    this.pagination[tableId].currentPage = 1;
+                });
+                this.renderResults();
+            }
+
+            clearFilters() {
+                this.filters = { validity: 'all', billcode: '', minDiff: 0 };
+                const validityFilter = document.getElementById('validityFilter');
+                const billcodeSearch = document.getElementById('billcodeSearch');
+                const diffFilter = document.getElementById('diffFilter');
+                if (validityFilter) validityFilter.value = 'all';
+                if (billcodeSearch) billcodeSearch.value = '';
+                if (diffFilter) diffFilter.value = '';
+                Object.keys(this.pagination).forEach(tableId => {
+                    this.pagination[tableId].currentPage = 1;
+                });
+                this.renderResults();
+            }
+
+            renderChart() {
+                const canvas = document.getElementById('validityChart');
+                if (!canvas || !this.results) return;
+                const ctx = canvas.getContext('2d');
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                const filteredData = this.applyFiltersToData(this.results.data);
+                const validCount = filteredData.missingInFile2.filter(row => row.status === 'valid').length +
+                                  filteredData.valueDiffs.filter(row => row.status === 'valid').length;
+                const invalidCount = filteredData.missingInFile2.filter(row => row.status === 'invalid').length +
+                                    filteredData.missingInFile1.length +
+                                    filteredData.valueDiffs.filter(row => row.status === 'invalid').length;
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: [translations[this.currentLang]?.valid || 'Valid', translations[this.currentLang]?.invalid || 'Invalid'],
+                        datasets: [{
+                            data: [validCount, invalidCount],
+                            backgroundColor: ['#28a745', '#dc3545'],
+                            borderColor: ['#fff', '#fff'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: this.theme === 'dark' ? '#fff' : '#343a40' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            exportToExcel() {
+                if (!this.results) {
+                    this.showAlert('warning', translations[this.currentLang]?.alert?.warning?.replace('%s', 'Chưa có kết quả để xuất') || 'No results to export');
+                    return;
+                }
+
+                const wb = XLSX.utils.book_new();
+
+                const ws1 = XLSX.utils.json_to_sheet(this.results.data.missingInFile2.map(row => ({
+                    [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
+                    'Lý do': row.reason,
+                    [translations[this.currentLang]?.table?.status || 'Status']: translations[this.currentLang]?.[row.status] || row.status
+                })));
+                XLSX.utils.book_append_sheet(wb, ws1, 'Missing in File 2');
+
+                const ws2 = XLSX.utils.json_to_sheet(this.results.data.missingInFile1.map(row => ({
+                    [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
+                    'Lý do': row.reason,
+                    [translations[this.currentLang]?.table?.status || 'Status']: translations[this.currentLang]?.[row.status] || row.status
+                })));
+                XLSX.utils.book_append_sheet(wb, ws2, 'Missing in File 1');
+
+                const ws3 = XLSX.utils.json_to_sheet(this.results.data.valueDiffs.map(row => ({
+                    [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
+                    [translations[this.currentLang]?.table?.amount1 || 'Amount File 1']: row.amount1 !== null ? row.amount1 : '-',
+                    [translations[this.currentLang]?.table?.amount2 || 'Amount File 2']: row.amount2 !== null ? row.amount2 : '-',
+                    [translations[this.currentLang]?.table?.difference || 'Difference']: row.difference,
+                    [translations[this.currentLang]?.table?.status || 'Status']: translations[this.currentLang]?.[row.status] || row.status,
+                    'other_svc_ttl': row.otherSvc !== null ? row.otherSvc : '-'
+                })));
+                XLSX.utils.book_append_sheet(wb, ws3, 'Value Differences');
+
+                XLSX.writeFile(wb, 'comparison_results.xlsx');
+                this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Xuất file Excel thành công') || 'Exported Excel successfully');
+            }
+
+            refreshPage() {
+                this.data1 = null;
+                this.data2 = null;
+                this.results = null;
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                    this.chartInstance = null;
+                }
+                const file1 = document.getElementById('file1');
+                const file2 = document.getElementById('file2');
+                if (file1) file1.value = '';
+                if (file2) file2.value = '';
+                const file1Info = document.getElementById('file1Info');
+                const file2Info = document.getElementById('file2Info');
+                if (file1Info) file1Info.style.display = 'none';
+                if (file2Info) file2Info.style.display = 'none';
+                const results = document.getElementById('results');
+                if (results) results.style.display = 'none';
+                const compareBtn = document.getElementById('compareBtn');
+                const exportBtn = document.getElementById('exportBtn');
+                if (compareBtn) compareBtn.disabled = true;
+                if (exportBtn) exportBtn.disabled = true;
+                this.clearFilters();
+                localStorage.removeItem('excelCompareData');
+                this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Đã làm mới trang') || 'Page refreshed');
+            }
+
+            saveTemplate() {
+                if (!this.results) {
+                    this.showAlert('warning', translations[this.currentLang]?.alert?.warning?.replace('%s', 'Chưa có kết quả để lưu mẫu') || 'No results to save as template');
+                    return;
+                }
+                localStorage.setItem('excelCompareTemplate', JSON.stringify(this.results));
+                this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Đã lưu mẫu') || 'Template saved');
+            }
+
+            saveData() {
+                const saveData = {
+                    data1: this.data1 ? { name: this.data1.file.name } : null,
+                    data2: this.data2 ? { name: this.data2.file.name } : null
+                };
+                localStorage.setItem('excelCompareData', JSON.stringify(saveData));
+            }
+
+            loadSavedData() {
+                const savedData = localStorage.getItem('excelCompareData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    const file1Info = document.getElementById('file1Info');
+                    const file2Info = document.getElementById('file2Info');
+                    if (data.data1 && file1Info) {
+                        file1Info.innerHTML = `<div><strong>${data.data1.name}</strong></div>`;
+                        file1Info.style.display = 'block';
+                    }
+                    if (data.data2 && file2Info) {
+                        file2Info.innerHTML = `<div><strong>${data.data2.name}</strong></div>`;
+                        file2Info.style.display = 'block';
+                    }
+                }
+            }
+            // setLanguage(lang) {
+            //     if (!translations[lang]) {
+            //         console.warn(`Language ${lang} not found, falling back to 'vi'`);
+            //         lang = 'vi';
+            //     }
+            //     this.currentLang = lang;
+            //     localStorage.setItem('lang', lang);
+            //     const langSelect = document.getElementById('langSelect');
+            //     if (langSelect) langSelect.value = lang;
+            //     const title = document.getElementById('title');
+            //     if (title) title.textContent = translations[lang]?.title || 'Excel File Comparison Tool';
+            //     const subtitle = document.getElementById('subtitle');
+            //     if (subtitle) subtitle.textContent = translations[lang]?.subtitle || 'Analyze and compare data from two Excel/CSV files';
+            //     const file1Title = document.getElementById('file1Title');
+            //     if (file1Title) file1Title.textContent = translations[lang]?.file1Title || 'File 1';
+            //     const file2Title = document.getElementById('file2Title');
+            //     if (file2Title) file2Title.textContent = translations[lang]?.file2Title || 'File 2';
+            //     const file1Desc = document.getElementById('file1Desc');
+            //     if (file1Desc) file1Desc.textContent = translations[lang]?.file1Desc || 'Drag and drop or click to select';
+            //     const file2Desc = document.getElementById('file2Desc');
+            //     if (file2Desc) file2Desc.textContent = translations[lang]?.file2Desc || 'Drag and drop or click to select';
+            //     const compareBtn = document.getElementById('compareBtn');
+            //     if (compareBtn) compareBtn.querySelector('span').nextSibling.textContent = translations[lang]?.compare || 'Compare';
+            //     const exportBtn = document.getElementById('exportBtn');
+            //     if (exportBtn) exportBtn.querySelector('span').nextSibling.textContent = translations[lang]?.export || 'Export to Excel';
+            //     const refreshBtn = document.getElementById('refreshBtn');
+            //     if (refreshBtn) refreshBtn.querySelector('span').nextSibling.textContent = translations[lang]?.refresh || 'Refresh';
+            //     const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+            //     if (saveTemplateBtn) saveTemplateBtn.querySelector('span').nextSibling.textContent = translations[lang]?.saveTemplate || 'Save Template';
+            //     const validityFilterLabel = document.querySelector('label[for="validityFilter"]');
+            //     if (validityFilterLabel) validityFilterLabel.textContent = translations[lang]?.filter?.validity || 'Validity';
+            //     const billcodeSearchLabel = document.querySelector('label[for="billcodeSearch"]');
+            //     if (billcodeSearchLabel) billcodeSearchLabel.textContent = translations[lang]?.filter?.billcodeSearch || 'Search Billcode';
+            //     const diffFilterLabel = document.querySelector('label[for="diffFilter"]');
+            //     if (diffFilterLabel) diffFilterLabel.textContent = translations[lang]?.filter?.diffFilter || 'Minimum Difference';
+            //     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            //     if (clearFiltersBtn) clearFiltersBtn.textContent = translations[lang]?.filter?.clearFilters || 'Clear Filters';
+            //     const validityFilter = document.getElementById('validityFilter');
+            //     if (validityFilter) {
+            //         validityFilter.options[0].text = translations[lang]?.all || 'All';
+            //         validityFilter.options[1].text = translations[lang]?.valid || 'Valid';
+            //         validityFilter.options[2].text = translations[lang]?.invalid || 'Invalid';
+            //     }
+            //     if (this.results) {
+            //         this.renderResults();
+            //     }
+            // }
+            setLanguage(lang) {
+                if (!translations[lang]) {
+                    console.warn(`Language ${lang} not found, falling back to 'vi'`);
+                    lang = 'vi';
+                }
+                this.currentLang = lang;
+                localStorage.setItem('lang', lang);
+                const langSelect = document.getElementById('langSelect');
+                if (langSelect) langSelect.value = lang;
+                const title = document.getElementById('title');
+                if (title) title.textContent = translations[lang]?.title || 'Excel File Comparison Tool';
+                const subtitle = document.getElementById('subtitle');
+                if (subtitle) subtitle.textContent = translations[lang]?.subtitle || 'Analyze and compare data from two Excel/CSV files';
+                const file1Title = document.getElementById('file1Title');
+                if (file1Title) file1Title.textContent = translations[lang]?.file1Title || 'File 1';
+                const file2Title = document.getElementById('file2Title');
+                if (file2Title) file2Title.textContent = translations[lang]?.file2Title || 'File 2';
+                const file1Desc = document.getElementById('file1Desc');
+                if (file1Desc) file1Desc.textContent = translations[lang]?.file1Desc || 'Drag and drop or click to select';
+                const file2Desc = document.getElementById('file2Desc');
+                if (file2Desc) file2Desc.textContent = translations[lang]?.file2Desc || 'Drag and drop or click to select';
+                const compareBtn = document.getElementById('compareBtn');
+                if (compareBtn) compareBtn.querySelector('span').nextSibling.textContent = translations[lang]?.compare || 'Compare';
+                const exportBtn = document.getElementById('exportBtn');
+                if (exportBtn) exportBtn.querySelector('span').nextSibling.textContent = translations[lang]?.export || 'Export to Excel';
+                const refreshBtn = document.getElementById('refreshBtn');
+                if (refreshBtn) refreshBtn.querySelector('span').nextSibling.textContent = translations[lang]?.refresh || 'Refresh';
+                const saveTemplateBtn = document.getElementById('saveTemplateBtn');
+                if (saveTemplateBtn) saveTemplateBtn.querySelector('span').nextSibling.textContent = translations[lang]?.saveTemplate || 'Save Template';
+                
+                // Cập nhật phần bộ lọc
+                const filtersTitle = document.getElementById('filtersTitle');
+                if (filtersTitle) filtersTitle.textContent = `🔧 ${translations[lang]?.filter?.title || 'Filters'}`;
+                
+                const validityFilterLabel = document.getElementById('validityFilterLabel');
+                if (validityFilterLabel) validityFilterLabel.textContent = translations[lang]?.filter?.validity || 'Validity';
+                
+                const billcodeSearchLabel = document.getElementById('billcodeSearchLabel');
+                if (billcodeSearchLabel) billcodeSearchLabel.textContent = translations[lang]?.filter?.billcodeSearch || 'Search Billcode';
+                
+                const diffFilterLabel = document.getElementById('diffFilterLabel');
+                if (diffFilterLabel) diffFilterLabel.textContent = translations[lang]?.filter?.diffFilter || 'Minimum Difference';
+                
+                const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+                if (clearFiltersBtn) clearFiltersBtn.textContent = translations[lang]?.filter?.clearFilters || 'Clear Filters';
+                
+                const validityFilter = document.getElementById('validityFilter');
+                if (validityFilter) {
+                    validityFilter.options[0].text = translations[lang]?.all || 'All';
+                    validityFilter.options[1].text = translations[lang]?.valid || 'Valid';
+                    validityFilter.options[2].text = translations[lang]?.invalid || 'Invalid';
+                }
+                
+                const billcodeSearch = document.getElementById('billcodeSearch');
+                if (billcodeSearch) billcodeSearch.placeholder = translations[lang]?.filter?.billcodeSearchPlaceholder || 'Enter billcode...';
+                
+                if (this.results) {
+                    this.renderResults();
+                }
+            }
+
+            setTheme(theme) {
+                this.theme = theme;
+                localStorage.setItem('theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+                const themeIcon = document.getElementById('themeIcon');
+                if (themeIcon) themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+                if (this.chartInstance) {
+                    this.renderChart();
+                }
+            }
+
+            toggleTheme() {
+                this.setTheme(this.theme === 'light' ? 'dark' : 'light');
+            }
+
+            showHelp() {
+                this.showAlert('info', translations[this.currentLang]?.alert?.info?.replace('%s', `
+                    Hướng dẫn sử dụng:
+                    1. Tải lên file Excel/CSV bằng cách kéo thả hoặc click vào khu vực tải file
+                    2. Nhấn nút So sánh để phân tích dữ liệu
+                    3. Sử dụng bộ lọc để xem kết quả cụ thể
+                    4. Xuất kết quả ra Excel hoặc lưu mẫu để sử dụng sau
+                    5. Nhấn Làm mới để bắt đầu lại
+                `) || `
+                    Instructions:
+                    1. Upload Excel/CSV files by dragging or clicking the upload area
+                    2. Click Compare to analyze data
+                    3. Use filters to view specific results
+                    4. Export results to Excel or save as a template
+                    5. Click Refresh to start over
+                `);
+            }
+
+            setupEvents() {
+                const billcodeSearch = document.getElementById('billcodeSearch');
+                const diffFilter = document.getElementById('diffFilter');
+                const debounce = (func, delay) => {
+                    let timeoutId;
+                    return (...args) => {
+                        clearTimeout(timeoutId);
+                        timeoutId = setTimeout(() => func.apply(this, args), delay);
+                    };
+                };
+                const debouncedApplyFilters = debounce(this.applyFilters.bind(this), 300);
+                if (billcodeSearch) billcodeSearch.addEventListener('keyup', debouncedApplyFilters);
+                if (diffFilter) diffFilter.addEventListener('keyup', debouncedApplyFilters);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new ExcelCompareApp();
+            app.init();
+        });
+    </script>
+</body>
+</html>
