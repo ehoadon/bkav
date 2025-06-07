@@ -1744,13 +1744,18 @@
                     }),
                     valueDiffs: data.valueDiffs.filter(row => {
                         const validityMatch = this.filters.validity === 'all' || 
-                                            (this.filters.validity === 'invalid' && row.status === 'invalid') || 
-                                            (this.filters.validity === 'valid' && row.status === 'valid');
+                                              (this.filters.validity === 'invalid' && row.status === 'invalid') || 
+                                              (this.filters.validity === 'valid' && row.status === 'valid');
                         const billcodeMatch = !this.filters.billcode || 
-                            (row.billcode && row.billcode.toString().toLowerCase().includes(this.filters.billcode.toLowerCase()));
+                                              (row.billcode && row.billcode.toString().toLowerCase().includes(this.filters.billcode.toLowerCase()));
                         const diffMatch = !this.filters.minDiff || Math.abs(row.difference) >= this.filters.minDiff;
-                        return validityMatch && billcodeMatch && diffMatch;
+
+                        // 👇 Thêm điều kiện để bỏ các dòng có chênh lệch đúng bằng 0
+                        const notZeroDiff = Math.abs(row.difference) !== 0;
+
+                        return validityMatch && billcodeMatch && diffMatch && notZeroDiff;
                     })
+
                 };
 
                 console.log('Filtered data:', filtered);
