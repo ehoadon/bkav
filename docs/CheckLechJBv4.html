@@ -1086,7 +1086,6 @@
                 this.setupDragAndDrop();
                 this.setupEvents();
                 this.loadSavedData();
-                //this.setupFilePond();
             }
 
             setupEventListeners() {
@@ -1178,27 +1177,6 @@
                     });
                 });
             }
-
-            // setupFilePond() {
-            //     if (typeof FilePond !== 'undefined') {
-            //         FilePond.registerPlugin(FilePondPluginFileValidateType);
-            //         ['file1', 'file2'].forEach(fileId => {
-            //             const input = document.getElementById(fileId);
-            //             if (input) {
-            //                 FilePond.create(input, {
-            //                     acceptedFileTypes: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
-            //                     allowMultiple: false,
-            //                     onaddfile: (error, file) => {
-            //                         if (!error) {
-            //                             this.handleFileSelect({ target: { files: [file.file] } }, fileId);
-            //                         }
-            //                     }
-            //                 });
-            //             }
-            //         });
-            //     }
-            // }
-
             async handleFileSelect(event, fileId) {
                 const file = event.target.files[0];
                 if (!file) return;
@@ -1550,6 +1528,10 @@
                 };
             }
             renderResults() {
+                if (!this.results) {
+                    console.log('No results to render');
+                    return;
+                }
                 const { data, stats } = this.results;
                 this.renderStats(stats);
                 this.renderTables(data);
@@ -1835,9 +1817,11 @@
                 Object.keys(this.pagination).forEach(tableId => {
                     this.pagination[tableId].currentPage = 1;
                 });
-                this.renderResults();
+                // Only render results if this.results exists
+                if (this.results) {
+                    this.renderResults();
+                }
             }
-
             renderChart() {
                 const canvas = document.getElementById('validityChart');
                 const chartDetails = document.getElementById('chartDetails');
@@ -1949,7 +1933,10 @@
                 if (exportBtn) exportBtn.disabled = true;
                 this.clearFilters();
                 localStorage.removeItem('excelCompareData');
+                    localStorage.removeItem('savedData');
+                    localStorage.removeItem('compareResults');
                 this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Đã làm mới trang') || 'Page refreshed');
+                 window.location.reload();
             }
 
             saveTemplate() {
@@ -1960,15 +1947,6 @@
                 localStorage.setItem('excelCompareTemplate', JSON.stringify(this.results));
                 this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Đã lưu mẫu') || 'Template saved');
             }
-
-            // saveData() {
-            //     const saveData = {
-            //         data1: this.data1 ? { name: this.data1.file.name } : null,
-            //         data2: this.data2 ? { name: this.data2.file.name } : null
-            //     };
-            //     localStorage.setItem('excelCompareData', JSON.stringify(saveData));
-            // }
-
             loadSavedData() {
                 const savedData = localStorage.getItem('excelCompareData');
                 if (savedData) {
@@ -1985,53 +1963,6 @@
                     }
                 }
             }
-            // setLanguage(lang) {
-            //     if (!translations[lang]) {
-            //         console.warn(`Language ${lang} not found, falling back to 'vi'`);
-            //         lang = 'vi';
-            //     }
-            //     this.currentLang = lang;
-            //     localStorage.setItem('lang', lang);
-            //     const langSelect = document.getElementById('langSelect');
-            //     if (langSelect) langSelect.value = lang;
-            //     const title = document.getElementById('title');
-            //     if (title) title.textContent = translations[lang]?.title || 'Excel File Comparison Tool';
-            //     const subtitle = document.getElementById('subtitle');
-            //     if (subtitle) subtitle.textContent = translations[lang]?.subtitle || 'Analyze and compare data from two Excel/CSV files';
-            //     const file1Title = document.getElementById('file1Title');
-            //     if (file1Title) file1Title.textContent = translations[lang]?.file1Title || 'File 1';
-            //     const file2Title = document.getElementById('file2Title');
-            //     if (file2Title) file2Title.textContent = translations[lang]?.file2Title || 'File 2';
-            //     const file1Desc = document.getElementById('file1Desc');
-            //     if (file1Desc) file1Desc.textContent = translations[lang]?.file1Desc || 'Drag and drop or click to select';
-            //     const file2Desc = document.getElementById('file2Desc');
-            //     if (file2Desc) file2Desc.textContent = translations[lang]?.file2Desc || 'Drag and drop or click to select';
-            //     const compareBtn = document.getElementById('compareBtn');
-            //     if (compareBtn) compareBtn.querySelector('span').nextSibling.textContent = translations[lang]?.compare || 'Compare';
-            //     const exportBtn = document.getElementById('exportBtn');
-            //     if (exportBtn) exportBtn.querySelector('span').nextSibling.textContent = translations[lang]?.export || 'Export to Excel';
-            //     const refreshBtn = document.getElementById('refreshBtn');
-            //     if (refreshBtn) refreshBtn.querySelector('span').nextSibling.textContent = translations[lang]?.refresh || 'Refresh';
-            //     const saveTemplateBtn = document.getElementById('saveTemplateBtn');
-            //     if (saveTemplateBtn) saveTemplateBtn.querySelector('span').nextSibling.textContent = translations[lang]?.saveTemplate || 'Save Template';
-            //     const validityFilterLabel = document.querySelector('label[for="validityFilter"]');
-            //     if (validityFilterLabel) validityFilterLabel.textContent = translations[lang]?.filter?.validity || 'Validity';
-            //     const billcodeSearchLabel = document.querySelector('label[for="billcodeSearch"]');
-            //     if (billcodeSearchLabel) billcodeSearchLabel.textContent = translations[lang]?.filter?.billcodeSearch || 'Search Billcode';
-            //     const diffFilterLabel = document.querySelector('label[for="diffFilter"]');
-            //     if (diffFilterLabel) diffFilterLabel.textContent = translations[lang]?.filter?.diffFilter || 'Minimum Difference';
-            //     const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-            //     if (clearFiltersBtn) clearFiltersBtn.textContent = translations[lang]?.filter?.clearFilters || 'Clear Filters';
-            //     const validityFilter = document.getElementById('validityFilter');
-            //     if (validityFilter) {
-            //         validityFilter.options[0].text = translations[lang]?.all || 'All';
-            //         validityFilter.options[1].text = translations[lang]?.valid || 'Valid';
-            //         validityFilter.options[2].text = translations[lang]?.invalid || 'Invalid';
-            //     }
-            //     if (this.results) {
-            //         this.renderResults();
-            //     }
-            // }
             setLanguage(lang) {
                 if (!translations[lang]) {
                     console.warn(`Language ${lang} not found, falling back to 'vi'`);
