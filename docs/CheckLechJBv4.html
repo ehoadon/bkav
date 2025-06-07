@@ -11,7 +11,13 @@
     <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.min.js"></script>
     <script src="https://unpkg.com/papaparse/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+      // Fallback nếu CDN không tải được
+      if (typeof Chart === 'undefined') {
+        document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.min.js"><\/script>');
+      }
+    </script>
     <style>
         :root {
             --primary: #007bff;
@@ -704,7 +710,7 @@
                         difference: 'Chênh lệch',
                         status: 'Trạng thái',
                         reason: 'Lý do',
-                        other_svc_ttl: 'Dịch vụ khác'
+                        other_svc_ttl: 'Phí giao hàng'
                     },
                     filter: {
                         validity: 'Tính hợp lệ',
@@ -764,7 +770,7 @@
                         difference: 'Difference',
                         status: 'Status',
                         reason: 'Reason',
-                        other_svc_ttl: 'Other Service Total'
+                        other_svc_ttl: 'Delivery fee'
                     },
                     filter: {
                         validity: 'Validity',
@@ -824,7 +830,7 @@
                         difference: '差额',
                         status: '状态',
                         reason: '原因',
-                        other_svc_ttl: '其他服务总额'
+                        other_svc_ttl: '运费'
                     },
                     filter: {
                         validity: '有效性',
@@ -884,7 +890,7 @@
                         difference: '差額',
                         status: 'ステータス',
                         reason: '理由',
-                        other_svc_ttl: 'その他のサービス合計'
+                        other_svc_ttl: '配達料'
                     },
                     filter: {
                         validity: '有効性',
@@ -944,7 +950,7 @@
                         difference: '차액',
                         status: '상태',
                         reason: '이유',
-                        other_svc_ttl: '기타 서비스 합계'
+                        other_svc_ttl: '배송료'
                     },
                     filter: {
                         validity: '유효성',
@@ -1004,7 +1010,7 @@
                         difference: 'Разница',
                         status: 'Статус',
                         reason: 'Причина',
-                        other_svc_ttl: 'Итог других услуг'
+                        other_svc_ttl: 'Стоимость доставки'
                     },
                     filter: {
                         validity: 'Действительность',
@@ -1058,7 +1064,7 @@
                 this.setupDragAndDrop();
                 this.setupEvents();
                 this.loadSavedData();
-                this.setupFilePond();
+                //this.setupFilePond();
             }
 
             setupEventListeners() {
@@ -1151,25 +1157,25 @@
                 });
             }
 
-            setupFilePond() {
-                if (typeof FilePond !== 'undefined') {
-                    FilePond.registerPlugin(FilePondPluginFileValidateType);
-                    ['file1', 'file2'].forEach(fileId => {
-                        const input = document.getElementById(fileId);
-                        if (input) {
-                            FilePond.create(input, {
-                                acceptedFileTypes: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
-                                allowMultiple: false,
-                                onaddfile: (error, file) => {
-                                    if (!error) {
-                                        this.handleFileSelect({ target: { files: [file.file] } }, fileId);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
+            // setupFilePond() {
+            //     if (typeof FilePond !== 'undefined') {
+            //         FilePond.registerPlugin(FilePondPluginFileValidateType);
+            //         ['file1', 'file2'].forEach(fileId => {
+            //             const input = document.getElementById(fileId);
+            //             if (input) {
+            //                 FilePond.create(input, {
+            //                     acceptedFileTypes: ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'],
+            //                     allowMultiple: false,
+            //                     onaddfile: (error, file) => {
+            //                         if (!error) {
+            //                             this.handleFileSelect({ target: { files: [file.file] } }, fileId);
+            //                         }
+            //                     }
+            //                 });
+            //             }
+            //         });
+            //     }
+            // }
 
             async handleFileSelect(event, fileId) {
                 const file = event.target.files[0];
@@ -1197,7 +1203,7 @@
                     this.showProgress(progressId, 100);
                     setTimeout(() => this.hideProgress(progressId), 1000);
                     this.updateCompareButton();
-                    this.saveData();
+                    //this.saveData();
                 } catch (error) {
                     this.showAlert('danger', translations[this.currentLang]?.alert?.error?.replace('%s', error.message) || `Error: ${error.message}`);
                     this.hideProgress(progressId);
@@ -1471,8 +1477,8 @@
                 let totalDiff = 0;
                 let matched = 0;
                 let unmatched = 0;
-                let totalOtherSvc = 0; // Tổng phí "Dịch vụ khác"
-                let adjustedTotalDiff = 0; // Chênh lệch không tính "Dịch vụ khác"
+                let totalOtherSvc = 0;
+                let adjustedTotalDiff = 0;
 
                 validRows1.forEach(row1 => {
                     const billcode = String(row1[billcodeCol1]).trim();
@@ -1483,11 +1489,14 @@
                         const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
                         const diff = val2 - val1;
                         const isValidDiff = Math.abs(diff - otherSvc) < 0.01 || Math.abs(diff + otherSvc) < 0.01;
-                        if (isValidDiff) matched++;
-                        else unmatched++;
-                        totalDiff += Math.abs(diff);
-                        totalOtherSvc += otherSvc; // Cộng dồn tổng phí "Dịch vụ khác"
-                        const adjustedDiff = diff - otherSvc; // Chênh lệch sau khi loại bỏ "Dịch vụ khác"
+                        if (isValidDiff) {
+                            matched++;
+                        } else {
+                            unmatched++;
+                            totalDiff += Math.abs(diff); // Chỉ cộng dồn nếu chênh lệch không phải do other_svc_ttl
+                        }
+                        totalOtherSvc += otherSvc;
+                        const adjustedDiff = diff - otherSvc;
                         adjustedTotalDiff += Math.abs(adjustedDiff);
                         valueDiffs.push({
                             billcode,
@@ -1512,8 +1521,8 @@
                         unmatched,
                         notTaken: notTakenCount,
                         totalDiff: totalDiff.toFixed(2),
-                        totalOtherSvc: totalOtherSvc.toFixed(2), // Tổng phí "Dịch vụ khác"
-                        adjustedTotalDiff: adjustedTotalDiff.toFixed(2) // Chênh lệch không tính "Dịch vụ khác"
+                        totalOtherSvc: totalOtherSvc.toFixed(2),
+                        adjustedTotalDiff: adjustedTotalDiff.toFixed(2)
                     }
                 };
             }
@@ -1528,6 +1537,14 @@
                 const filteredData = this.applyFiltersToData(data);
                 const accordion = document.getElementById('resultsAccordion');
                 if (!accordion) return;
+
+                // Hàm hỗ trợ để tính STT dựa trên trang hiện tại
+                const getSTT = (index, tableId) => {
+                    const page = this.pagination[tableId]?.currentPage || 1;
+                    const itemsPerPage = this.pagination[tableId]?.itemsPerPage || 20;
+                    return (page - 1) * itemsPerPage + index + 1;
+                };
+
                 accordion.innerHTML = `
                     <div class="accordion-item active">
                         <div class="accordion-header">
@@ -1539,21 +1556,23 @@
                                 <table>
                                     <thead>
                                         <tr>
+                                            <th>STT</th>
                                             <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
                                             <th>${translations[this.currentLang]?.table?.reason || 'Reason'}</th>
                                             <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${filteredData.missingInFile2.length > 0 ? this.paginateData(filteredData.missingInFile2, 'missingInFile2').map(row => `
+                                        ${filteredData.missingInFile2.length > 0 ? this.paginateData(filteredData.missingInFile2, 'missingInFile2').map((row, index) => `
                                             <tr>
+                                                <td>${getSTT(index, 'missingInFile2')}</td>
                                                 <td>${row.billcode || '-'}</td>
                                                 <td>${row.reason}</td>
                                                 <td><span class="badge badge-${row.status === 'valid' ? 'success' : 'danger'}">
                                                     ${translations[this.currentLang]?.[row.status] || row.status}
                                                 </span></td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="3">Không có dữ liệu</td></tr>'}
+                                        `).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>'}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.missingInFile2, 'missingInFile2')}
@@ -1570,21 +1589,23 @@
                                 <table>
                                     <thead>
                                         <tr>
+                                            <th>STT</th>
                                             <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
                                             <th>${translations[this.currentLang]?.table?.reason || 'Reason'}</th>
                                             <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${filteredData.missingInFile1.length > 0 ? this.paginateData(filteredData.missingInFile1, 'missingInFile1').map(row => `
+                                        ${filteredData.missingInFile1.length > 0 ? this.paginateData(filteredData.missingInFile1, 'missingInFile1').map((row, index) => `
                                             <tr>
+                                                <td>${getSTT(index, 'missingInFile1')}</td>
                                                 <td>${row.billcode || '-'}</td>
                                                 <td>${row.reason}</td>
                                                 <td><span class="badge badge-${row.status === 'valid' ? 'success' : 'danger'}">
                                                     ${translations[this.currentLang]?.[row.status] || row.status}
                                                 </span></td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="3">Không có dữ liệu</td></tr>'}
+                                        `).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>'}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.missingInFile1, 'missingInFile1')}
@@ -1601,6 +1622,7 @@
                                 <table>
                                     <thead>
                                         <tr>
+                                            <th>STT</th>
                                             <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
                                             <th>${translations[this.currentLang]?.table?.amount1 || 'Amount File 1'}</th>
                                             <th>${translations[this.currentLang]?.table?.amount2 || 'Amount File 2'}</th>
@@ -1610,8 +1632,9 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        ${filteredData.valueDiffs.length > 0 ? this.paginateData(filteredData.valueDiffs, 'valueDiffs').map(row => `
+                                        ${filteredData.valueDiffs.length > 0 ? this.paginateData(filteredData.valueDiffs, 'valueDiffs').map((row, index) => `
                                             <tr>
+                                                <td>${getSTT(index, 'valueDiffs')}</td>
                                                 <td>${row.billcode || '-'}</td>
                                                 <td>${row.amount1 !== null ? row.amount1.toFixed(2) : '-'}</td>
                                                 <td>${row.amount2 !== null ? row.amount2.toFixed(2) : '-'}</td>
@@ -1621,7 +1644,7 @@
                                                 </span></td>
                                                 <td>${row.otherSvc !== null ? row.otherSvc.toFixed(2) : '-'}</td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="6">Không có dữ liệu</td></tr>'}
+                                        `).join('') : '<tr><td colspan="7">Không có dữ liệu</td></tr>'}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.valueDiffs, 'valueDiffs')}
@@ -1630,8 +1653,7 @@
                     </div>
                 `;
             }
-
-            setupAccordionEvents() {
+                        setupAccordionEvents() {
                 const headers = document.querySelectorAll('.accordion-header');
                 headers.forEach(header => {
                     header.addEventListener('click', () => {
@@ -1660,33 +1682,40 @@
             }
 
             renderStats(stats) {
-                const statsGrid = document.getElementById('statsGrid');
-                if (!statsGrid) return;
-                statsGrid.innerHTML = `
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.total}</div>
-                        <div class="stat-label">${translations[this.currentLang]?.stats?.total || 'Total Records'}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.matched}</div>
-                        <div class="stat-label">${translations[this.currentLang]?.stats?.matched || 'Matched'}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.unmatched}</div>
-                        <div class="stat-label">${translations[this.currentLang]?.stats?.unmatched || 'Unmatched'}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.notTaken}</div>
-                        <div class="stat-label">${translations[this.currentLang]?.stats?.notTaken || 'Not Taken'}</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${stats.totalDiff}</div>
-                        <div class="stat-label">${translations[this.currentLang]?.stats?.diffAmount || 'Total Difference'}<br>
-                            (<b>${translations[this.currentLang]?.stats?.totalOtherSvc || 'Total Other Services'}: ${stats.totalOtherSvc}</b>, 
-                             <br><b>${translations[this.currentLang]?.stats?.adjustedTotalDiff || 'Difference without Other Services'}: ${stats.adjustedTotalDiff}</b>)</div>
-                    </div>
-                `;
-            }
+                    const statsGrid = document.getElementById('statsGrid');
+                    if (!statsGrid) return;
+                    statsGrid.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.total}</div>
+                            <div class="stat-label">${translations[this.currentLang]?.stats?.total || 'Total Records'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.matched}</div>
+                            <div class="stat-label">${translations[this.currentLang]?.stats?.matched || 'Matched'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.unmatched}</div>
+                            <div class="stat-label">${translations[this.currentLang]?.stats?.unmatched || 'Unmatched'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${stats.notTaken}</div>
+                            <div class="stat-label">${translations[this.currentLang]?.stats?.notTaken || 'Not Taken'}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${parseFloat(stats.totalDiff).toLocaleString('vi-VN')}</div>
+                            <div class="stat-label">${translations[this.currentLang]?.stats?.diffAmount || 'Total Difference'}<br>
+                               </div>
+                        </div>
+                    `;
+                }
+                formatNumber(value) {
+        const num = parseFloat(value); // Chuyển về số thực
+        if (Number.isInteger(num)) {
+            return num.toLocaleString('vi-VN'); // Hiển thị số nguyên với phân cách
+        } else {
+            return num.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); // Hiển thị 2 chữ số thập phân nếu có
+        }
+    }
             applyFiltersToData(data) {
                 console.log('Input data for filtering:', data);
                 console.log('Current filters:', this.filters);
@@ -1735,7 +1764,17 @@
                 if (!this.pagination[tableId]) {
                     this.pagination[tableId] = { currentPage: 1, itemsPerPage: 20 };
                 }
-                const totalPages = Math.ceil(data.length / this.pagination[tableId].itemsPerPage);
+                const totalPages = data.length === 0 ? 0 : Math.ceil(data.length / this.pagination[tableId].itemsPerPage);
+                // Nếu không có dữ liệu, hiển thị 0/0 và vô hiệu hóa nút
+                if (totalPages === 0) {
+                    return `
+                        <div class="pagination">
+                            <button data-table-id="${tableId}" data-action="prev" disabled>←</button>
+                            <span>${translations[this.currentLang]?.pagination?.page || 'Page'} 0 / 0</span>
+                            <button data-table-id="${tableId}" data-action="next" disabled>→</button>
+                        </div>
+                    `;
+                }
                 return `
                     <div class="pagination">
                         <button data-table-id="${tableId}" data-action="prev" 
@@ -1823,21 +1862,24 @@
 
                 const wb = XLSX.utils.book_new();
 
-                const ws1 = XLSX.utils.json_to_sheet(this.results.data.missingInFile2.map(row => ({
+                const ws1 = XLSX.utils.json_to_sheet(this.results.data.missingInFile2.map((row, index) => ({
+                    STT: index + 1,
                     [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
                     'Lý do': row.reason,
                     [translations[this.currentLang]?.table?.status || 'Status']: translations[this.currentLang]?.[row.status] || row.status
                 })));
                 XLSX.utils.book_append_sheet(wb, ws1, 'Missing in File 2');
 
-                const ws2 = XLSX.utils.json_to_sheet(this.results.data.missingInFile1.map(row => ({
+                const ws2 = XLSX.utils.json_to_sheet(this.results.data.missingInFile1.map((row, index) => ({
+                    STT: index + 1,
                     [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
                     'Lý do': row.reason,
                     [translations[this.currentLang]?.table?.status || 'Status']: translations[this.currentLang]?.[row.status] || row.status
                 })));
                 XLSX.utils.book_append_sheet(wb, ws2, 'Missing in File 1');
 
-                const ws3 = XLSX.utils.json_to_sheet(this.results.data.valueDiffs.map(row => ({
+                const ws3 = XLSX.utils.json_to_sheet(this.results.data.valueDiffs.map((row, index) => ({
+                    STT: index + 1,
                     [translations[this.currentLang]?.table?.billcode || 'Billcode']: row.billcode,
                     [translations[this.currentLang]?.table?.amount1 || 'Amount File 1']: row.amount1 !== null ? row.amount1 : '-',
                     [translations[this.currentLang]?.table?.amount2 || 'Amount File 2']: row.amount2 !== null ? row.amount2 : '-',
@@ -1887,13 +1929,13 @@
                 this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'Đã lưu mẫu') || 'Template saved');
             }
 
-            saveData() {
-                const saveData = {
-                    data1: this.data1 ? { name: this.data1.file.name } : null,
-                    data2: this.data2 ? { name: this.data2.file.name } : null
-                };
-                localStorage.setItem('excelCompareData', JSON.stringify(saveData));
-            }
+            // saveData() {
+            //     const saveData = {
+            //         data1: this.data1 ? { name: this.data1.file.name } : null,
+            //         data2: this.data2 ? { name: this.data2.file.name } : null
+            //     };
+            //     localStorage.setItem('excelCompareData', JSON.stringify(saveData));
+            // }
 
             loadSavedData() {
                 const savedData = localStorage.getItem('excelCompareData');
