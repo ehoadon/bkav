@@ -1490,6 +1490,9 @@
                         const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
                         const diff = val2 - val1;
                         const isValidDiff = Math.abs(diff - otherSvc) < 0.01 || Math.abs(diff + otherSvc) < 0.01;
+                        //Chênh lệch trừ thêm Phí giao hàng
+                        // const diff = val2 - val1 - otherSvc;
+                        // const isValidDiff = Math.abs(diff) < 0.01;
                         if (isValidDiff) {
                             matched++;
                         } else {
@@ -1507,6 +1510,31 @@
                             status: isValidDiff ? 'valid' : 'invalid',
                             otherSvc
                         });
+                        // const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
+                        //     const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
+                        //     const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
+
+                        //     const diff = val2 - val1 - otherSvc;
+                        //     const isValidDiff = Math.abs(diff) < 0.01;
+
+                        //     if (isValidDiff) {
+                        //         matched++;
+                        //     } else {
+                        //         unmatched++;
+                        //         totalDiff += Math.abs(diff);
+                        //     }
+                        //     totalOtherSvc += otherSvc;
+                        //     adjustedTotalDiff += Math.abs(diff); // giờ đã trùng với diff
+
+                        //     valueDiffs.push({
+                        //         billcode,
+                        //         amount1: val1,
+                        //         amount2: val2,
+                        //         difference: diff,
+                        //         status: isValidDiff ? 'valid' : 'invalid',
+                        //         otherSvc
+                        //     });
+
                     }
                 });
 
