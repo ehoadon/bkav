@@ -431,15 +431,34 @@
         }
 
         .chart-container {
+            display: flex;
+            align-items: center; /* Căn giữa theo chiều dọc */
+            justify-content: space-between; /* Phân cách đều giữa canvas và chi tiết */
             max-width: 600px;
-            max-height: 300px;
             margin: 1rem auto;
             padding: 1.5rem;
             background: var(--light);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
+        .chart-wrapper {
+            flex: 1; /* Chiếm không gian linh hoạt */
+        }
+        .chart-details {
+            flex: 1; /* Chiếm không gian ngang bằng với canvas */
+            margin-left: 20px; /* Khoảng cách giữa biểu đồ và chi tiết */
+            padding: 10px; /* Thêm padding cho đẹp */
+        }
 
+        .chart-details ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .chart-details li {
+            margin-bottom: 5px; /* Khoảng cách giữa các dòng */
+        }
         .loading {
             display: flex;
             justify-content: center;
@@ -663,9 +682,12 @@
                     </div>
                 </div>
             </div>
-
-                <div class="chart-container">
+            <div class="chart-container">
+                <div class="chart-wrapper">
                     <canvas id="validityChart" width="300" height="150"></canvas>
+                </div>
+                <div id="chartDetails" class="chart-details"></div>
+            </div>
                 </div>
                 <div class="accordion" id="resultsAccordion"></div>
             </div>
@@ -1357,6 +1379,7 @@
                     const resultsDiv = document.getElementById('results');
                     if (resultsDiv) resultsDiv.style.display = 'block';
                     this.showAlert('success', translations[this.currentLang]?.alert?.success?.replace('%s', 'So sánh hoàn tất') || 'Comparison completed');
+                    this.renderChart(); // Thêm dòng này
                 } catch (error) {
                     this.showAlert('danger', translations[this.currentLang]?.alert?.error?.replace('%s', error.message) || `Error: ${error.message}`);
                 } finally {
@@ -1817,7 +1840,9 @@
 
             renderChart() {
                 const canvas = document.getElementById('validityChart');
+                const chartDetails = document.getElementById('chartDetails');
                 if (!canvas || !this.results) return;
+
                 const ctx = canvas.getContext('2d');
                 if (this.chartInstance) {
                     this.chartInstance.destroy();
@@ -1829,6 +1854,14 @@
                 const invalidCount = filteredData.missingInFile2.filter(row => row.status === 'invalid').length +
                                     filteredData.missingInFile1.length +
                                     filteredData.valueDiffs.filter(row => row.status === 'invalid').length;
+
+                // Tạo nội dung danh sách chi tiết
+                chartDetails.innerHTML = `
+                    <ul>
+                        <li style="color: #28a745;"><b>Hợp lệ:</b> ${validCount}</li>
+                        <li style="color: #dc3545;"><b>Không hợp lệ:</b> ${invalidCount}</li>
+                    </ul>
+                `;
 
                 this.chartInstance = new Chart(ctx, {
                     type: 'pie',
@@ -1853,7 +1886,6 @@
                     }
                 });
             }
-
             exportToExcel() {
                 if (!this.results) {
                     this.showAlert('warning', translations[this.currentLang]?.alert?.warning?.replace('%s', 'Chưa có kết quả để xuất') || 'No results to export');
