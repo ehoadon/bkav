@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Converter Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            color: #495057;
+        }
+
+        .tab-button:hover {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .tab-button.active {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2980b9;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .conversion-area {
+            display: grid;
+            grid-template-columns: 1fr 80px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .input-section, .output-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .input-section:hover, .output-section:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drop-zone {
+            border: 3px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .drop-zone.dragover {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.05);
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            color: #bdc3c7;
+            margin-bottom: 15px;
+        }
+
+        .drop-zone:hover .drop-icon {
+            color: #3498db;
+            transform: scale(1.1);
+        }
+
+        textarea, input[type="file"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            resize: vertical;
+            min-height: 200px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        textarea:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .convert-button {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+
+        .convert-button:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .convert-button:active {
+            transform: scale(0.95) rotate(180deg);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 15px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 10px 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .file-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #1976d2;
+            color: #1565c0;
+        }
+
+        @media (max-width: 768px) {
+            .conversion-area {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .convert-button {
+                transform: rotate(90deg);
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 File Converter Tool</h1>
+            <p>Chuyển đổi JSON ↔ XML và File ↔ Base64</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('json-xml')">
+                📄 JSON ↔ XML
+            </button>
+            <button class="tab-button" onclick="showTab('file-base64')">
+                📁 File ↔ Base64
+            </button>
+        </div>
+
+        <!-- JSON ↔ XML Tab -->
+        <div id="json-xml" class="tab-content active">
+            <div class="conversion-area">
+                <div class="input-section">
+                    <div class="section-title">
+                        📝 Input (JSON hoặc XML)
+                    </div>
+                    <textarea id="jsonXmlInput" placeholder="Dán nội dung JSON hoặc XML vào đây...&#10;&#10;Ví dụ JSON:&#10;{&#10;  &quot;name&quot;: &quot;John&quot;,&#10;  &quot;age&quot;: 30&#10;}&#10;&#10;Ví dụ XML:&#10;&lt;person&gt;&#10;  &lt;name&gt;John&lt;/name&gt;&#10;  &lt;age&gt;30&lt;/age&gt;&#10;&lt;/person&gt;"></textarea>
+                    <div class="file-input-wrapper">
+                        <label class="file-input-label" for="jsonXmlFile">
+                            📂 Hoặc chọn file JSON/XML
+                        </label>
+                        <input type="file" id="jsonXmlFile" accept=".json,.xml" onchange="handleJsonXmlFile(this)">
+                    </div>
+                </div>
+
+                <button class="convert-button" onclick="convertJsonXml()" title="Convert">
+                    ⚡
+                </button>
+
+                <div class="output-section">
+                    <div class="section-title">
+                        ✨ Output
+                    </div>
+                    <textarea id="jsonXmlOutput" placeholder="Kết quả sẽ hiển thị ở đây..." readonly></textarea>
+                    <button class="download-btn" onclick="downloadJsonXml()" style="display: none;" id="downloadJsonXml">
+                        💾 Tải xuống
+                    </button>
+                    <button class="download-btn" onclick="copyJsonXml()" style="display: none;" id="copyJsonXml">
+                        📋 Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- File ↔ Base64 Tab -->
+        <div id="file-base64" class="tab-content">
+            <div class="conversion-area">
+                <div class="input-section">
+                    <div class="section-title">
+                        📁 File Input
+                    </div>
+                    <div class="drop-zone" id="fileDropZone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('fileInput').click()">
+                        <div class="drop-icon">📤</div>
+                        <p><strong>Kéo thả file vào đây</strong></p>
+                        <p>hoặc click để chọn file</p>
+                        <small>(PDF, WORD, EXCEL được hỗ trợ)</small>
+                    </div>
+                    <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.xls,.xlsx" onchange="handleFileSelect(this)" style="display: none;">
+                    
+                    <div class="section-title" style="margin-top: 30px;">
+                        📝 Base64 Input
+                    </div>
+                    <textarea id="base64Input" placeholder="Hoặc dán Base64 string vào đây để convert thành file..."></textarea>
+                    <div style="margin-top: 15px;">
+                        <label>Tên file output: </label>
+                        <input type="text" id="outputFileName" placeholder="document.pdf (cần có đuôi file)" style="min-height: auto; padding: 8px; margin-left: 10px;">
+                        <small style="display: block; color: #666; margin-top: 5px;">
+                            💡 Tip: Nhập đầy đủ tên + đuôi file (vd: report.pdf, data.xlsx, letter.docx)
+                        </small>
+                    </div>
+                </div>
+
+                <button class="convert-button" onclick="convertFileBase64()" title="Convert">
+                    🔄
+                </button>
+
+                <div class="output-section">
+                    <div class="section-title">
+                        💾 Output
+                    </div>
+                    <textarea id="base64Output" placeholder="Base64 string hoặc thông tin file sẽ hiển thị ở đây..." readonly></textarea>
+                    <button class="download-btn" onclick="downloadBase64File()" style="display: none;" id="downloadBase64">
+                        📥 Tải file xuống
+                    </button>
+                    <button class="download-btn" onclick="copyBase64()" style="display: none;" id="copyBase64">
+                        📋 Copy Base64
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentFile = null;
+        let currentBase64 = '';
+        let outputFileType = '';
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // JSON ↔ XML Functions
+        function handleJsonXmlFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('jsonXmlInput').value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function convertJsonXml() {
+            const input = document.getElementById('jsonXmlInput').value.trim();
+            const output = document.getElementById('jsonXmlOutput');
+            
+            if (!input) {
+                showMessage('Vui lòng nhập nội dung cần convert!', 'error');
+                return;
+            }
+
+            try {
+                if (isJSON(input)) {
+                    // Convert JSON to XML
+                    const jsonObj = JSON.parse(input);
+                    const xml = jsonToXml(jsonObj);
+                    output.value = xml;
+                    outputFileType = 'xml';
+                    showMessage('✅ Đã convert JSON sang XML thành công!', 'success');
+                } else if (isXML(input)) {
+                    // Convert XML to JSON
+                    const json = xmlToJson(input);
+                    output.value = JSON.stringify(json, null, 2);
+                    outputFileType = 'json';
+                    showMessage('✅ Đã convert XML sang JSON thành công!', 'success');
+                } else {
+                    throw new Error('Định dạng không hợp lệ');
+                }
+                
+                document.getElementById('downloadJsonXml').style.display = 'inline-flex';
+                document.getElementById('copyJsonXml').style.display = 'inline-flex';
+            } catch (error) {
+                showMessage('❌ Lỗi: ' + error.message, 'error');
+                output.value = '';
+                document.getElementById('downloadJsonXml').style.display = 'none';
+                document.getElementById('copyJsonXml').style.display = 'none';
+            }
+        }
+
+        function isJSON(str) {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function isXML(str) {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(str, "text/xml");
+                return !xmlDoc.querySelector("parsererror");
+            } catch {
+                return false;
+            }
+        }
+
+        function jsonToXml(obj, rootName = 'root') {
+            function escapeXml(str) {
+                return String(str).replace(/&/g, "&amp;")
+                                  .replace(/</g, "&lt;")
+                                  .replace(/>/g, "&gt;")
+                                  .replace(/"/g, "&quot;")
+                                  .replace(/'/g, "&apos;");
+            }
+
+            function convert(key, value) {
+                if (Array.isArray(value)) {
+                    return value.map(item => convert(key, item)).join('');
+                } else if (typeof value === 'object' && value !== null) {
+                    const children = Object.entries(value)
+                        .map(([k, v]) => convert(k, v))
+                        .join('');
+                    return `<${key}>${children}</${key}>`;
+                } else {
+                    return `<${key}>${escapeXml(value)}</${key}>`;
+                }
+            }
+
+            const xmlContent = Object.entries(obj)
+                .map(([k, v]) => convert(k, v))
+                .join('');
+
+            return `<?xml version="1.0" encoding="UTF-8"?>\n<${rootName}>${xmlContent}</${rootName}>`;
+        }
+
+        function xmlToJson(xml) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xml, "application/xml");
+
+            function parseNode(node) {
+                // Text node
+                if (node.nodeType === 3) {
+                    return node.nodeValue.trim() || null;
+                }
+
+                const obj = {};
+                // Attributes
+                if (node.attributes && node.attributes.length > 0) {
+                    obj["@attributes"] = {};
+                    for (let attr of node.attributes) {
+                        obj["@attributes"][attr.name] = attr.value;
+                    }
+                }
+
+                // Child nodes
+                for (let child of node.childNodes) {
+                    const name = child.nodeName;
+                    const value = parseNode(child);
+                    if (value === null) continue;
+
+                    if (!obj[name]) {
+                        obj[name] = value;
+                    } else {
+                        // Convert to array if multiple same keys
+                        if (!Array.isArray(obj[name])) {
+                            obj[name] = [obj[name]];
+                        }
+                        obj[name].push(value);
+                    }
+                }
+
+                return obj;
+            }
+
+            const root = xmlDoc.documentElement.nodeName;
+            const result = {};
+            result[root] = parseNode(xmlDoc.documentElement);
+            return result;
+        }
+
+
+        function downloadJsonXml() {
+            const content = document.getElementById('jsonXmlOutput').value;
+            const extension = outputFileType;
+            const filename = `converted.${extension}`;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function copyJsonXml() {
+            const content = document.getElementById('jsonXmlOutput').value;
+            if (content) {
+                navigator.clipboard.writeText(content).then(() => {
+                    showMessage('✅ Đã copy kết quả vào clipboard!', 'success');
+                }).catch(() => {
+                    showMessage('❌ Không thể copy. Vui lòng thử lại!', 'error');
+                });
+            } else {
+                showMessage('❌ Không có nội dung để copy!', 'error');
+            }
+        }
+
+        // File ↔ Base64 Functions
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('fileDropZone').classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            document.getElementById('fileDropZone').classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('fileDropZone').classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect({ files: files });
+            }
+        }
+
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                currentFile = file;
+                // Clear base64 input when file is selected
+                document.getElementById('base64Input').value = '';
+                document.getElementById('outputFileName').value = '';
+                
+                showMessage(`📁 Đã chọn file: ${file.name} (${formatFileSize(file.size)})`, 'info');
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentBase64 = e.target.result.split(',')[1]; // Remove data:type;base64, prefix
+                    document.getElementById('base64Output').value = currentBase64;
+                    document.getElementById('copyBase64').style.display = 'inline-flex';
+                    document.getElementById('downloadBase64').style.display = 'none'; // Hide download for base64 output
+                    showMessage('✅ Đã convert file sang Base64 thành công!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function convertFileBase64() {
+            const base64Input = document.getElementById('base64Input').value.trim();
+            const outputElement = document.getElementById('base64Output');
+            
+            if (currentFile && !base64Input) {
+                // File to Base64 (already done in handleFileSelect)
+                showMessage('✅ File đã được convert sang Base64!', 'success');
+                return;
+            } else if (base64Input) {
+                // Base64 to File
+                try {
+                    // Clean base64 input (remove data URL prefix if present)
+                    let cleanBase64 = base64Input;
+                    if (base64Input.includes(',')) {
+                        cleanBase64 = base64Input.split(',')[1];
+                    }
+                    
+                    // Validate base64
+                    const binaryString = atob(cleanBase64);
+                    // const outputFileName = document.getElementById('outputFileName').value || 'converted_file';
+                    // Dò loại file từ dữ liệu base64
+                    const byteCharacters = atob(cleanBase64);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+
+                    // Tự động xác định MIME type
+                    const mimeType = detectMimeType(byteArray, '');
+
+                    // Gợi ý tên file dựa vào MIME
+                    const defaultExtensions = {
+                        'application/pdf': 'pdf',
+                        'application/msword': 'doc',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+                        'application/vnd.ms-excel': 'xls',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+                        'image/jpeg': 'jpg',
+                        'image/png': 'png',
+                        'text/plain': 'txt'
+                    };
+                    const defaultExt = defaultExtensions[mimeType] || 'bin';
+                    const fileNameInput = document.getElementById('outputFileName');
+                    if (!fileNameInput.value.trim()) {
+                        fileNameInput.value = 'converted.' + defaultExt;
+                    }
+                    const outputFileName = fileNameInput.value.trim();
+
+                                        
+                    currentBase64 = cleanBase64;
+                    outputElement.value = `✅ Base64 đã được decode thành công!\n📁 Tên file: ${outputFileName}\n💾 Kích thước: ${formatFileSize(binaryString.length)}\n\nClick "Tải file xuống" để download.`;
+                    
+                    document.getElementById('downloadBase64').style.display = 'inline-flex';
+                    document.getElementById('copyBase64').style.display = 'none'; // Hide copy button for file output
+                    
+                    showMessage('✅ Base64 đã sẵn sàng để download!', 'success');
+                } catch (error) {
+                    showMessage('❌ Base64 không hợp lệ! Vui lòng kiểm tra lại.', 'error');
+                    outputElement.value = '';
+                    document.getElementById('downloadBase64').style.display = 'none';
+                    document.getElementById('copyBase64').style.display = 'none';
+                }
+            } else {
+                showMessage('⚠️ Vui lòng chọn file hoặc nhập Base64 string!', 'error');
+            }
+        }
+
+        function downloadBase64File() {
+            const base64 = currentBase64;
+            const fileName = document.getElementById('outputFileName').value || 'converted_file';
+            
+            if (!base64) {
+                showMessage('❌ Không có dữ liệu để download!', 'error');
+                return;
+            }
+            
+            try {
+                const byteCharacters = atob(base64);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                // Detect MIME type based on file signature
+                const mimeType = detectMimeType(byteArray, fileName);
+                const blob = new Blob([byteArray], { type: mimeType });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showMessage(`✅ File ${fileName} đã được tải xuống với định dạng ${mimeType}!`, 'success');
+            } catch (error) {
+                showMessage('❌ Lỗi khi tạo file: ' + error.message, 'error');
+            }
+        }
+
+        // Function to detect MIME type from file signature and extension
+        function detectMimeType(byteArray, fileName) {
+            const signature = Array.from(byteArray.slice(0, 10))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('').toLowerCase();
+
+            // PDF
+            if (signature.startsWith('255044462d')) return 'application/pdf';
+
+            // Office 2007+ (DOCX, XLSX, PPTX - ZIP based)
+            if (signature.startsWith('504b0304')) {
+                // Check for specific directory entries in ZIP
+                const textDecoder = new TextDecoder("utf-8");
+                const zipContent = textDecoder.decode(byteArray);
+                if (zipContent.includes('word/')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                if (zipContent.includes('xl/')) return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                if (zipContent.includes('ppt/')) return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+                return 'application/zip';
+            }
+
+            // Office cũ (DOC, XLS - OLE)
+            if (signature.startsWith('d0cf11e0a1b11ae1')) {
+                const ext = getFileExtension(fileName);
+                if (ext === 'doc') return 'application/msword';
+                if (ext === 'xls') return 'application/vnd.ms-excel';
+                return 'application/octet-stream';
+            }
+
+            // Hình ảnh
+            if (signature.startsWith('ffd8ff')) return 'image/jpeg';
+            if (signature.startsWith('89504e47')) return 'image/png';
+            if (signature.startsWith('474946')) return 'image/gif';
+
+            return 'application/octet-stream';
+        }
+
+        function copyBase64() {
+            if (currentBase64) {
+                navigator.clipboard.writeText(currentBase64).then(() => {
+                    showMessage('✅ Đã copy Base64 vào clipboard!', 'success');
+                }).catch(() => {
+                    showMessage('❌ Không thể copy. Vui lòng thử lại!', 'error');
+                });
+            } else {
+                showMessage('❌ Không có Base64 để copy!', 'error');
+            }
+        }
+
+        // Utility Functions
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function showMessage(message, type) {
+            // Remove existing messages
+            document.querySelectorAll('.error, .success, .file-info').forEach(el => el.remove());
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'file-info';
+            messageDiv.textContent = message;
+            
+            const activeTab = document.querySelector('.tab-content.active');
+            activeTab.insertBefore(messageDiv, activeTab.firstChild);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
