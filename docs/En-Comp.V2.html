@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Encrypt & Decrypt Tool - Công cụ mã hóa giải mã</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      line-height: 1.6;
+    }
+    .wrapper {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1.2em;
+      color: #666;
+    }
+    .partner-token, .mode-selection {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .partner-token input, .mode-selection select {
+      max-width: 400px;
+      width: 80%;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .content {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .section {
+      flex: 1 1 45%;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      min-width: 300px;
+    }
+    .section h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.8em;
+      color: #007BFF;
+    }
+    select, textarea, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 150px;
+    }
+    button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .result {
+      background-color: #e7f3ff;
+      padding: 10px;
+      border-left: 4px solid #007BFF;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    @media (max-width: 768px) {
+      .content {
+        flex-direction: column;
+      }
+      .section {
+        flex: 1 1 100%;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>Encrypt & Decrypt Tool</h1>
+    </header>
+    
+    <!-- Partner Token -->
+    <div class="partner-token">
+      <input type="text" id="partnerToken" placeholder="Nhập Partner Token (Base64Key:Base64IV)">
+      <div class="error" id="tokenError"></div>
+    </div>
+    
+    <!-- Chọn chế độ -->
+    <div class="mode-selection">
+      <select id="modeSelect">
+        <option value="mode1">Mode 6</option>
+        <option value="mode2">Mode 4</option>
+        <option value="mode3">Mode 7</option>
+        <option value="mode4">Mode 0</option>
+        <option value="mode5">Mode 1</option>
+      </select>
+    </div>
+    
+    <div class="content">
+      <!-- Phần Encrypt -->
+      <div class="section" id="encryptSection">
+        <h2>Dữ liệu mã hóa</h2>
+        <textarea id="inputData" placeholder="Nhập dữ liệu (JSON hoặc XML)"></textarea>
+        <button id="encryptBtn">Encrypt</button>
+        <div class="error" id="encryptError"></div>
+        <textarea id="encryptedData" class="result" placeholder="Kết quả mã hóa (Base64)" readonly></textarea>
+        <button id="copyEncryptedBtn">Copy kết quả</button>
+      </div>
+      
+      <!-- Phần Decrypt -->
+      <div class="section" id="decryptSection">
+        <h2>Kết quả trả về</h2>
+        <textarea id="responseData" placeholder="Dán dữ liệu đã mã hóa tại đây"></textarea>
+        <button id="decryptResponseBtn">Decrypt</button>
+        <div class="error" id="decryptError"></div>
+        <textarea id="responseOutput" class="result" placeholder="Kết quả giải mã" readonly></textarea>
+        <button id="copyDecryptedBtn">Copy kết quả</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Hàm chuyển đổi Base64
+    function fromBase64(base64) {
+      return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+    }
+    function toBase64(data) {
+      return btoa(String.fromCharCode(...data));
+    }
+    
+    // ------------------ MODE 1: Compress & Padding (JSON - AES) ------------------
+    async function zipData(data) {
+      return pako.gzip(data);
+    }
+    async function unzipData(data) {
+      return pako.ungzip(data, { to: 'string' });
+    }
+    function addPadding(data) {
+      const blockSize = 16;
+      const paddingLength = blockSize - (data.length % blockSize);
+      const paddedData = new Uint8Array(data.length + paddingLength);
+      paddedData.set(data);
+      paddedData.fill(paddingLength, data.length);
+      return paddedData;
+    }
+    function removePadding(data) {
+      const paddingLength = data[data.length - 1];
+      return data.slice(0, data.length - paddingLength);
+    }
+    async function encryptDataMode1(data, key, iv) {
+      const paddedData = addPadding(data);
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt']);
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, paddedData);
+      return toBase64(new Uint8Array(encrypted));
+    }
+    async function decryptDataMode1(encryptedData, key, iv) {
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']);
+      const buffer = fromBase64(encryptedData);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, buffer);
+      const unpadded = removePadding(new Uint8Array(decrypted));
+      return unpadded;
+    }
+    
+    // ------------------ MODE 2: Plain Text (BEPOS) ------------------
+    async function encryptDataMode2(data, key, iv) {
+      const encodedData = new TextEncoder().encode(data);
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['encrypt']);
+      const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, encodedData);
+      return toBase64(new Uint8Array(encrypted));
+    }
+    async function decryptDataMode2(encryptedData, key, iv) {
+      const cryptoKey = await crypto.subtle.importKey('raw', key, { name: 'AES-CBC' }, false, ['decrypt']);
+      const buffer = fromBase64(encryptedData);
+      const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, buffer);
+      return new TextDecoder().decode(new Uint8Array(decrypted));
+    }
+    
+    // ------------------ MODE 3: XML (Zip & Escape - AES) ------------------
+    function escapeInnerXML(xml) {
+      if (xml.indexOf('<CommandObject') !== -1) {
+        return xml.replace(/<CommandObject([^>]*)>([\s\S]*?)<\/CommandObject>/g, function(match, attrs, innerContent) {
+          const escapedContent = innerContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<CommandObject${attrs}>` + escapedContent + `</CommandObject>`;
+        });
+      } else {
+        xml = xml.replace(/<\?xml.*?\?>\s*/g, "");
+        return xml.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+    }
+    async function encryptDataMode3(xmlData, key, iv) {
+      const processedXML = escapeInnerXML(xmlData);
+      const zippedData = new Uint8Array(await zipData(processedXML));
+      return encryptDataMode1(zippedData, key, iv);
+    }
+    async function decryptDataMode3(encryptedData, key, iv) {
+      const decryptedBytes = await decryptDataMode1(encryptedData, key, iv);
+      return await unzipData(decryptedBytes);
+    }
+    
+    // ------------------ MODE 4: JSON (Chỉ Base64) ------------------
+    async function encryptDataMode4(data) {
+      try {
+        const jsonData = JSON.stringify(JSON.parse(data));
+        const encoded = new TextEncoder().encode(jsonData);
+        return toBase64(encoded);
+      } catch {
+        throw new Error('Dữ liệu không phải là JSON hợp lệ.');
+      }
+    }
+    async function decryptDataMode4(encodedData) {
+      const decodedBytes = fromBase64(encodedData);
+      const decodedText = new TextDecoder().decode(decodedBytes);
+      try {
+        const result = JSON.parse(decodedText);
+        return JSON.stringify(result, null, 2);
+      } catch {
+        return decodedText;
+      }
+    }
+    
+    // ------------------ MODE 5: XML (Escape & Base64) ------------------
+    async function encryptDataMode5(xmlData) {
+      if (!validateXML(xmlData)) {
+        throw new Error('Dữ liệu đầu vào không phải là XML hợp lệ.');
+      }
+      const processedXML = escapeInnerXML(xmlData);
+      const encoded = new TextEncoder().encode(processedXML);
+      return toBase64(encoded);
+    }
+    async function decryptDataMode5(encodedData) {
+      const decodedBytes = fromBase64(encodedData);
+      return new TextDecoder().decode(decodedBytes);
+    }
+    
+    // ------------------ Validate ------------------
+    function validateJSON(data) {
+      try { JSON.parse(data); return true; }
+      catch { return false; }
+    }
+    function validateXML(data) {
+      try {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(data, "application/xml");
+        return !xmlDoc.getElementsByTagName("parsererror").length;
+      } catch { return false; }
+    }
+    
+    // ------------------ Copy to Clipboard ------------------
+    function copyToClipboard(textAreaId, button) {
+      const textarea = document.getElementById(textAreaId);
+      if (!textarea.value) return;
+      textarea.select();
+      document.execCommand('copy');
+      const originalText = button.textContent;
+      button.textContent = 'Đã copy!';
+      setTimeout(() => button.textContent = originalText, 1500);
+    }
+    document.getElementById('copyEncryptedBtn').addEventListener('click', function() {
+      copyToClipboard('encryptedData', this);
+    });
+    document.getElementById('copyDecryptedBtn').addEventListener('click', function() {
+      copyToClipboard('responseOutput', this);
+    });
+    
+    // ------------------ Xử lý sự kiện Encrypt/Decrypt ------------------
+    document.getElementById('encryptBtn').addEventListener('click', async () => {
+      const inputData = document.getElementById('inputData').value.trim();
+      const partnerToken = document.getElementById('partnerToken').value.trim();
+      const mode = document.getElementById('modeSelect').value;
+      const encryptError = document.getElementById('encryptError');
+      encryptError.textContent = '';
+      if (!inputData) {
+        encryptError.textContent = 'Vui lòng nhập dữ liệu.';
+        return;
+      }
+      if ((mode === 'mode1' || mode === 'mode4') && !validateJSON(inputData)) {
+        encryptError.textContent = 'Dữ liệu đầu vào không phải là JSON hợp lệ.';
+        return;
+      }
+      if ((mode === 'mode3' || mode === 'mode5') && !validateXML(inputData)) {
+        encryptError.textContent = 'Dữ liệu đầu vào không phải là XML hợp lệ.';
+        return;
+      }
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!partnerToken) {
+          encryptError.textContent = 'Vui lòng nhập Partner Token hợp lệ.';
+          return;
+        }
+        try {
+          const [k, i] = partnerToken.split(':');
+          if (!k||!i) throw '';
+          key = fromBase64(k);
+          iv  = fromBase64(i);
+        } catch {
+          encryptError.textContent = 'Định dạng Partner Token không hợp lệ. Yêu cầu "Base64Key:Base64IV".';
+          return;
+        }
+      }
+      try {
+        let encrypted;
+        if (mode === 'mode1') {
+          const jsonData = JSON.stringify(JSON.parse(inputData));
+          const zippedData = new Uint8Array(await zipData(jsonData));
+          encrypted = await encryptDataMode1(zippedData, key, iv);
+        } else if (mode === 'mode2') {
+          encrypted = await encryptDataMode2(inputData, key, iv);
+        } else if (mode === 'mode3') {
+          encrypted = await encryptDataMode3(inputData, key, iv);
+        } else if (mode === 'mode4') {
+          encrypted = await encryptDataMode4(inputData);
+        } else if (mode === 'mode5') {
+          encrypted = await encryptDataMode5(inputData);
+        }
+        document.getElementById('encryptedData').value = encrypted;
+      } catch (error) {
+        encryptError.textContent = error.message || 'Mã hóa thất bại. Vui lòng kiểm tra lại dữ liệu và token.';
+      }
+    });
+
+    document.getElementById('decryptResponseBtn').addEventListener('click', async () => {
+      const encryptedData = document.getElementById('responseData').value.trim();
+      const partnerToken  = document.getElementById('partnerToken').value.trim();
+      const mode          = document.getElementById('modeSelect').value;
+      const decryptError  = document.getElementById('decryptError');
+      decryptError.textContent = '';
+      if (!encryptedData) {
+        decryptError.textContent = 'Vui lòng nhập dữ liệu mã hóa.';
+        return;
+      }
+      let key, iv;
+      if (['mode1','mode2','mode3'].includes(mode)) {
+        if (!partnerToken) {
+          decryptError.textContent = 'Vui lòng nhập Partner Token hợp lệ.';
+          return;
+        }
+        try {
+          const [k, i] = partnerToken.split(':');
+          if (!k||!i) throw '';
+          key = fromBase64(k);
+          iv  = fromBase64(i);
+        } catch {
+          decryptError.textContent = 'Định dạng Partner Token không hợp lệ. Yêu cầu "Base64Key:Base64IV".';
+          return;
+        }
+      }
+      try {
+        let result;
+        if (mode === 'mode1') {
+          const decryptedBytes = await decryptDataMode1(encryptedData, key, iv);
+          const unzippedData   = await unzipData(decryptedBytes);
+          result = JSON.stringify(JSON.parse(unzippedData), null, 2);
+        } else if (mode === 'mode2') {
+          result = await decryptDataMode2(encryptedData, key, iv);
+        } else if (mode === 'mode3') {
+          result = await decryptDataMode3(encryptedData, key, iv);
+        } else if (mode === 'mode4') {
+          result = await decryptDataMode4(encryptedData);
+        } else if (mode === 'mode5') {
+          result = await decryptDataMode5(encryptedData);
+        }
+        document.getElementById('responseOutput').value = result;
+      } catch (error) {
+        decryptError.textContent = error.message || 'Giải mã thất bại. Vui lòng kiểm tra lại dữ liệu và token.';
+      }
+    });
+  </script>
+</body>
+</html>
