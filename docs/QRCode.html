@@ -282,9 +282,9 @@
         <p class="subtitle">Chuyển đổi text, link thành mã QR dễ dàng</p>
 
         <div class="quick-actions">
-            <button class="quick-btn" onclick="setQuickText('https://google.com')">Website</button>
+            <button class="quick-btn" onclick="setQuickText('https://ehoadon.github.io/bkav/')">Website</button>
             <button class="quick-btn" onclick="setQuickText('Xin chào!')">Text</button>
-            <button class="quick-btn" onclick="setQuickText('tel:+84123456789')">Điện thoại</button>
+            <button class="quick-btn" onclick="setQuickText('tel:0123456789')">Điện thoại</button>
             <button class="quick-btn" onclick="setQuickText('mailto:email@example.com')">Email</button>
         </div>
 
@@ -415,7 +415,7 @@
         }
 
         function generateQR() {
-            const inputText = document.getElementById('inputText').value.trim();
+            let inputText = document.getElementById('inputText').value.trim();
             const qrSize = parseInt(document.getElementById('qrSize').value);
             const errorLevel = document.getElementById('errorLevel').value;
             const resultDiv = document.getElementById('qrResult');
@@ -424,6 +424,20 @@
             if (!inputText) {
                 alert('Vui lòng nhập nội dung cần chuyển đổi!');
                 return;
+            }
+
+            // Auto-detect and format input
+            if (/^[0-9+\-\s]{8,}$/.test(inputText)) {
+                // Looks like a phone number
+                inputText = `tel:${inputText.replace(/\s+/g, '')}`;
+            } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputText)) {
+                // Looks like email
+                inputText = `mailto:${inputText}`;
+            } else if (/^www\./i.test(inputText)) {
+                inputText = `https://${inputText}`;
+            } else if (!/^https?:\/\//i.test(inputText) && /\.\w{2,}/.test(inputText)) {
+                // Looks like a raw link
+                inputText = `https://${inputText}`;
             }
 
             // Check if QR library is ready
@@ -439,6 +453,7 @@
 
             generateQRCode(inputText, qrSize, errorLevel, resultDiv, btnText);
         }
+
 
         function generateQRCode(inputText, qrSize, errorLevel, resultDiv, btnText) {
             // Show loading state
