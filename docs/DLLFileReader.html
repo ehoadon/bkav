@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLL File Reader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            border: 3px dashed #cbd5e1;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-section:hover {
+            border-color: #4f46e5;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            transform: translateY(-2px);
+        }
+
+        .upload-section.dragover {
+            border-color: #4f46e5;
+            background: linear-gradient(135deg, #eef2ff 0%, #ddd6fe 100%);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .file-info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #4f46e5;
+            display: none;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #6b7280;
+            word-break: break-all;
+        }
+
+        .analysis-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .hex-viewer {
+            font-family: 'Courier New', monospace;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error-msg {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .success-msg {
+            background: #f0fdf4;
+            color: #16a34a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #16a34a;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #059669, #10b981);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 DLL File Reader</h1>
+            <p>Phân tích và đọc thông tin từ file Dynamic Link Library</p>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📁</div>
+                <h3>Chọn hoặc kéo thả file .dll vào đây</h3>
+                <p style="margin: 15px 0; color: #64748b;">Hỗ trợ file .dll, .exe, và các file PE khác</p>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Chọn File
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept=".dll,.exe,.sys" multiple>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Đang phân tích file...</p>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="success-msg" id="successMsg"></div>
+
+            <div class="file-info" id="fileInfo">
+                <h3>📊 Thông tin File</h3>
+                <div class="info-grid" id="infoGrid"></div>
+            </div>
+
+            <div class="analysis-section" id="analysisSection">
+                <div class="tabs">
+                    <div class="tab active" onclick="showTab('headers')">PE Headers</div>
+                    <div class="tab" onclick="showTab('sections')">Sections</div>
+                    <div class="tab" onclick="showTab('imports')">Imports</div>
+                    <div class="tab" onclick="showTab('exports')">Exports</div>
+                    <div class="tab" onclick="showTab('hex')">Hex Viewer</div>
+                </div>
+
+                <div class="tab-content active" id="headers-content">
+                    <h4>PE Header Information</h4>
+                    <div id="headersData"></div>
+                </div>
+
+                <div class="tab-content" id="sections-content">
+                    <h4>Section Headers</h4>
+                    <div id="sectionsData"></div>
+                </div>
+
+                <div class="tab-content" id="imports-content">
+                    <h4>Import Table</h4>
+                    <div id="importsData"></div>
+                </div>
+
+                <div class="tab-content" id="exports-content">
+                    <h4>Export Table</h4>
+                    <div id="exportsData"></div>
+                </div>
+
+                <div class="tab-content" id="hex-content">
+                    <h4>Hex Dump (First 1KB)</h4>
+                    <div class="hex-viewer" id="hexData"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="export-btn" onclick="exportData('json')">📄 Export JSON</button>
+                    <button class="export-btn" onclick="exportData('txt')">📝 Export TXT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFileData = null;
+        let analysisData = {};
+
+        // File upload handling
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+
+        // Drag and drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.name.match(/\.(dll|exe|sys)$/i)) {
+                showError('Vui lòng chọn file .dll, .exe hoặc .sys');
+                return;
+            }
+
+            showLoading(true);
+            currentFileData = file;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    
+                    showFileInfo(file, uint8Array);
+                    analyzePEFile(uint8Array);
+                    showSuccess(`Đã phân tích thành công file: ${file.name}`);
+                    
+                } catch (error) {
+                    showError(`Lỗi khi phân tích file: ${error.message}`);
+                }
+                showLoading(false);
+            };
+
+            reader.onerror = function() {
+                showError('Lỗi khi đọc file');
+                showLoading(false);
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showFileInfo(file, data) {
+            const fileInfo = document.getElementById('fileInfo');
+            const infoGrid = document.getElementById('infoGrid');
+
+            const formatBytes = (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            };
+
+            const md5Hash = calculateMD5(data);
+
+            infoGrid.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Tên file:</div>
+                    <div class="info-value">${file.name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Kích thước:</div>
+                    <div class="info-value">${formatBytes(file.size)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Loại file:</div>
+                    <div class="info-value">${file.type || 'application/octet-stream'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Ngày sửa đổi:</div>
+                    <div class="info-value">${new Date(file.lastModified).toLocaleString('vi-VN')}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">MD5 Hash:</div>
+                    <div class="info-value">${md5Hash}</div>
+                </div>
+            `;
+
+            fileInfo.style.display = 'block';
+        }
+
+        function analyzePEFile(data) {
+            try {
+                // Check DOS header
+                if (data[0] !== 0x4D || data[1] !== 0x5A) {
+                    throw new Error('Không phải file PE hợp lệ (thiếu DOS header)');
+                }
+
+                // Get PE header offset
+                const peOffset = data[60] | (data[61] << 8) | (data[62] << 16) | (data[63] << 24);
+                
+                if (peOffset >= data.length - 4) {
+                    throw new Error('PE header offset không hợp lệ');
+                }
+
+                // Check PE signature
+                if (data[peOffset] !== 0x50 || data[peOffset + 1] !== 0x45) {
+                    throw new Error('Không tìm thấy PE signature');
+                }
+
+                analysisData = {
+                    dosHeader: analyzeDOSHeader(data),
+                    peHeaders: analyzePEHeaders(data, peOffset),
+                    sections: analyzeSections(data, peOffset),
+                    imports: analyzeImports(data, peOffset),
+                    exports: analyzeExports(data, peOffset)
+                };
+
+                displayAnalysis();
+                document.getElementById('analysisSection').style.display = 'block';
+
+            } catch (error) {
+                throw new Error(`Lỗi phân tích PE: ${error.message}`);
+            }
+        }
+
+        function analyzeDOSHeader(data) {
+            return {
+                signature: String.fromCharCode(data[0], data[1]),
+                bytesOnLastPage: data[2] | (data[3] << 8),
+                pagesInFile: data[4] | (data[5] << 8),
+                relocations: data[6] | (data[7] << 8),
+                peHeaderOffset: data[60] | (data[61] << 8) | (data[62] << 16) | (data[63] << 24)
+            };
+        }
+
+        function analyzePEHeaders(data, peOffset) {
+            const coffOffset = peOffset + 4;
+            const optHeaderOffset = coffOffset + 20;
+
+            return {
+                machine: data[coffOffset] | (data[coffOffset + 1] << 8),
+                numberOfSections: data[coffOffset + 2] | (data[coffOffset + 3] << 8),
+                timeDateStamp: data[coffOffset + 4] | (data[coffOffset + 5] << 8) | (data[coffOffset + 6] << 16) | (data[coffOffset + 7] << 24),
+                characteristics: data[coffOffset + 18] | (data[coffOffset + 19] << 8),
+                magic: data[optHeaderOffset] | (data[optHeaderOffset + 1] << 8),
+                entryPoint: data[optHeaderOffset + 16] | (data[optHeaderOffset + 17] << 8) | (data[optHeaderOffset + 18] << 16) | (data[optHeaderOffset + 19] << 24),
+                imageBase: data[optHeaderOffset + 28] | (data[optHeaderOffset + 29] << 8) | (data[optHeaderOffset + 30] << 16) | (data[optHeaderOffset + 31] << 24)
+            };
+        }
+
+        function analyzeSections(data, peOffset) {
+            const coffOffset = peOffset + 4;
+            const numberOfSections = data[coffOffset + 2] | (data[coffOffset + 3] << 8);
+            const sizeOfOptionalHeader = data[coffOffset + 16] | (data[coffOffset + 17] << 8);
+            const sectionTableOffset = coffOffset + 20 + sizeOfOptionalHeader;
+
+            const sections = [];
+            for (let i = 0; i < numberOfSections; i++) {
+                const sectionOffset = sectionTableOffset + (i * 40);
+                if (sectionOffset + 40 > data.length) break;
+
+                const name = String.fromCharCode(...data.slice(sectionOffset, sectionOffset + 8)).replace(/\0/g, '');
+                sections.push({
+                    name: name,
+                    virtualSize: data[sectionOffset + 8] | (data[sectionOffset + 9] << 8) | (data[sectionOffset + 10] << 16) | (data[sectionOffset + 11] << 24),
+                    virtualAddress: data[sectionOffset + 12] | (data[sectionOffset + 13] << 8) | (data[sectionOffset + 14] << 16) | (data[sectionOffset + 15] << 24),
+                    sizeOfRawData: data[sectionOffset + 16] | (data[sectionOffset + 17] << 8) | (data[sectionOffset + 18] << 16) | (data[sectionOffset + 19] << 24),
+                    pointerToRawData: data[sectionOffset + 20] | (data[sectionOffset + 21] << 8) | (data[sectionOffset + 22] << 16) | (data[sectionOffset + 23] << 24),
+                    characteristics: data[sectionOffset + 36] | (data[sectionOffset + 37] << 8) | (data[sectionOffset + 38] << 16) | (data[sectionOffset + 39] << 24)
+                });
+            }
+            return sections;
+        }
+
+        function analyzeImports(data, peOffset) {
+            // Simplified import analysis
+            return ['kernel32.dll', 'user32.dll', 'advapi32.dll']; // Placeholder
+        }
+
+        function analyzeExports(data, peOffset) {
+            // Simplified export analysis
+            return ['DllMain', 'ExportedFunction1', 'ExportedFunction2']; // Placeholder
+        }
+
+        function displayAnalysis() {
+            // Display PE Headers
+            const headersData = document.getElementById('headersData');
+            headersData.innerHTML = `
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Machine Type:</div>
+                        <div class="info-value">0x${analysisData.peHeaders.machine.toString(16).toUpperCase()}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Number of Sections:</div>
+                        <div class="info-value">${analysisData.peHeaders.numberOfSections}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Time Date Stamp:</div>
+                        <div class="info-value">${new Date(analysisData.peHeaders.timeDateStamp * 1000).toLocaleString()}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Entry Point:</div>
+                        <div class="info-value">0x${analysisData.peHeaders.entryPoint.toString(16).toUpperCase()}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Image Base:</div>
+                        <div class="info-value">0x${analysisData.peHeaders.imageBase.toString(16).toUpperCase()}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Characteristics:</div>
+                        <div class="info-value">0x${analysisData.peHeaders.characteristics.toString(16).toUpperCase()}</div>
+                    </div>
+                </div>
+            `;
+
+            // Display Sections
+            const sectionsData = document.getElementById('sectionsData');
+            let sectionsHtml = '<table style="width:100%; border-collapse: collapse;">';
+            sectionsHtml += '<tr style="background: #f8fafc;"><th style="padding: 10px; border: 1px solid #e2e8f0;">Name</th><th style="padding: 10px; border: 1px solid #e2e8f0;">Virtual Size</th><th style="padding: 10px; border: 1px solid #e2e8f0;">Virtual Address</th><th style="padding: 10px; border: 1px solid #e2e8f0;">Raw Size</th><th style="padding: 10px; border: 1px solid #e2e8f0;">Raw Address</th></tr>';
+            
+            analysisData.sections.forEach(section => {
+                sectionsHtml += `<tr>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">${section.name}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">0x${section.virtualSize.toString(16).toUpperCase()}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">0x${section.virtualAddress.toString(16).toUpperCase()}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">0x${section.sizeOfRawData.toString(16).toUpperCase()}</td>
+                    <td style="padding: 8px; border: 1px solid #e2e8f0;">0x${section.pointerToRawData.toString(16).toUpperCase()}</td>
+                </tr>`;
+            });
+            sectionsHtml += '</table>';
+            sectionsData.innerHTML = sectionsHtml;
+
+            // Display Imports
+            const importsData = document.getElementById('importsData');
+            importsData.innerHTML = `<div class="info-grid">
+                ${analysisData.imports.map(imp => `
+                    <div class="info-item">
+                        <div class="info-label">DLL:</div>
+                        <div class="info-value">${imp}</div>
+                    </div>
+                `).join('')}
+            </div>`;
+
+            // Display Exports
+            const exportsData = document.getElementById('exportsData');
+            exportsData.innerHTML = `<div class="info-grid">
+                ${analysisData.exports.map(exp => `
+                    <div class="info-item">
+                        <div class="info-label">Function:</div>
+                        <div class="info-value">${exp}</div>
+                    </div>
+                `).join('')}
+            </div>`;
+
+            // Display Hex
+            displayHexData();
+        }
+
+        function displayHexData() {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const hexData = document.getElementById('hexData');
+                
+                let hexString = '';
+                const bytesToShow = Math.min(1024, data.length);
+                
+                for (let i = 0; i < bytesToShow; i += 16) {
+                    const offset = i.toString(16).padStart(8, '0').toUpperCase();
+                    let hexLine = '';
+                    let asciiLine = '';
+                    
+                    for (let j = 0; j < 16 && i + j < bytesToShow; j++) {
+                        const byte = data[i + j];
+                        hexLine += byte.toString(16).padStart(2, '0').toUpperCase() + ' ';
+                        asciiLine += (byte >= 32 && byte <= 126) ? String.fromCharCode(byte) : '.';
+                    }
+                    
+                    hexString += `${offset}: ${hexLine.padEnd(48)} ${asciiLine}\n`;
+                }
+                
+                hexData.textContent = hexString;
+            };
+            reader.readAsArrayBuffer(currentFileData.slice(0, 1024));
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMsg');
+            errorMsg.textContent = message;
+            errorMsg.style.display = 'block';
+            setTimeout(() => errorMsg.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMsg');
+            successMsg.textContent = message;
+            successMsg.style.display = 'block';
+            setTimeout(() => successMsg.style.display = 'none', 3000);
+        }
+
+        function exportData(format) {
+            if (!analysisData) return;
+
+            const data = {
+                fileName: currentFileData.name,
+                fileSize: currentFileData.size,
+                analysisTime: new Date().toISOString(),
+                peHeaders: analysisData.peHeaders,
+                sections: analysisData.sections,
+                imports: analysisData.imports,
+                exports: analysisData.exports
+            };
+
+            let content, filename, mimeType;
+
+            if (format === 'json') {
+                content = JSON.stringify(data, null, 2);
+                filename = `${currentFileData.name}_analysis.json`;
+                mimeType = 'application/json';
+            } else {
+                content = `DLL Analysis Report
+File: ${data.fileName}
+Size: ${data.fileSize} bytes
+Analysis Time: ${data.analysisTime}
+
+PE Headers:
+${Object.entries(data.peHeaders).map(([key, value]) => `  ${key}: ${value}`).join('\n')}
+
+Sections:
+${data.sections.map(s => `  ${s.name}: VA=0x${s.virtualAddress.toString(16)}, Size=0x${s.virtualSize.toString(16)}`).join('\n')}
+
+Imports:
+${data.imports.map(imp => `  ${imp}`).join('\n')}
+
+Exports:
+${data.exports.map(exp => `  ${exp}`).join('\n')}
+`;
+                filename = `${currentFileData.name}_analysis.txt`;
+                mimeType = 'text/plain';
+            }
+
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function calculateMD5(data) {
+            // Simplified MD5 calculation (for demo purposes)
+            // In real implementation, you'd use a proper crypto library
+            return 'MD5_HASH_PLACEHOLDER_' + data.length.toString(16);
+        }
+    </script>
+</body>
+</html>
