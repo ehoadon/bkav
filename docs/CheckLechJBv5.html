@@ -717,6 +717,7 @@
                     valid: 'Hợp lệ',
                     invalid: 'Không hợp lệ',
                     all: 'Tất cả',
+                    noData: 'Không có dữ liệu',
                     stats: {
                         total: 'Tổng số bản ghi',
                         matched: 'Khớp',
@@ -740,18 +741,20 @@
                         other_svc_ttl: 'Phí giao hàng',
                         chk_seq: 'chk_seq',
                         file: 'File',
-                        file1Count: 'File1',
-                        file2Count: 'File2',
+                        file1Count: 'Số lần xuất hiện File 1',
+                        file2Count: 'Số lần xuất hiện File 2',
                         details: 'Chi tiết',
                         statusInFile1: 'Trùng trong File 1',
                         statusInFile2: 'Trùng trong File 2',
-                        statusBetweenFiles: 'Trùng giữa File 1 và File 2'            
+                        statusBetweenFiles: 'Trùng giữa File 1 và File 2',
+                        property: 'Tính chất'            
                     },
                     filter: {
                         validity: 'Tính hợp lệ',
                         billcodeSearch: 'Tìm kiếm Billcode',
                         diffFilter: 'Chênh lệch tối thiểu',
-                        clearFilters: 'Xóa bộ lọc'
+                        clearFilters: 'Xóa bộ lọc',
+                        filtersTitle: 'Lọc'
                     },
                     accordion: {
                         missingInFile2: 'Billcode có ở File 1 nhưng không có ở File 2',
@@ -791,6 +794,7 @@
                     valid: 'Valid',
                     invalid: 'Invalid',
                     all: 'All',
+                    noData: 'No data available',
                     stats: {
                         total: 'Total Records',
                         matched: 'Matched',
@@ -817,19 +821,22 @@
                         details: 'Details',
                         statusInFile1: 'Duplicate in File 1',
                         statusInFile2: 'Duplicate in File 2',
-                        statusBetweenFiles: 'Duplicate between File 1 and File 2'
+                        statusBetweenFiles: 'Duplicate between File 1 and File 2',
+                        property: 'Property'
                     },
                     filter: {
                         validity: 'Validity',
                         billcodeSearch: 'Search Billcode',
                         diffFilter: 'Minimum Difference',
                         clearFilters: 'Clear Filters',
-                        duplicates: 'Duplicate Billcodes'
+                        duplicates: 'Duplicate Billcodes',
+                        filtersTitle: 'Filters'
                     },
                     accordion: {
                         missingInFile2: 'Billcodes in File 1 but not in File 2',
                         missingInFile1: 'Billcodes in File 2 but not in File 1',
-                        valueDiffs: 'Billcodes with Value Differences'
+                        valueDiffs: 'Billcodes with Value Differences',
+                        duplicates: ' Duplicate Billcodes'
                     },
                     alert: {
                         success: 'Success: %s',
@@ -862,6 +869,7 @@
                     valid: '有效',
                     invalid: '无效',
                     all: '全部',
+                    noData: '没有数据',
                     stats: {
                         total: '总记录数',
                         matched: '匹配',
@@ -869,7 +877,8 @@
                         diffAmount: '总差额',
                         notTaken: '未取',
                         otherSvc: '运费',
-                        adjustedTotalDiff: '运费差异'
+                        adjustedTotalDiff: '运费差异',
+                        duplicates: '重复'
                     },
                     table: {
                         billcode: '账单代码',
@@ -878,18 +887,25 @@
                         difference: '差额',
                         status: '状态',
                         reason: '原因',
-                        other_svc_ttl: '运费'
+                        other_svc_ttl: '运费',
+                        otherSvc: '运费',
+                        property: '属性',
+                        details: '详细信息',
+                        file1Count: '文件 1 出现次数',
+                        file2Count: '文件 2 出现次数'
                     },
                     filter: {
                         validity: '有效性',
                         billcodeSearch: '搜索账单代码',
                         diffFilter: '最小差额',
-                        clearFilters: '清除过滤器'
+                        clearFilters: '清除过滤器',
+                        filtersTitle: '筛选'
                     },
                     accordion: {
                         missingInFile2: '文件1中有但文件2中没有的账单代码',
                         missingInFile1: '文件2中有但文件1中没有的账单代码',
-                        valueDiffs: '具有价值差异的账单代码'
+                        valueDiffs: '具有价值差异的账单代码',
+                        duplicates: '重复的账单代码'
                     },
                     alert: {
                         success: '成功：%s',
@@ -922,6 +938,7 @@
                     valid: '有効',
                     invalid: '無効',
                     all: 'すべて',
+                    noData: 'データがありません',
                     stats: {
                         total: '総レコード数',
                         matched: '一致',
@@ -929,7 +946,8 @@
                         diffAmount: '総差額',
                         notTaken: '取得しない',
                         otherSvc: '配達料',
-                        adjustedTotalDiff: '送料の差'
+                        adjustedTotalDiff: '送料の差',
+                        duplicates: '重複'
                     },
                     table: {
                         billcode: 'ビルコード',
@@ -938,18 +956,25 @@
                         difference: '差額',
                         status: 'ステータス',
                         reason: '理由',
-                        other_svc_ttl: '配達料'
+                        other_svc_ttl: '配達料',
+                        otherSvc: '配達料',
+                        property: '特性',
+                        details: '詳細',
+                        file1Count: 'ファイル1の出現回数',
+                        file2Count: 'ファイル2の出現回数'
                     },
                     filter: {
                         validity: '有効性',
                         billcodeSearch: 'ビルコード検索',
                         diffFilter: '最小差額',
-                        clearFilters: 'フィルターをクリア'
+                        clearFilters: 'フィルターをクリア',
+                        filtersTitle: 'フィルター'
                     },
                     accordion: {
                         missingInFile2: 'ファイル1にあり、ファイル2にないビルコード',
                         missingInFile1: 'ファイル2にあり、ファイル1にないビルコード',
-                        valueDiffs: '価値の差があるビルコード'
+                        valueDiffs: '価値の差があるビルコード',
+                        duplicates: '重複した請求コード'
                     },
                     alert: {
                         success: '成功：%s',
@@ -982,6 +1007,7 @@
                     valid: '유효',
                     invalid: '무효',
                     all: '모두',
+                    noData: '데이터가 없습니다',
                     stats: {
                         total: '총 레코드 수',
                         matched: '일치',
@@ -989,7 +1015,8 @@
                         diffAmount: '총 차액',
                         notTaken: '취하지 않음',
                         otherSvc: '배송료',
-                        adjustedTotalDiff: '배송료 차이'
+                        adjustedTotalDiff: '배송료 차이',
+                        duplicates: '중복'
                     },
                     table: {
                         billcode: '빌 코드',
@@ -998,18 +1025,25 @@
                         difference: '차액',
                         status: '상태',
                         reason: '이유',
-                        other_svc_ttl: '배송료'
+                        other_svc_ttl: '배송료',
+                        otherSvc: '배송료',
+                        property: '속성',
+                        details: '상세 정보',
+                        file1Count: '파일 1 등장 횟수',
+                        file2Count: '파일 2 등장 횟수'
                     },
                     filter: {
                         validity: '유효성',
                         billcodeSearch: '빌 코드 검색',
                         diffFilter: '최소 차액',
-                        clearFilters: '필터 지우기'
+                        clearFilters: '필터 지우기',
+                        filtersTitle: '필터'
                     },
                     accordion: {
                         missingInFile2: '파일 1에 있지만 파일 2에 없는 빌 코드',
                         missingInFile1: '파일 2에 있지만 파일 1에 없는 빌 코드',
-                        valueDiffs: '가치 차이가 있는 빌 코드'
+                        valueDiffs: '가치 차이가 있는 빌 코드',
+                        duplicates: '중복된 청구 코드'
                     },
                     alert: {
                         success: '성공: %s',
@@ -1042,6 +1076,7 @@
                     valid: 'Действительный',
                     invalid: 'Недействительный',
                     all: 'Все',
+                    noData: 'Нет данных',
                     stats: {
                         total: 'Всего записей',
                         matched: 'Совпадения',
@@ -1049,7 +1084,8 @@
                         diffAmount: 'Общая разница',
                         notTaken: 'Не взято',
                         otherSvc: 'Стоимость доставки',
-                        adjustedTotalDiff: 'Разница в стоимости доставки'
+                        adjustedTotalDiff: 'Разница в стоимости доставки',
+                        duplicates: 'Дубликат'
                     },
                     table: {
                         billcode: 'Код счета',
@@ -1058,18 +1094,25 @@
                         difference: 'Разница',
                         status: 'Статус',
                         reason: 'Причина',
-                        other_svc_ttl: 'Стоимость доставки'
+                        other_svc_ttl: 'Стоимость доставки',
+                        otherSvc: 'Стоимость доставки',
+                        property: 'Свойство',
+                        details: 'Подробности',
+                        file1Count: 'Кол-во вхождений в файле 1',
+                        file2Count:  'Кол-во вхождений в файле 2'
                     },
                     filter: {
                         validity: 'Действительность',
                         billcodeSearch: 'Поиск кода счета',
                         diffFilter: 'Минимальная разница',
-                        clearFilters: 'Очистить фильтры'
+                        clearFilters: 'Очистить фильтры',
+                        filtersTitle: 'Фильтр'
                     },
                     accordion: {
                         missingInFile2: 'Коды счетов, присутствующие в файле 1, но отсутствующие в файле 2',
                         missingInFile1: 'Коды счетов, присутствующие в файле 2, но отсутствующие в файле 1',
-                        valueDiffs: 'Коды счетов с различиями в значениях'
+                        valueDiffs: 'Коды счетов с различиями в значениях',
+                        duplicates: 'Повторяющиеся коды счетов'
                     },
                     alert: {
                         success: 'Успех: %s',
@@ -1403,8 +1446,8 @@
                 }
               }
             compareData(data1, data2) {
-                if (!data1 || !data2 || data1.length === 0 || data2.length === 0) {
-                    throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'Dữ liệu không hợp lệ hoặc rỗng') || 'Invalid or empty data');
+                if (!data1 || !data2 || !Array.isArray(data1) || !Array.isArray(data2) || data1.length === 0 || data2.length === 0) {
+                    throw new Error('Dữ liệu không hợp lệ hoặc rỗng');
                 }
 
                 const defaultHeaders1 = [
@@ -1437,8 +1480,7 @@
                 const billcodeCol1 = findColumnIndex(headers1, 'chk_num');
                 const valueCol1 = findColumnIndex(headers1, 'sub_ttl');
                 const otherSvcCol = findColumnIndex(headers1, 'other_svc_ttl');
-                const chkSeqCol = findColumnIndex(headers1, 'chk_seq');
-                const conditionCols = {
+                const conditionCols1 = {
                     standaloneCheck: findColumnIndex(headers1, 'standalone_check'),
                     summTtlPrntd: findColumnIndex(headers1, 'summ_ttl_prntd'),
                     fastTransChk: findColumnIndex(headers1, 'fast_trans_chk'),
@@ -1449,22 +1491,23 @@
 
                 const billcodeCol2 = findColumnIndex(headers2, 'Mã bill');
                 const valueCol2 = findColumnIndex(headers2, 'Thành tiền');
+                const conditionCols2 = {
+                    status: findColumnIndex(headers2, 'Trạng thái')
+                };
 
                 if (!headers1.includes(billcodeCol1) || !headers1.includes(valueCol1)) {
-                    throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'File 1 thiếu cột chk_num hoặc sub_ttl') || 'File 1 missing chk_num or sub_ttl column');
+                    throw new Error('File 1 thiếu cột chk_num hoặc sub_ttl');
                 }
                 if (!headers2.includes(billcodeCol2) || !headers2.includes(valueCol2)) {
-                    throw new Error(translations[this.currentLang]?.alert?.error?.replace('%s', 'File 2 thiếu cột Mã bill hoặc Thành tiền') || 'File 2 missing Mã bill or Thành tiền column');
+                    throw new Error('File 2 thiếu cột Mã bill hoặc Thành tiền');
                 }
 
                 const groupByBillcode = (data, billcodeCol) => {
                     const grouped = {};
                     data.forEach((row, index) => {
-                        const billcode = String(row[billcodeCol]).trim();
+                        const billcode = String(row[billcodeCol]).trim().toLowerCase();
                         if (!billcode) return;
-                        if (!grouped[billcode]) {
-                            grouped[billcode] = [];
-                        }
+                        if (!grouped[billcode]) grouped[billcode] = [];
                         grouped[billcode].push({ ...row, originalIndex: index + 2 });
                     });
                     return grouped;
@@ -1473,245 +1516,190 @@
                 const groupedData1 = groupByBillcode(data1, billcodeCol1);
                 const groupedData2 = groupByBillcode(data2, billcodeCol2);
 
-                const billcodeCounts1 = {};
-                const billcodeCounts2 = {};
-                Object.keys(groupedData1).forEach(billcode => {
-                    billcodeCounts1[billcode] = groupedData1[billcode].length;
+                // Khai báo excludedBills cho cả File 1 và File 2
+                const excludedBills1 = [];
+                const excludedBills2 = [];
+
+                // Điều kiện bỏ qua cho File 1
+                const validRows1 = (Array.isArray(data1) ? data1 : []).filter(row => {
+                    const reasons = [];
+                    const billcode = String(row[billcodeCol1]).trim();
+                    const subTtl = parseFloat(row[valueCol1]) || 0;
+                    const conditions = [
+                        { col: conditionCols1.standaloneCheck, name: 'standalone_check' },
+                        { col: conditionCols1.summTtlPrntd, name: 'summ_ttl_prntd' },
+                        { col: conditionCols1.fastTransChk, name: 'fast_trans_chk' },
+                        { col: conditionCols1.chkCancelled, name: 'chk_cancelled' },
+                        { col: conditionCols1.chkEdited, name: 'chk_edited' },
+                        { col: conditionCols1.training, name: 'training' }
+                    ];
+
+                    conditions.forEach(({ col, name }) => {
+                        if (row[col] != null) {
+                            const val = parseInt(row[col], 10);
+                            if (!isNaN(val) && (val === 1 || val === -1)) {
+                                reasons.push(`${name} = ${val}`);
+                            }
+                        }
+                    });
+
+                    if (subTtl < 0) {
+                        reasons.push(`sub_ttl < 0 (${subTtl.toFixed(2)})`);
+                    }
+                    if (subTtl === 0) {
+                        const hasInFile2 = groupedData2[billcode] && groupedData2[billcode].length > 0;
+                        if (!hasInFile2) {
+                            reasons.push(`sub_ttl = 0`);
+                        }
+                    }
+
+                    if (reasons.length > 0) {
+                        excludedBills1.push({ billcode, reason: reasons.join(', ') });
+                        return false;
+                    }
+                    return true;
                 });
-                Object.keys(groupedData2).forEach(billcode => {
-                    billcodeCounts2[billcode] = groupedData2[billcode].length;
+                data2.forEach(row => {
+                    const billcode = String(row[billcodeCol2]).trim().toLowerCase();
+                    if (row[conditionCols2.status] && String(row[conditionCols2.status]).toLowerCase() === 'hủy') {
+                        excludedBills2.push({ billcode, reason: 'Trạng thái = Hủy', status: 'valid' });
+                    }
                 });
 
-                const duplicateBillcodes = [];
+                let notTakenCount = excludedBills1.length + excludedBills2.length;
+
+                // Bước 1: Kiểm tra billcode có ở File 1 nhưng không ở File 2
                 const missingInFile2 = [];
+                Object.keys(groupedData1).forEach(billcode => {
+                    const rows1 = groupedData1[billcode];
+                    const rows2 = groupedData2[billcode] || [];
+                    const count2 = rows2.length;
+
+                    if (count2 === 0) {
+                        rows1.forEach(row => {
+                            const excluded = excludedBills1.find(e => e.billcode === billcode);
+                            if (excluded) {
+                                missingInFile2.push({ billcode, reason: excluded.reason, status: 'valid' });
+                            } else {
+                                missingInFile2.push({ billcode, reason: 'Không có trong File 2', status: 'invalid' });
+                            }
+                        });
+                    }
+                });
+
+                // Bước 2: Kiểm tra billcode có ở File 2 nhưng không ở File 1
                 const missingInFile1 = [];
+                Object.keys(groupedData2).forEach(billcode => {
+                    const rows1 = groupedData1[billcode] || [];
+                    const rows2 = groupedData2[billcode];
+                    const count1 = rows1.length;
+
+                    if (count1 === 0) {
+                        rows2.forEach(row => {
+                            const excluded = excludedBills2.find(e => e.billcode === billcode);
+                            if (excluded) {
+                                missingInFile1.push({ billcode, reason: excluded.reason, status: 'valid' });
+                            } else {
+                                missingInFile1.push({ billcode, reason: 'Không có trong File 1', status: 'invalid' });
+                            }
+                        });
+                    }
+                });
+
+                // Bước 3: So sánh giá trị chênh lệch và xử lý trùng lặp
                 const valueDiffs = [];
+                const duplicateBillcodes = [];
                 let totalDiff = 0;
                 let matched = 0;
                 let unmatched = 0;
                 let totalOtherSvc = 0;
-                let notTakenCount = 0;
+                let adjustedTotalDiff = 0;
 
-                const excludedBills = [];
-                const validRows1 = [];
-                Object.keys(groupedData1).forEach(billcode => {
-                    groupedData1[billcode].forEach(row => {
-                        const reasons = [];
-                        const conditions = [
-                            { col: conditionCols.standaloneCheck, name: 'standalone_check' },
-                            { col: conditionCols.summTtlPrntd, name: 'summ_ttl_prntd' },
-                            { col: conditionCols.fastTransChk, name: 'fast_trans_chk' },
-                            { col: conditionCols.chkCancelled, name: 'chk_cancelled' },
-                            { col: conditionCols.chkEdited, name: 'chk_edited' },
-                            { col: conditionCols.training, name: 'training' }
-                        ];
-
-                        conditions.forEach(({ col, name }) => {
-                            if (row[col] != null) {
-                                const val = parseInt(row[col], 10);
-                                if (!isNaN(val) && (val === 1 || val === -1)) {
-                                    reasons.push(`${name} = ${val}`);
-                                }
-                            }
-                        });
-
-                        if (reasons.length > 0) {
-                            excludedBills.push({ billcode, reason: reasons.join(', '), status: 'valid' });
-                            notTakenCount++;
-                        } else {
-                            validRows1.push(row);
-                        }
-                    });
-                });
-
-                const allBillcodes = new Set([...Object.keys(groupedData1), ...Object.keys(groupedData2)]);
-                allBillcodes.forEach(billcode => {
+                const billcodes = new Set([...Object.keys(groupedData1), ...Object.keys(groupedData2)]);
+                billcodes.forEach(billcode => {
                     const rows1 = groupedData1[billcode] || [];
                     const rows2 = groupedData2[billcode] || [];
-                    const count1 = billcodeCounts1[billcode] || 0;
-                    const count2 = billcodeCounts2[billcode] || 0;
+                    const count1 = rows1.length;
+                    const count2 = rows2.length;
 
-                    // Handle duplicates
-                    if (count1 > 1 || count2 > 1 || (count1 !== count2 && count1 > 0 && count2 > 0)) {
-                        const status = [];
-                        const details = new Set();
-                        let billcodeDiff = 0;
+                    if (count1 > 0 && count2 > 0) {
+                        const totalVal1 = rows1.reduce((sum, row) => sum + (parseFloat(row[valueCol1]) || 0) + (parseFloat(row[otherSvcCol]) || 0), 0);
+                        const totalVal2 = rows2.reduce((sum, row) => sum + (parseFloat(row[valueCol2]) || 0), 0);
+                        const diff = Math.abs(totalVal2 - totalVal1);
 
-                        if (count1 > 1) {
-                            status.push(`Billcode ${billcode} xuất hiện ${count1} lần trong File 1`);
-                            const rows = groupedData1[billcode].map((row, idx) => `Row ${row.originalIndex} (${idx === 0 ? 'Valid' : 'Invalid'})`).join(', ');
-                            details.add(`File 1: ${rows}`);
-                        } else if (count1 === 1 && count2 > 1) {
-                            details.add(`File 1: Row ${groupedData1[billcode][0].originalIndex} (Valid)`);
+                        // Kiểm tra sub_ttl = 0 để so sánh
+                        const hasSubTtlZero = rows1.some(row => parseFloat(row[valueCol1]) === 0);
+                        if (hasSubTtlZero || !(rows1.some(row => excludedBills1.find(e => e.billcode === billcode)))) {
+                            if (diff > 0.01) {
+                                valueDiffs.push({
+                                    billcode,
+                                    amount1: totalVal1,
+                                    amount2: totalVal2,
+                                    difference: totalVal2 - totalVal1,
+                                    status: 'invalid',
+                                    otherSvc: rows1.reduce((sum, row) => sum + (parseFloat(row[otherSvcCol]) || 0), 0)
+                                });
+                                unmatched++;
+                                totalDiff += diff;
+                            } else {
+                                valueDiffs.push({
+                                    billcode,
+                                    amount1: totalVal1,
+                                    amount2: totalVal2,
+                                    difference: totalVal2 - totalVal1,
+                                    status: 'valid',
+                                    otherSvc: rows1.reduce((sum, row) => sum + (parseFloat(row[otherSvcCol]) || 0), 0)
+                                });
+                                matched++;
+                            }
                         }
 
-                        if (count2 > 1) {
-                            status.push(`Billcode ${billcode} xuất hiện ${count2} lần trong File 2`);
-                            const rows = groupedData2[billcode].map((row, idx) => `Row ${row.originalIndex} (${idx === 0 ? 'Valid' : 'Invalid'})`).join(', ');
-                            details.add(`File 2: ${rows}`);
-                        } else if (count2 === 1 && count1 > 1) {
-                            details.add(`File 2: Row ${groupedData2[billcode][0].originalIndex} (Valid)`);
-                        }
+                        // Xử lý trùng lặp
+                        if (count1 > 1 || count2 > 1) {
+                            const positionsFile1 = rows1.map(row => row.originalIndex || '?');
+                            const positionsFile2 = rows2.map(row => row.originalIndex || '?');
 
-                        if (count1 !== count2 && count1 > 0 && count2 > 0) {
-                            status.push('Số lần xuất hiện không khớp giữa File 1 và File 2');
-                            const rows1 = groupedData1[billcode]?.map((row, idx) => `Row ${row.originalIndex} (${idx === 0 ? 'Valid' : 'Invalid'})`).join(', ') || '';
-                            const rows2 = groupedData2[billcode]?.map((row, idx) => `Row ${row.originalIndex} (${idx === 0 ? 'Valid' : 'Invalid'})`).join(', ') || '';
-                            if (rows1) details.add(`File 1: ${rows1}`);
-                            if (rows2) details.add(`File 2: ${rows2}`);
-                        }
-
-                        let validStatus = 'Valid';
-                        if (count1 > 1 || count2 > 1 || (count1 !== count2)) {
-                            validStatus = 'Invalid';
-                        }
-
-                        const rows1Data = groupedData1[billcode] || [];
-                        const rows2Data = groupedData2[billcode] || [];
-                        const maxCount = Math.max(count1, count2);
-
-                        for (let i = 0; i < maxCount; i++) {
-                            const val1 = i < count1 ? (rows1Data[i][valueCol1] != null ? parseFloat(rows1Data[i][valueCol1]) || 0 : 0) : 0;
-                            const val2 = i < count2 ? (rows2Data[i][valueCol2] != null ? parseFloat(rows2Data[i][valueCol2]) || 0 : 0) : 0;
-                            billcodeDiff += val2 - val1;
-                        }
-
-                        if (status.length > 0) {
                             duplicateBillcodes.push({
                                 billcode,
                                 file1Count: count1,
                                 file2Count: count2,
-                                status: status.join('; '),
-                                details: Array.from(details).join('; '),
-                                difference: billcodeDiff.toFixed(2),
-                                validStatus: validStatus
+                                details: `File 1: ${count1} (Rows: ${positionsFile1.join(', ')}), File 2: ${count2} (Rows: ${positionsFile2.join(', ')})`,
+                                validStatus: count1 === count2 ? 'valid' : 'invalid',
+                                difference: diff,
+                                positionsFile1,
+                                positionsFile2
                             });
                         }
-
-                        totalDiff += billcodeDiff;
-                    }
-
-                    // Handle missing billcodes
-                    if (rows2.length === 0) {
-                        rows1.forEach(row => {
-                            const excluded = excludedBills.find(e => e.billcode === billcode);
-                            if (excluded) {
-                                missingInFile2.push({ billcode, reason: excluded.reason, status: 'valid' });
-                            } else if (row[valueCol1] != null && parseFloat(row[valueCol1]) <= 0) {
-                                missingInFile2.push({ billcode, reason: 'sub_ttl <= 0', status: 'valid' });
-                                notTakenCount++;
-                            } else {
-                                missingInFile2.push({ billcode, reason: 'Không có trong File 2', status: 'invalid' });
-                                const val1 = parseFloat(row[valueCol1]) || 0;
-                                totalDiff -= val1;
-                            }
-                        });
-                    } else if (rows1.length === 0) {
-                        rows2.forEach(row => {
-                            missingInFile1.push({ billcode, reason: 'Không có trong File 1', status: 'invalid' });
-                            const val2 = parseFloat(row[valueCol2]) || 0;
-                            totalDiff += val2;
-                        });
-                    } else {
-                        // Handle matched billcodes
-                        rows1.forEach(row1 => {
-                            const excluded = excludedBills.find(e => e.billcode === billcode);
-                            if (excluded) return;
-
-                            let matchedRow = false;
-                            rows2.forEach(row2 => {
-                                const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
-                                const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
-                                const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
-
-                                const diff = val2 - val1 - otherSvc;
-                                const isValidDiff = Math.abs(diff) < 0.001;
-
-                                if (isValidDiff) {
-                                    matched++;
-                                    matchedRow = true;
-                                    valueDiffs.push({
-                                        billcode,
-                                        amount1: val1,
-                                        amount2: val2,
-                                        difference: diff,
-                                        status: 'valid',
-                                        otherSvc
-                                    });
-                                } else {
-                                    unmatched++;
-                                    totalDiff += diff;
-                                    valueDiffs.push({
-                                        billcode,
-                                        amount1: val1,
-                                        amount2: val2,
-                                        difference: diff,
-                                        status: 'invalid',
-                                        otherSvc
-                                    });
-                                }
-                                totalOtherSvc += otherSvc;
-                            });
-
-                            if (!matchedRow && row1[valueCol1] != null && parseFloat(row1[valueCol1]) > 0) {
-                                missingInFile2.push({ billcode, reason: 'Không có bản ghi khớp trong File 2', status: 'invalid' });
-                                const val1 = parseFloat(row1[valueCol1]) || 0;
-                                totalDiff -= val1;
-                            }
-                        });
-
-                        // Handle unmatched rows in File 2
-                        rows2.forEach(row2 => {
-                            const val2 = row2[valueCol2] != null ? parseFloat(row2[valueCol2]) || 0 : 0;
-                            let isMatched = false;
-
-                            rows1.forEach(row1 => {
-                                const val1 = row1[valueCol1] != null ? parseFloat(row1[valueCol1]) || 0 : 0;
-                                const otherSvc = row1[otherSvcCol] != null ? parseFloat(row1[otherSvcCol]) || 0 : 0;
-                                const diff = val2 - val1 - otherSvc;
-
-                                if (Math.abs(diff) < 0.001) {
-                                    isMatched = true;
-                                }
-                            });
-
-                            if (!isMatched) {
-                                unmatched++;
-                                totalDiff += val2;
-                                missingInFile1.push({
-                                    billcode,
-                                    reason: 'Không có bản ghi khớp trong File 1',
-                                    status: 'invalid'
-                                });
-                                valueDiffs.push({
-                                    billcode,
-                                    amount1: 0,
-                                    amount2: val2,
-                                    difference: val2,
-                                    status: 'invalid',
-                                    otherSvc: 0
-                                });
-                            }
-                        });
+                        totalOtherSvc += rows1.reduce((sum, row) => sum + (parseFloat(row[otherSvcCol]) || 0), 0);
+                        adjustedTotalDiff += diff;
                     }
                 });
 
+                // Tính tổng số bản ghi
+                const totalRecords = data1.length + data2.length; // Tổng số bản ghi từ cả hai file
+                const uniqueBillcodes = new Set([...Object.keys(groupedData1), ...Object.keys(groupedData2)]).size;
+                const overlappingBillcodes = Object.keys(groupedData1).filter(billcode => groupedData2[billcode]).length;
+                const adjustedTotal = totalRecords - overlappingBillcodes + (overlappingBillcodes * 2); // Điều chỉnh để mỗi cặp trùng là 2 bản ghi
+
                 return {
-                    stats: {
-                        total: allBillcodes.size,
-                        matched,
-                        unmatched,
-                        totalDiff: totalDiff.toFixed(2),
-                        notTaken: notTakenCount,
-                        totalOtherSvc: totalOtherSvc.toFixed(2),
-                        adjustedTotalDiff: (totalDiff - totalOtherSvc).toFixed(2),
-                        duplicates: duplicateBillcodes.length
-                    },
                     data: {
                         missingInFile2,
                         missingInFile1,
                         valueDiffs,
                         duplicateBillcodes
+                    },
+                    stats: {
+                        total: data1.length + data2.length,           // Tổng số hàng
+                        matched,                                      // Số cặp khớp
+                        matchedRows: matched * 2,                     // Số hàng khớp
+                        unmatched,                                    // Số cặp lệch
+                        unmatchedRows: unmatched * 2,                 // Số hàng lệch
+                        notTaken: notTakenCount,                      // Số hàng bị loại
+                        remainingRows: (data1.length + data2.length) - (matched * 2), // Phần chưa khớp
+                        totalDiff: totalDiff.toFixed(2),
+                        totalOtherSvc: totalOtherSvc.toFixed(2),
+                        adjustedTotalDiff: adjustedTotalDiff.toFixed(2),
+                        duplicates: duplicateBillcodes.length
                     }
                 };
             }
@@ -1726,7 +1714,7 @@
                 this.setupAccordionEvents();
                 this.setupPaginationEvents();
             }
-            renderTables(data) {
+             renderTables(data) {
                 const filteredData = this.applyFiltersToData(data);
                 const accordion = document.getElementById('resultsAccordion');
                 if (!accordion) return;
@@ -1778,10 +1766,10 @@
                                                 <td>${row.billcode || '-'}</td>
                                                 <td>${row.reason || '-'}</td>
                                                 <td><span class="${row.status === 'valid' ? 'badge badge-success' : 'badge badge-danger'}">
-                                                    ${row.status === 'valid' ? 'Valid' : 'Invalid'}
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
                                                 </span></td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>'}
+                                        `).join('') : `<tr><td colspan="4">${translations[this.currentLang]?.noData || 'No data'}</td></tr>`}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.missingInFile2, 'missingInFile2')}
@@ -1812,10 +1800,10 @@
                                                 <td>${row.billcode || '-'}</td>
                                                 <td>${row.reason || '-'}</td>
                                                 <td><span class="${row.status === 'valid' ? 'badge badge-success' : 'badge badge-danger'}">
-                                                    ${row.status === 'valid' ? 'Valid' : 'Invalid'}
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
                                                 </span></td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="4">Không có dữ liệu</td></tr>'}
+                                        `).join('') : `<tr><td colspan="4">${translations[this.currentLang]?.noData || 'No data'}</td></tr>`}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.missingInFile1, 'missingInFile1')}
@@ -1851,11 +1839,11 @@
                                                 <td>${row.amount2 !== undefined ? row.amount2.toFixed(2) : '0.00'}</td>
                                                 <td>${row.difference !== undefined ? row.difference.toFixed(2) : '0.00'}</td>
                                                 <td><span class="${row.status === 'valid' ? 'badge badge-success' : 'badge badge-danger'}">
-                                                    ${row.status === 'valid' ? 'Valid' : 'Invalid'}
+                                                    ${translations[this.currentLang]?.[row.status] || row.status}
                                                 </span></td>
                                                 <td>${row.otherSvc !== undefined ? row.otherSvc.toFixed(2) : '0.00'}</td>
                                             </tr>
-                                        `).join('') : '<tr><td colspan="7">Không có dữ liệu</td></tr>'}
+                                        `).join('') : `<tr><td colspan="4">${translations[this.currentLang]?.noData || 'No data'}</td></tr>`}
                                     </tbody>
                                 </table>
                                 ${this.renderPagination(filteredData.valueDiffs, 'valueDiffs')}
@@ -1864,64 +1852,49 @@
                     </div>
 
                     <div class="accordion-item active">
-                                <div class="accordion-header">
-                                    ${translations[this.currentLang]?.accordion?.duplicates || 'Duplicate Billcodes'}
-                                    <span class="accordion-icon">▼</span>
-                                </div>
-                                <div class="accordion-content" style="display: block;">
-                                    <div class="table-container">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>STT</th>
-                                                    <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.file1Count || 'File 1 Count'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.file2Count || 'File 2 Count'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.status || 'Status'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.details || 'Details'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.validStatus || 'Valid Status'}</th>
-                                                    <th>${translations[this.currentLang]?.table?.difference || 'Difference'}</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${filteredData.duplicateBillcodes.length > 0 ? this.paginateData(filteredData.duplicateBillcodes, 'duplicates').map((row, index) => `
-                                                    <tr>
-                                                        <td>${getSTT(index, 'duplicates')}</td>
-                                                        <td>${row.billcode || '-'}</td>
-                                                        <td>${row.file1Count || 0}</td>
-                                                        <td>${row.file2Count || 0}</td>
-                                                        <td><span class="badge badge-danger">${row.status || '-'}</span></td>
-                                                        <td>${row.details || '-'}</td>
-                                                        <td><span class="${row.validStatus === 'Valid' ? 'badge badge-success' : 'badge badge-danger'}">
-                                                            ${row.validStatus || '-'}
-                                                        </span></td>
-                                                        <td>${row.difference !== undefined ? this.formatNumber(row.difference) : '0.00'}</td>
-                                                    </tr>
-                                                `).join('') : '<tr><td colspan="8">Không có dữ liệu</td></tr>'}
-                                            </tbody>
-                                        </table>
-                                        ${this.renderPagination(filteredData.duplicateBillcodes, 'duplicates')}
-                                    </div>
-                                    <!-- Thêm biểu đồ -->
-                                        ${filteredData.duplicateBillcodes.length > 0 ? `
-                                            <div class="chart-wrapper">
-                                                <!-- Biểu đồ Difference by Billcode -->
-                                                <div class="chart-container">
-                                                  ${filteredData.duplicateBillcodes.length > 0 ? `
-                                                    <div class="chart-wrapper">
-                                                      <canvas id="billcodeChart" width="400" height="200"></canvas>
-                                                    </div>
-                                                    <div id="chartDetails" class="chart-details"></div>
-                                                  ` : '<p>No data for chart</p>'}
-                                                </div>
-                                            </div>
-                                            <div id="chartDetails" class="chart-details"></div>
-                                        ` : '<p>No data for chart</p>'}
-                                    </div>
-                                </div>
+                        <div class="accordion-header">
+                            ${translations[this.currentLang]?.accordion?.duplicates || 'Duplicate Billcodes'}
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-content" style="display: block;">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>${translations[this.currentLang]?.table?.billcode || 'Billcode'}</th>
+                                            <th>${translations[this.currentLang]?.table?.file1Count || 'File 1 Count'}</th>
+                                            <th>${translations[this.currentLang]?.table?.file2Count || 'File 2 Count'}</th>
+                                            <th>${translations[this.currentLang]?.table?.details || 'Details'}</th>
+                                            <th>${translations[this.currentLang]?.table?.status || 'Valid Status'}</th>
+                                            <th>${translations[this.currentLang]?.table?.difference || 'Difference'}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${filteredData.duplicateBillcodes.length > 0 ? this.paginateData(filteredData.duplicateBillcodes, 'duplicates').map((row, index) => `
+                                            <tr>
+                                                <td>${getSTT(index, 'duplicates')}</td>
+                                                <td>${row.billcode || '-'}</td>
+                                                <td>${row.file1Count || 0}</td>
+                                                <td>${row.file2Count || 0}</td>
+                                                <td>${row.details || '-'}</td>
+                                                <td><span class="${row.validStatus?.toLowerCase() === 'valid' ? 'badge badge-success' : 'badge badge-danger'}">
+                                                    ${translations[this.currentLang]?.[row.validStatus?.toLowerCase()] || row.validStatus || '-'}
+                                                </span></td>
+                                                <td>${row.difference !== undefined ? this.formatNumber(row.difference) : '0.00'}</td>
+                                            </tr>
+                                        `).join('') : `<tr><td colspan="4">${translations[this.currentLang]?.noData || 'No data'}</td></tr>`}
+                                    </tbody>
+                                </table>
+                                ${this.renderPagination(filteredData.duplicateBillcodes, 'duplicates')}
+                            </div>
+                        </div>
+                    </div>
                 `;
+
                 this.renderBillcodeChart(filteredData.duplicateBillcodes);
             }
+
                             setupAccordionEvents() {
                 const headers = document.querySelectorAll('.accordion-header');
                 headers.forEach(header => {
@@ -2313,7 +2286,7 @@
                 
                 // Cập nhật phần bộ lọc
                 const filtersTitle = document.getElementById('filtersTitle');
-                    if (filtersTitle) filtersTitle.textContent = `🔧 ${translations[lang]?.filter?.title || 'Filters'}`;
+                    if (filtersTitle) filtersTitle.textContent = `🔧 ${translations[lang]?.filter?.filtersTitle || 'Filters'}`;
                     
                     const validityFilterLabel = document.getElementById('validityFilterLabel');
                     if (validityFilterLabel) validityFilterLabel.textContent = translations[lang]?.filter?.validity || 'Validity';
