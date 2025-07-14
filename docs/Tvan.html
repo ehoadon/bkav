@@ -3,96 +3,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ Đối soát lỗi TVAN v2.8 (Giao diện cải tiến)</title>
+    <title>Công cụ Đối soát lỗi TVAN v3.0 (Quản lý Quy tắc)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --primary-color: #007bff; --secondary-color: #6c757d; --success-color: #28a745;
-            --danger-color: #dc3545; --warning-color: #ffc107; --info-color: #17a2b8;
-            --light-color: #f8f9fa; --lighter-gray: #e9ecef; --dark-color: #343a40; 
-            --white-color: #fff; --border-color: #dee2e6;
-            --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.075); --border-radius: 8px;
+            --primary-color: #007bff; /* Changed slightly to a vibrant blue */
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --lighter-gray: #e9ecef;
+            --dark-color: #343a40;
+            --white-color: #fff;
+            --border-color: #dee2e6;
+            --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Slightly more prominent shadow */
+            --border-radius: 8px;
+            --background-dark: #1a202c; /* Dark background from image */
+            --card-dark: #2d3748; /* Slightly lighter card background */
+            --text-light: #e2e8f0; /* Light text color */
+            --accent-purple: #805ad5; /* Accent color from image */
+            --accent-green: #38b2ac; /* Another accent color */
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--light-color); color: var(--dark-color); }
-        .container { max-width: 1600px; margin: 20px auto; background-color: transparent; padding: 0; border-radius: 0; box-shadow: none; }
-        .card { background-color: var(--white-color); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--box-shadow); margin-bottom: 25px; }
-        h2, h3, h4 { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-top: 0; }
-        h4 { border-bottom: none; color: var(--dark-color); }
-        h2 i, h3 i { margin-right: 10px; }
-        button { padding: 10px 20px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background-color 0.3s ease, transform 0.1s ease; }
-        button i { margin-right: 8px; }
-        button:hover { background-color: #0056b3; }
-        button:disabled { background-color: var(--secondary-color); cursor: not-allowed; opacity: 0.7; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0; /* Removed padding here, added to container */
+            background-color: var(--background-dark); /* Dark background */
+            color: var(--text-light); /* Light text */
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 20px auto;
+            background-color: transparent; /* No background, cards handle it */
+            padding: 20px; /* Added padding to container */
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .card {
+            background-color: var(--card-dark); /* Dark card background */
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border */
+        }
+        h2, h3, h4 {
+            color: var(--primary-color); /* Kept primary color for headings for now */
+            border-bottom: 2px solid var(--accent-purple); /* Accent border */
+            padding-bottom: 10px;
+            margin-top: 0;
+            color: var(--text-light); /* Headings text light */
+        }
+        h4 {
+            border-bottom: none;
+            color: var(--text-light);
+        }
+        h2 i, h3 i {
+            margin-right: 10px;
+            color: var(--accent-purple); /* Icon color */
+        }
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            white-space: nowrap; /* Prevent text wrapping inside buttons */
+        }
+        button i {
+            margin-right: 8px;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+        button:disabled {
+            background-color: var(--secondary-color);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+        }
         .btn-success { background-color: var(--success-color); } .btn-success:hover { background-color: #218838; }
         .btn-danger { background-color: var(--danger-color); padding: 5px 10px; font-size: 14px; } .btn-danger:hover { background-color: #c82333; }
         .btn-warning { background-color: var(--warning-color); color: #212529; padding: 5px 10px; font-size: 14px; } .btn-warning:hover { background-color: #e0a800; }
         .btn-info { background-color: var(--info-color); } .btn-info:hover { background-color: #138496; }
+        .btn-secondary { background-color: var(--secondary-color); } .btn-secondary:hover { background-color: #5a6268; }
         .btn-move { padding: 5px 10px; font-size: 14px; }
-        input, select { padding: 10px; margin: 5px 0 15px 0; border-radius: 5px; border: 1px solid var(--border-color); width: 100%; box-sizing: border-box; }
-        .input-group { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; margin-top: 15px; background-color: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #e9ecef; }
-        .input-group > * { flex: 1 1 250px; }
-        .pagination-controls { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin: 10px 0; }
-        .pagination-controls .page-jump-input { width: 60px; text-align: center; padding: 5px; height: 31px; margin: 0; }
-        .pagination-controls .btn-move { height: 31px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
-        .table-wrapper { overflow: auto; max-height: 450px; }
-        tbody tr:hover { background-color: #f5f5f5; }
-        .empty-row td { text-align: center; padding: 40px; color: var(--secondary-color); font-size: 1.1em; }
-        th, td { border: 1px solid var(--border-color); padding: 12px 15px; text-align: left; vertical-align: middle; white-space: nowrap; }
-        th { background-color: var(--primary-color); color: var(--white-color); position: sticky; top: 0; z-index: 1; }
-        .sortable-header { cursor: pointer; user-select: none; } .sortable-header:hover { background-color: #0069d9; }
-        .sort-indicator { margin-left: 5px; font-size: 0.8em; display: inline-block; width: 10px; }
-        td.col-action { text-align: center; display: flex; gap: 5px; justify-content: center; }
-        th.col-action { background-color: #6c757d; text-align: center; }
-        td.editable { background-color: #fffbe6; cursor: text; }
-        .edit-in-place { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--primary-color); }
-        .message { padding: 15px; border-radius: 5px; margin-top: 15px; font-weight: 500; display: none; }
+        input, select {
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--background-dark); /* Dark input background */
+            color: var(--text-light); /* Light input text */
+        }
+        input::placeholder {
+            color: var(--secondary-color);
+        }
+        select {
+            -webkit-appearance: none; /* Remove default arrow on select */
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236c757d'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+            padding-right: 30px; /* Make space for the arrow */
+        }
+
+        .input-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap; /* Allows items to wrap on smaller screens */
+            align-items: flex-end;
+            margin-top: 15px;
+            background-color: var(--card-dark); /* Darker background for filter group */
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .input-group > * {
+            flex: 1 1 200px; /* Adjusted flex-basis for better wrapping */
+        }
+        .pagination-controls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap; /* Allow pagination controls to wrap */
+        }
+        .pagination-controls .page-jump-input {
+            width: 60px;
+            text-align: center;
+            padding: 5px;
+            height: 31px;
+            margin: 0;
+        }
+        .pagination-controls .btn-move {
+            height: 31px;
+        }
+        .table-wrapper {
+            overflow-x: auto; /* Enable horizontal scrolling for tables */
+            max-height: 450px;
+            border-radius: var(--border-radius); /* Apply border-radius to the wrapper */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--card-dark);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0; /* Remove top margin, handled by wrapper */
+            font-size: 0.9em;
+            background-color: var(--card-dark); /* Table background */
+            min-width: 800px; /* Ensure table doesn't get too small and triggers scroll */
+        }
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05); /* Lighter hover for dark theme */
+        }
+        .empty-row td {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-color);
+            font-size: 1.1em;
+        }
+        th, td {
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Lighter borders */
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap; /* Prevent text wrapping in cells by default */
+        }
+        th {
+            background-color: var(--accent-purple); /* Darker header background */
+            color: var(--white-color);
+            position: sticky;
+            top: 0;
+            z-index: 2; /* Increased z-index to ensure it stays on top */
+        }
+        td {
+            color: var(--text-light); /* Light text for table data */
+        }
+        .sortable-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .sortable-header:hover {
+            background-color: #6a40b8; /* Darker hover for header */
+        }
+        .sort-indicator {
+            margin-left: 5px;
+            font-size: 0.8em;
+            display: inline-block;
+            width: 10px;
+        }
+        td.col-action {
+            text-align: center;
+            display: flex; /* Use flexbox for action buttons */
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+            white-space: normal; /* Allow action column to wrap */
+            min-width: 120px; /* Give more space for buttons */
+        }
+        th.col-action {
+            background-color: var(--secondary-color);
+            text-align: center;
+        }
+        td.editable {
+            background-color: rgba(255, 255, 255, 0.05); /* Subtle highlight for editable cells */
+            cursor: text;
+        }
+        .edit-in-place {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            border: 1px solid var(--primary-color);
+            background-color: var(--background-dark);
+            color: var(--text-light);
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: 500;
+            display: none;
+        }
         .message.success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .message.error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .message.warning-message { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .message.info-message { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        #loader { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); justify-content: center; align-items: center; }
-        .spinner { border: 8px solid var(--light-color); border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
+        #loader { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; }
+        .spinner { border: 8px solid rgba(255, 255, 255, 0.3); border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .drop-zones-container { display: flex; gap: 20px; margin-bottom: 20px; }
-        .drop-zone { flex: 1; border: 2px dashed var(--border-color); border-radius: var(--border-radius); padding: 30px; text-align: center; color: var(--secondary-color); transition: background-color 0.3s ease, border-color 0.3s ease; cursor: pointer; }
-        .drop-zone.dragover { background-color: #e9ecef; border-color: var(--primary-color); }
-        .file-name { font-weight: bold; color: var(--dark-color); display: block; margin-top: 10px; word-break: break-all; }
+        .drop-zones-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow drop zones to wrap */
+        }
+        .drop-zone {
+            flex: 1;
+            min-width: 280px; /* Ensure drop zone is not too small */
+            border: 2px dashed rgba(255, 255, 255, 0.3); /* Lighter dashed border */
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            color: var(--secondary-color);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            cursor: pointer;
+            background-color: var(--background-dark); /* Darker background */
+        }
+        .drop-zone.dragover {
+            background-color: rgba(255, 255, 255, 0.05); /* Light hover for dark theme */
+            border-color: var(--primary-color);
+        }
+        .file-name {
+            font-weight: bold;
+            color: var(--text-light); /* Light text for file name */
+            display: block;
+            margin-top: 10px;
+            word-break: break-all;
+        }
         #standardValueGroup { display: none; }
-        .chart-options { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; align-items: center; }
-        .chart-options label { cursor: pointer; font-weight: 500; }
-        .chart-options input { width: auto; margin-right: 5px; }
-        .tab-container { border-bottom: 2px solid var(--border-color); margin-bottom: 20px; display: flex; position: -webkit-sticky; position: sticky; top: 0; background-color: var(--white-color); z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .tab-link { background-color: transparent; border: none; padding: 15px 20px; font-size: 1.1em; cursor: pointer; position: relative; color: var(--secondary-color); border-radius: 5px 5px 0 0; }
-        .tab-link.active { background-color: var(--white-color); font-weight: 600; color: var(--primary-color); border: 2px solid var(--border-color); border-bottom: 2px solid var(--white-color); margin-bottom: -2px; }
-        .tab-content { display: none; }
-        .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; border-radius: var(--border-radius); }
+        .chart-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            color: var(--text-light);
+        }
+        .chart-options label {
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .chart-options input {
+            width: auto;
+            margin-right: 5px;
+            accent-color: var(--primary-color); /* Style radio buttons */
+        }
+        .tab-container {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            background-color: var(--card-dark); /* Match card background */
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: var(--border-radius) var(--border-radius) 0 0; /* Rounded top corners */
+            overflow-x: auto; /* Allow tabs to scroll if too many */
+            white-space: nowrap; /* Prevent tabs from wrapping */
+        }
+        .tab-link {
+            background-color: transparent;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            position: relative;
+            color: var(--secondary-color);
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s ease;
+            margin-bottom: -2px; /* Pull tabs up to overlap border */
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+        }
+        .tab-link.active {
+            background-color: var(--card-dark);
+            font-weight: 600;
+            color: var(--primary-color);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-bottom-color: var(--card-dark); /* Hide bottom border for active tab */
+            z-index: 1; /* Bring active tab to front */
+        }
+        .tab-link:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+        .tab-content { display: none; padding-top: 15px; } /* Add padding for content below tabs */
+        .modal {
+            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); /* Darker overlay */
+        }
+        .modal-content {
+            background-color: var(--card-dark); /* Modal background */
+            color: var(--text-light); /* Modal text */
+            margin: 5% auto; /* Reduced top margin */
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%; /* Responsive width */
+            max-width: 1000px; /* Increased max-width for rule management */
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
         .modal-close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
-        .modal-close:hover, .modal-close:focus { color: black; text-decoration: none; cursor: pointer; }
+        .modal-close:hover, .modal-close:focus { color: var(--text-light); text-decoration: none; cursor: pointer; }
         
         /* --- NEW STYLES FOR UI IMPROVEMENTS --- */
-        #overviewDashboardSection { display: none; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }
-        .summary-container { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
-        .summary-chart-container { position: relative; width: 180px; height: 180px; }
-        .summary-legend-container { display: flex; flex-direction: column; gap: 15px; }
-        .summary-item { display: flex; align-items: center; font-size: 1.1em; }
-        .summary-item .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 10px; }
-        .summary-item .count { font-weight: 600; color: var(--dark-color); margin-left: auto; padding-left: 20px; }
-        .analysis-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }
-        .analysis-card { background-color: #fdfdff; padding: 20px; border-radius: var(--border-radius); border: 1px solid var(--border-color); }
-        .analysis-card h4 { color: var(--dark-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 15px; }
+        #overviewDashboardSection {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Adjusted minmax for better layout */
+            gap: 25px;
+        }
+        .summary-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .summary-chart-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            min-width: 180px; /* Ensure it doesn't shrink */
+        }
+        .summary-legend-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            color: var(--text-light);
+        }
+        .summary-item {
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+        }
+        .summary-item .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2); /* Added border to dots */
+        }
+        .summary-item .count {
+            font-weight: 600;
+            color: var(--text-light);
+            margin-left: auto;
+            padding-left: 20px;
+        }
+        .analysis-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted minmax for analysis cards */
+            gap: 25px;
+        }
+        .analysis-card {
+            background-color: var(--background-dark); /* Darker background for analysis cards */
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .analysis-card h4 {
+            color: var(--text-light);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
         .analysis-card #mstErrorChart { max-height: 300px; }
-        #alertsContainer .alert { padding: 12px; margin-bottom: 10px; border-radius: 4px; font-size: 0.95em; border-left: 5px solid; }
+        #alertsContainer .alert {
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            border-left: 5px solid;
+            color: var(--dark-color); /* Default text for alerts (light background) */
+        }
         #alertsContainer .alert.alert-spike { border-left-color: var(--warning-color); background-color: #fffaf0; }
         #alertsContainer .alert.alert-new { border-left-color: var(--info-color); background-color: #f1faff; }
         #alertsContainer .alert strong { color: var(--danger-color); }
         #alertsContainer .alert .error-code { font-weight: bold; color: var(--dark-color); }
         #alertsContainer .view-chart-link { color: var(--primary-color); cursor: pointer; font-weight: bold; text-decoration: underline; margin-left: 10px; }
-        .toggle-filter-btn { width: 100%; text-align: left; background-color: var(--lighter-gray); color: var(--dark-color); margin-bottom: 10px; font-weight: 600; }
+        .toggle-filter-btn {
+            width: 100%;
+            text-align: left;
+            background-color: rgba(255, 255, 255, 0.1); /* Lighter button for toggle */
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-weight: 600;
+            border-radius: 5px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .toggle-filter-btn:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
         .toggle-filter-btn .fa-chevron-down { float: right; transition: transform 0.3s ease; }
         .toggle-filter-btn.active .fa-chevron-down { transform: rotate(180deg); }
-        .collapsible-filters { display: none; padding-top: 10px; }
+        .collapsible-filters {
+            display: none;
+            padding-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: var(--card-dark);
+        }
+        .collapsible-filters .input-group {
+            background-color: transparent; /* Remove extra background for inner group */
+            border: none;
+            padding: 0;
+            margin-top: 0;
+        }
+
+        /* Chart container styling for the main error chart */
+        #errorChartSection > div {
+            background-color: var(--background-dark);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Chart.js specific styling for dark theme */
+        .chartjs-render-monitor {
+            background-color: var(--background-dark); /* Ensure chart background matches card */
+        }
+        canvas {
+            max-width: 100%; /* Ensure charts are responsive */
+            height: auto;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            h3 {
+                font-size: 1.2em;
+            }
+            button {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+            input, select {
+                margin-bottom: 10px;
+            }
+            .input-group {
+                gap: 10px;
+            }
+            .input-group > * {
+                flex-basis: 100%; /* Stack inputs on small screens */
+            }
+            .drop-zones-container {
+                flex-direction: column; /* Stack drop zones */
+            }
+            .drop-zone {
+                min-width: unset;
+                width: 100%;
+            }
+            .summary-container {
+                flex-direction: column; /* Stack summary items */
+                gap: 20px;
+            }
+            .summary-chart-container {
+                width: 150px;
+                height: 150px;
+            }
+            .analysis-container {
+                grid-template-columns: 1fr; /* Stack analysis cards */
+            }
+            .modal-content {
+                margin: 5% auto;
+                width: 95%;
+            }
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.85em;
+            }
+            td.col-action {
+                flex-direction: column; /* Stack action buttons in column */
+                gap: 2px;
+                min-width: 80px; /* Adjust min-width */
+            }
+            .tab-link {
+                padding: 10px 15px;
+                font-size: 1em;
+            }
+            .pagination-controls {
+                justify-content: center;
+            }
+            .pagination-controls .page-jump-input {
+                width: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .tab-container {
+                overflow-x: auto; /* Ensure tabs scrollable on very small screens */
+            }
+            .tab-link {
+                font-size: 0.9em;
+            }
+            .pagination-controls {
+                flex-direction: column; /* Stack pagination controls */
+                gap: 5px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -112,12 +577,19 @@
             <canvas id="errorTrendChart"></canvas>
         </div>
     </div>
+    
+    <!-- ==================================================== -->
+    <!-- MODAL QUẢN LÝ QUY TẮC - ĐÃ ĐƯỢC NÂNG CẤP -->
+    <!-- ==================================================== -->
     <div id="ruleManagementModal" class="modal">
         <div class="modal-content">
             <span class="modal-close" id="ruleMgmtCloseBtn">&times;</span>
             <h3><i class="fas fa-database"></i> Quản lý Quy tắc Đối soát (Nâng cao)</h3>
-             <div class="content" style="display: block; padding: 0; border: none;">
+            
+            <!-- Form Thêm/Sửa Quy tắc -->
+            <div class="content" style="display: block; padding: 0; border: none;">
                 <h4>Thêm/Cập nhật quy tắc</h4>
+                <input type="hidden" id="editingRuleKey"> <!-- Input ẩn để lưu key khi sửa -->
                 <div class="input-group">
                     <div><label for="newRuleAction">Hành động của Quy tắc:</label><select id="newRuleAction"><option value="INCLUDE">Bao gồm (Lấy vào bảng kết xuất)</option><option value="EXCLUDE">Loại trừ (Ẩn khỏi bảng thủ công)</option><option value="STANDARDIZE">Chuẩn hóa (Ghi đè Mô tả lỗi)</option></select></div>
                     <div><label for="newMaTD">Mã Loại Thông Điệp:</label><input type="text" id="newMaTD" placeholder="Bắt buộc"></div>
@@ -131,8 +603,32 @@
                         <label for="newStandardValue">Giá trị Chuẩn hóa để Ghi đè:</label>
                         <input type="text" id="newStandardValue" placeholder="Bắt buộc khi hành động là Chuẩn hóa">
                 </div>
-                <button onclick="addErrorToFirebase()"><i class="fas fa-save"></i> Lưu Quy tắc</button>
+                <button id="saveRuleBtn"><i class="fas fa-save"></i> Lưu Quy tắc</button>
+                <button id="clearRuleFormBtn" class="btn-secondary" style="display:none;"><i class="fas fa-eraser"></i> Hủy Sửa</button>
                 <div id="firebaseMessage" class="message"></div>
+            </div>
+
+            <!-- Bảng hiển thị danh sách quy tắc -->
+            <div class="content" style="display: block; padding: 15px 0 0 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
+                <h4>Danh sách Quy tắc hiện có (<span id="rulesCount">0</span>)</h4>
+                <div class="table-wrapper" style="max-height: 300px;">
+                    <table id="rulesDataTable">
+                        <thead>
+                            <tr>
+                                <th class="col-action" style="min-width: 100px;">Hành động</th>
+                                <th>Hành động Quy tắc</th>
+                                <th>Mã Loại TĐ</th>
+                                <th>Mã Lỗi</th>
+                                <th>Loại so sánh</th>
+                                <th style="min-width: 200px;">Giá trị so sánh</th>
+                                <th style="min-width: 200px;">Giá trị Chuẩn hóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesTableBody">
+                            <!-- Quy tắc sẽ được chèn vào đây bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -157,33 +653,33 @@
             </section>
             
             <section id="processingSection" style="display:none;">
-                 <div class="card" id="overviewDashboardSection">
-                     <div id="summaryCard">
-                        <h3><i class="fas fa-tachometer-alt"></i> Tổng quan Dữ liệu</h3>
-                        <div class="summary-container">
-                            <div class="summary-chart-container"><canvas id="summaryDonutChart"></canvas></div>
-                            <div class="summary-legend-container">
-                                <div class="summary-item"><span class="legend-dot" style="background-color: var(--primary-color);"></span><span class="label">Tổng cộng</span><span class="count" id="totalCount">0</span></div>
-                                <div class="summary-item"><span class="legend-dot" style="background-color: var(--warning-color);"></span><span class="label">Cần xử lý</span><span class="count" id="sourceSummaryCount">0</span></div>
-                                <div class="summary-item"><span class="legend-dot" style="background-color: var(--secondary-color);"></span><span class="label">Đã loại trừ</span><span class="count" id="excludedSummaryCount">0</span></div>
-                                <div class="summary-item"><span class="legend-dot" style="background-color: var(--success-color);"></span><span class="label">Để kết xuất</span><span class="count" id="exportSummaryCount">0</span></div>
+                    <div class="card" id="overviewDashboardSection">
+                        <div id="summaryCard">
+                            <h3><i class="fas fa-tachometer-alt"></i> Tổng quan Dữ liệu</h3>
+                            <div class="summary-container">
+                                <div class="summary-chart-container"><canvas id="summaryDonutChart"></canvas></div>
+                                <div class="summary-legend-container">
+                                    <div class="summary-item"><span class="legend-dot" style="background-color: var(--primary-color);"></span><span class="label">Tổng cộng</span><span class="count" id="totalCount">0</span></div>
+                                    <div class="summary-item"><span class="legend-dot" style="background-color: var(--warning-color);"></span><span class="label">Cần xử lý</span><span class="count" id="sourceSummaryCount">0</span></div>
+                                    <div class="summary-item"><span class="legend-dot" style="background-color: var(--secondary-color);"></span><span class="label">Đã loại trừ</span><span class="count" id="excludedSummaryCount">0</span></div>
+                                    <div class="summary-item"><span class="legend-dot" style="background-color: var(--success-color);"></span><span class="label">Để kết xuất</span><span class="count" id="exportSummaryCount">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="analysisSection">
+                            <h3><i class="fas fa-chart-line"></i>Phân tích và Cảnh báo Tự động</h3>
+                            <div class="analysis-container">
+                                <div class="analysis-card">
+                                    <h4><i class="fas fa-bell" style="color: var(--warning-color);"></i>Cảnh báo Thông minh</h4>
+                                    <div id="alertsContainer"><p style="color: var(--secondary-color);">Không có cảnh báo nào.</p></div>
+                                </div>
+                                <div class="analysis-card">
+                                    <h4><i class="fas fa-flag" style="color: var(--danger-color);"></i>Top 5 MST có nhiều lỗi nhất</h4>
+                                    <canvas id="mstErrorChart"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div id="analysisSection">
-                        <h3><i class="fas fa-chart-line"></i>Phân tích và Cảnh báo Tự động</h3>
-                        <div class="analysis-container">
-                            <div class="analysis-card">
-                                <h4><i class="fas fa-bell" style="color: var(--warning-color);"></i>Cảnh báo Thông minh</h4>
-                                <div id="alertsContainer"><p>Không có cảnh báo nào.</p></div>
-                            </div>
-                            <div class="analysis-card">
-                                <h4><i class="fas fa-flag" style="color: var(--danger-color);"></i>Top 5 MST có nhiều lỗi nhất</h4>
-                                <canvas id="mstErrorChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="card">
                     <h3><i class="fas fa-filter"></i>Bước 2: Sàng lọc dữ liệu</h3>
@@ -207,7 +703,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-wrapper"><table id="sourceDataTable"><thead><tr><th class="col-action"><input type="checkbox" id="selectAllSource" title="Chọn/Bỏ chọn tất cả các mục đã lọc"></th><th class="col-action">Hành động</th><th class="sortable-header" onclick="handleSort('source', 'sourceFile')">Nguồn<span id="sort-source-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MTĐ')">MTĐ<span id="sort-source-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MST')">MST<span id="sort-source-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-source-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LỖI')">MÃ LỖI<span id="sort-source-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-source-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="sourceTableBody"></tbody></table></div>
+                        <div class="table-wrapper"><table id="sourceDataTable"><thead><tr><th class="col-action">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <input type="checkbox" id="selectAllSource" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+    <span>Hành động</span>
+  </div>
+</th>
+<th class="sortable-header" onclick="handleSort('source', 'sourceFile')">Nguồn<span id="sort-source-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MTĐ')">MTĐ<span id="sort-source-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MST')">MST<span id="sort-source-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-source-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LỖI')">MÃ LỖI<span id="sort-source-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-source-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="sourceTableBody"></tbody></table></div>
                     </div>
 
                     <div id="excludedTab" class="tab-content">
@@ -240,7 +742,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="table-wrapper"><table id="exportDataTable"><thead><tr><th class="col-action"><input type="checkbox" id="selectAllExport" title="Chọn/Bỏ chọn tất cả các mục đã lọc"></th><th class="col-action">Hành động</th><th class="sortable-header" onclick="handleSort('export', 'TVAN')">TVAN<span id="sort-export-TVAN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MTĐ')">MTĐ<span id="sort-export-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-export-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LỖI')">MÃ LỖI<span id="sort-export-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-export-MÔ TẢ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'TIMELOG')">TIMELOG<span id="sort-export-TIMELOG" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'GỬI LẦN')">GỬI LẦN<span id="sort-export-GỬI LẦN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MST')">MST<span id="sort-export-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MẪU SỐ KÝ HIỆU')">MẪU SỐ KÝ HIỆU<span id="sort-export-MẪU SỐ KÝ HIỆU" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'SỐ HĐ')">SỐ HĐ<span id="sort-export-SỐ HĐ" class="sort-indicator"></span></th></tr></thead><tbody id="exportTableBody"></tbody></table></div>
+                        <div class="table-wrapper"><table id="exportDataTable"><thead><tr><th class="col-action">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <input type="checkbox" id="selectAllExport" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+    <span>Hành động</span>
+  </div>
+</th>
+<th class="sortable-header" onclick="handleSort('export', 'TVAN')">TVAN<span id="sort-export-TVAN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MTĐ')">MTĐ<span id="sort-export-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-export-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LỖI')">MÃ LỖI<span id="sort-export-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-export-MÔ TẢ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'TIMELOG')">TIMELOG<span id="sort-export-TIMELOG" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'GỬI LẦN')">GỬI LẦN<span id="sort-export-GỬI LẦN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MST')">MST<span id="sort-export-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MẪU SỐ KÝ HIỆU')">MẪU SỐ KÝ HIỆU<span id="sort-export-MẪU SỐ KÝ HIỆU" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'SỐ HĐ')">SỐ HĐ<span id="sort-export-SỐ HĐ" class="sort-indicator"></span></th></tr></thead><tbody id="exportTableBody"></tbody></table></div>
                     </div>
                 </div>
 
@@ -249,8 +757,8 @@
                      <div class="input-group" style="background: none; border: none; padding: 0;">
                         <button onclick="exportToExcel()" id="exportBtn" class="btn-success"><i class="fas fa-file-excel"></i>Kết xuất Bảng 3 ra Excel</button>
                         <button id="openRuleMgmtBtn" class="btn-info"><i class="fas fa-database"></i> Mở Trình Quản lý Quy tắc</button>
-                     </div>
-                     <div id="exportMessage" class="message"></div>
+                    </div>
+                    <div id="exportMessage" class="message"></div>
                 </div>
 
                 <div class="card" id="errorChartSection" style="display:none;">
@@ -259,7 +767,7 @@
                         <label><input type="radio" name="chartViewMode" id="viewModeRemaining" value="remaining" checked> Công việc còn lại</label>
                         <label><input type="radio" name="chartViewMode" id="viewModeInitial" value="initial"> Tổng quan ban đầu</label>
                     </div>
-                    <div style="position: relative; width: 90%; max-width: 900px; margin: auto; padding: 20px; border: 1px solid var(--border-color); border-radius: var(--border-radius);"><canvas id="errorChart"></canvas></div>
+                    <div style="position: relative; width: 90%; max-width: 900px; margin: auto; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: var(--border-radius);"><canvas id="errorChart"></canvas></div>
                 </div>
             </section>
         </main>
@@ -364,19 +872,17 @@
             return;
         }
 
-        const uniqueKey = db.ref('error_definitions').push().key;
         try {
-            await db.ref('error_definitions/' + uniqueKey).set(newRule);
+            await db.ref('error_definitions').push(newRule);
             
             // Add rule to local cache
-            firebaseRules.push(newRule);
+            await fetchFirebaseErrors();
             
             // Move item locally
             const [movedRow] = dataStores.source.data.splice(rowIndex, 1);
             if (action === 'EXCLUDE') {
                 dataStores.excluded.data.push(movedRow);
             }
-            // In future, can add other actions like 'INCLUDE'
             
             showMessage('uploadMessage', `Đã tạo quy tắc loại trừ và di chuyển lỗi.`, 'success');
 
@@ -392,7 +898,27 @@
 
     // --- CORE RECONCILIATION LOGIC ---
     function isMatch(excelRow, rule) { const maLoaiTDMatch = excelRow['MÃ LOẠI TĐ'].toString().trim() === rule.ma_loai_td.toString().trim(); if (!maLoaiTDMatch) return false; let maLoiMatch = true; if (rule.ma_loi) { maLoiMatch = excelRow['MÃ LỖI'].toString().trim() === rule.ma_loi.toString().trim(); } if (!maLoiMatch) return false; const moTaLoi = excelRow['MÔ TẢ LỖI'].toString(); const matchValue = rule.match_value.toString(); switch (rule.match_type) { case 'EXACT': return moTaLoi.trim() === matchValue.trim(); case 'CONTAINS': return moTaLoi.toLowerCase().includes(matchValue.toLowerCase()); case 'REGEX': try { const regex = new RegExp(matchValue, 'i'); return regex.test(moTaLoi); } catch (e) { console.error(`Regex không hợp lệ: "${matchValue}"`, e); return false; } default: return false; } }
-    async function fetchFirebaseErrors() { if (!db) return 0; firebaseRules = []; const snapshot = await db.ref('error_definitions').get(); if (snapshot.exists()) { const data = snapshot.val(); for (const key in data) { const rule = data[key]; rule.rule_action = rule.rule_action || 'INCLUDE'; if (!rule.match_type && rule.mo_ta_loi) { rule.match_type = 'EXACT'; rule.match_value = rule.mo_ta_loi; } firebaseRules.push(rule); } } return firebaseRules.length; }
+    
+    // UPDATED: fetchFirebaseErrors now stores the key
+    async function fetchFirebaseErrors() {
+        if (!db) return 0;
+        firebaseRules = [];
+        const snapshot = await db.ref('error_definitions').get();
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            for (const key in data) {
+                const rule = data[key];
+                rule.key = key; // IMPORTANT: Store the key for editing/deleting
+                rule.rule_action = rule.rule_action || 'INCLUDE';
+                if (!rule.match_type && rule.mo_ta_loi) {
+                    rule.match_type = 'EXACT';
+                    rule.match_value = rule.mo_ta_loi;
+                }
+                firebaseRules.push(rule);
+            }
+        }
+        return firebaseRules.length;
+    }
 
     async function handleFileUpload() {
         hideAllMessages(); showLoader(true); showMessage('uploadMessage', 'Bắt đầu xử lý... Vui lòng đợi.', 'info', 0);
@@ -522,10 +1048,10 @@
         startDate.setDate(endDate.getDate() - days);
 
         const snapshot = await db.ref('processing_history')
-                                    .orderByKey()
-                                    .startAt(getFirebaseDateKey(startDate))
-                                    .endAt(getFirebaseDateKey(endDate))
-                                    .get();
+                                        .orderByKey()
+                                        .startAt(getFirebaseDateKey(startDate))
+                                        .endAt(getFirebaseDateKey(endDate))
+                                        .get();
         const history = [];
         if (snapshot.exists()) {
             snapshot.forEach(childSnapshot => {
@@ -608,7 +1134,7 @@
         }
         
         if (alertsFound === 0) {
-            alertsContainer.innerHTML = `<p>Không phát hiện tăng đột biến hoặc lỗi mới cho ngày ${latestDateKey}.</p>`;
+            alertsContainer.innerHTML = `<p style="color: var(--secondary-color);">Không phát hiện tăng đột biến hoặc lỗi mới cho ngày ${latestDateKey}.</p>`;
         }
         renderMstErrorChart(latestDateData, pastData);
     }
@@ -663,10 +1189,14 @@
                 scales: { 
                     x: { 
                         beginAtZero: true,
-                        title: { display: true, text: 'Số lượng lỗi' }
+                        title: { display: true, text: 'Số lượng lỗi', color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
                     },
                     y: {
-                        grid: { display: false }
+                        grid: { display: false },
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() }
                     }
                 }
             }
@@ -699,8 +1229,26 @@
             },
             options: {
                 scales: {
-                    x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd/MM/yyyy', displayFormats: { day: 'dd/MM' } }, title: { display: true, text: 'Ngày' } },
-                    y: { beginAtZero: true, title: { display: true, text: 'Số lượng' } }
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day', tooltipFormat: 'dd/MM/yyyy', displayFormats: { day: 'dd/MM' } },
+                        title: { display: true, text: 'Ngày', color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Số lượng', color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim()
+                        }
+                    }
                 }
             }
         });
@@ -715,21 +1263,49 @@
     function displayAllTables() { sourceCurrentPage = 1; excludedCurrentPage = 1; exportCurrentPage = 1; displaySourceData(); displayExportData(); displayExcludedData(); updateSummaryBar(); }
     function updateTableCount(tableId, count) { document.getElementById(`${tableId}Count`).textContent = count.toLocaleString('vi-VN'); }
     function renderEmptyRow(tableBody, colSpan) { tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colSpan}"><i class="fas fa-info-circle"></i> Không có dữ liệu phù hợp.</td></tr>`; }
+function displaySourceData() {
+    const tableBody = document.getElementById('sourceTableBody');
+    let dataToDisplay = getFilteredSourceData();
+    updateTableCount('source', dataToDisplay.length);
 
-    // *** MODIFIED: displaySourceData to include the new 1-Click Rule button ***
-    function displaySourceData() {
-        const tableBody = document.getElementById('sourceTableBody'); let dataToDisplay = getFilteredSourceData(); updateTableCount('source', dataToDisplay.length);
-        if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 8); renderPagination('source', 0, 1); return; }
-        sortData(dataToDisplay, 'source'); updateSortIndicators('source'); const paginatedData = dataToDisplay.slice((sourceCurrentPage - 1) * rowsPerPage, sourceCurrentPage * rowsPerPage); tableBody.innerHTML = '';
-        paginatedData.forEach(row => { const isChecked = selectedSourceRowIds.has(row.id) ? 'checked' : ''; const tr = document.createElement('tr'); tr.innerHTML = `<td class="col-action"><input type="checkbox" class="row-checkbox" data-table="source" data-row-id="${row.id}" ${isChecked}></td>
+    if (dataToDisplay.length === 0) {
+        renderEmptyRow(tableBody, 7); // Adjusted colspan
+        renderPagination('source', 0, 1);
+        return;
+    }
+
+    sortData(dataToDisplay, 'source');
+    updateSortIndicators('source');
+
+    const paginatedData = dataToDisplay.slice(
+        (sourceCurrentPage - 1) * rowsPerPage,
+        sourceCurrentPage * rowsPerPage
+    );
+
+    tableBody.innerHTML = '';
+
+    paginatedData.forEach(row => {
+        const isChecked = selectedSourceRowIds.has(row.id) ? 'checked' : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
             <td class="col-action">
+                <input type="checkbox" class="row-checkbox" data-table="source" data-row-id="${row.id}" ${isChecked}>
                 <button class="btn-success btn-move" onclick="moveSingleItem('${row.id}', 'source', 'export')" title="Chuyển sang Bảng 3"><i class="fas fa-arrow-right"></i></button>
                 <button class="btn-warning btn-move" onclick="addRuleAndMove('${row.id}', 'EXCLUDE')" title="Loại trừ & Tạo quy tắc vĩnh viễn"><i class="fas fa-ban"></i></button>
             </td>
-            <td>${row.sourceFile.toUpperCase()}</td><td>${row['MTĐ']}</td><td>${row.MST}</td><td>${row['MÃ LOẠI TĐ']}</td><td>${row['MÃ LỖI']}</td><td>${row['MÔ TẢ LỖI']}</td>`; tableBody.appendChild(tr); });
-        renderPagination('source', dataToDisplay.length, sourceCurrentPage);
-    }
-    
+            <td>${row.sourceFile.toUpperCase()}</td>
+            <td>${row['MTĐ']}</td>
+            <td>${row.MST}</td>
+            <td>${row['MÃ LOẠI TĐ']}</td>
+            <td>${row['MÃ LỖI']}</td>
+            <td>${row['MÔ TẢ LỖI']}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+
+    renderPagination('source', dataToDisplay.length, sourceCurrentPage);
+}
+   
     function displayExcludedData() {
         const tableBody = document.getElementById('excludedTableBody'); let dataToDisplay = getFilteredExcludedData(); updateTableCount('excluded', dataToDisplay.length);
         if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 7); renderPagination('excluded', 0, 1); return; }
@@ -741,9 +1317,28 @@
     function displayExportData() {
         const tableBody = document.getElementById('exportTableBody'); let dataToDisplay = getFilteredExportData(); updateTableCount('export', dataToDisplay.length);
         document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
-        if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 12); renderPagination('export', 0, 1); return; }
+        if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 11); renderPagination('export', 0, 1); return; }
         sortData(dataToDisplay, 'export'); updateSortIndicators('export'); const paginatedData = dataToDisplay.slice((exportCurrentPage - 1) * rowsPerPage, exportCurrentPage * rowsPerPage); tableBody.innerHTML = '';
-        paginatedData.forEach(row => { const isChecked = selectedExportRowIds.has(row.id) ? 'checked' : ''; const tr = document.createElement('tr'); tr.innerHTML = `<td class="col-action"><input type="checkbox" class="row-checkbox" data-table="export" data-row-id="${row.id}" ${isChecked}></td><td class="col-action"><button class="btn-danger" onclick="moveSingleItem('${row.id}', 'export', 'source')" title="Hoàn tác"><i class="fas fa-undo"></i></button></td><td>${row.TVAN}</td><td>${row['MTĐ']}</td><td>${row['MÃ LOẠI TĐ']}</td><td>${row['MÃ LỖI']}</td><td class="editable" data-row-id="${row.id}" data-column-key="MÔ TẢ LỖI">${row['MÔ TẢ LỖI']}</td><td>${row.TIMELOG}</td><td>${row['GỬI LẦN']}</td><td class="editable" data-row-id="${row.id}" data-column-key="MST">${row.MST}</td><td class="editable" data-row-id="${row.id}" data-column-key="MẪU SỐ KÝ HIỆU">${row['MẪU SỐ KÝ HIỆU']}</td><td class="editable" data-row-id="${row.id}" data-column-key="SỐ HĐ">${row['SỐ HĐ']}</td>`; tableBody.appendChild(tr); });
+        paginatedData.forEach(row => { 
+            const isChecked = selectedExportRowIds.has(row.id) ? 'checked' : ''; 
+            const tr = document.createElement('tr'); 
+            tr.innerHTML = `
+                <td class="col-action">
+                    <input type="checkbox" class="row-checkbox" data-table="export" data-row-id="${row.id}" ${isChecked}>
+                    <button class="btn-danger" onclick="moveSingleItem('${row.id}', 'export', 'source')" title="Hoàn tác"><i class="fas fa-undo"></i></button>
+                </td>
+                <td>${row.TVAN}</td>
+                <td>${row['MTĐ']}</td>
+                <td>${row['MÃ LOẠI TĐ']}</td>
+                <td>${row['MÃ LỖI']}</td>
+                <td class="editable" data-row-id="${row.id}" data-column-key="MÔ TẢ LỖI">${row['MÔ TẢ LỖI']}</td>
+                <td>${row.TIMELOG}</td>
+                <td>${row['GỬI LẦN']}</td>
+                <td class="editable" data-row-id="${row.id}" data-column-key="MST">${row.MST}</td>
+                <td class="editable" data-row-id="${row.id}" data-column-key="MẪU SỐ KÝ HIỆU">${row['MẪU SỐ KÝ HIỆU']}</td>
+                <td class="editable" data-row-id="${row.id}" data-column-key="SỐ HĐ">${row['SỐ HĐ']}</td>`; 
+            tableBody.appendChild(tr); 
+        });
         renderPagination('export', dataToDisplay.length, exportCurrentPage);
     }
 
@@ -780,16 +1375,140 @@
     function sortData(dataArray, tableName) { const sortState = dataStores[tableName].sortState; if (!sortState || !sortState.column) return; dataArray.sort((a, b) => { const valA = String(a[sortState.column] || ''); const valB = String(b[sortState.column] || ''); const comparison = valA.localeCompare(valB, 'vi', { numeric: true, sensitivity: 'base' }); return sortState.direction === 'asc' ? comparison : -comparison; }); }
     function updateSortIndicators(tableName) { const sortState = dataStores[tableName].sortState; if (!sortState) { return; } document.querySelectorAll(`#${tableName}DataTable .sort-indicator`).forEach(el => el.textContent = ''); if (sortState.column) { const indicatorEl = document.getElementById(`sort-${tableName}-${sortState.column}`); if (indicatorEl) indicatorEl.textContent = sortState.direction === 'asc' ? '▲' : '▼'; } }
     function exportToExcel() { hideAllMessages(); if (dataStores.export.data.length === 0) { showMessage('exportMessage', 'Không có dữ liệu để kết xuất.', 'warning'); return; } showMessage('exportMessage', 'Đang tạo file Excel từ toàn bộ ' + dataStores.export.data.length + ' dòng...', 'info'); try { const fileName = `Tvan_Bkav_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '')}.xlsx`; const dataForSheet = dataStores.export.data.map(({ id, sourceFile, DATE_OBJECT, ...rest }) => rest); const headerOrder = ["TVAN", "MTĐ", "MÃ LOẠI TĐ", "MÃ LỖI", "MÔ TẢ LỖI", "TIMELOG", "GỬI LẦN", "MST", "MẪU SỐ KÝ HIỆU", "SỐ HĐ"]; const worksheet = XLSX.utils.json_to_sheet(dataForSheet, { header: headerOrder }); worksheet['!cols'] = [ { wch: 10 }, { wch: 35 }, { wch: 12 }, { wch: 8 }, { wch: 50 }, { wch: 12 }, { wch: 8 }, { wch: 15 }, { wch: 15 }, { wch: 10 } ]; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQuaDoiSoat'); XLSX.writeFile(workbook, fileName); showMessage('exportMessage', `Kết xuất thành công file: ${fileName}`, 'success'); } catch (error) { showMessage('exportMessage', `Lỗi kết xuất Excel: ${error.message}`, 'error'); } }
-    async function addErrorToFirebase() { hideAllMessages(); const newRule = { rule_action: document.getElementById('newRuleAction').value, ma_loai_td: document.getElementById('newMaTD').value.trim(), ma_loi: document.getElementById('newMaLoi').value.trim(), match_type: document.getElementById('newMatchType').value, match_value: document.getElementById('newMatchValue').value.trim(), standard_value: document.getElementById('newRuleAction').value === 'STANDARDIZE' ? document.getElementById('newStandardValue').value.trim() : '' }; const isFilterAction = newRule.rule_action === 'INCLUDE' || newRule.rule_action === 'EXCLUDE'; if ( !newRule.ma_loai_td || !newRule.match_value || (isFilterAction && !newRule.ma_loi) || (newRule.rule_action === 'STANDARDIZE' && !newRule.standard_value) ) { showMessage('firebaseMessage', 'Vui lòng điền các trường bắt buộc.', 'error'); return; } const uniqueKey = db.ref('error_definitions').push().key; try { await db.ref('error_definitions/' + uniqueKey).set(newRule); showMessage('firebaseMessage', 'Lưu quy tắc thành công! Xử lý lại file để áp dụng.', 'success'); await fetchFirebaseErrors(); } catch (error) { showMessage('firebaseMessage', `Lỗi khi lưu: ${error.message}`, 'error'); } }
+    
+    // ====================================================
+    // NEW/UPDATED FUNCTIONS FOR RULE MANAGEMENT
+    // ====================================================
+    
+    // Displays all rules from the `firebaseRules` array in the modal's table
+    function displayFirebaseRules() {
+        const tableBody = document.getElementById('rulesTableBody');
+        const countSpan = document.getElementById('rulesCount');
+        if (!tableBody || !countSpan) return;
+
+        tableBody.innerHTML = '';
+        countSpan.textContent = firebaseRules.length;
+
+        if (firebaseRules.length === 0) {
+            renderEmptyRow(tableBody, 7);
+            return;
+        }
+
+        firebaseRules.sort((a, b) => (a.ma_loai_td || '').localeCompare(b.ma_loai_td || ''))
+            .forEach(rule => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-action">
+                        <button class="btn-warning btn-move" onclick="populateRuleFormForEdit('${rule.key}')" title="Sửa quy tắc này"><i class="fas fa-pencil-alt"></i></button>
+                        <button class="btn-danger btn-move" onclick="deleteRule('${rule.key}')" title="Xóa quy tắc này"><i class="fas fa-trash"></i></button>
+                    </td>
+                    <td>${rule.rule_action || ''}</td>
+                    <td>${rule.ma_loai_td || ''}</td>
+                    <td>${rule.ma_loi || ''}</td>
+                    <td>${rule.match_type || ''}</td>
+                    <td style="white-space: normal; max-width: 200px; word-break: break-word;">${rule.match_value || ''}</td>
+                    <td style="white-space: normal; max-width: 200px; word-break: break-word;">${rule.standard_value || ''}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+    }
+
+    // Fills the form with data from a rule to be edited
+    function populateRuleFormForEdit(ruleKey) {
+        const rule = firebaseRules.find(r => r.key === ruleKey);
+        if (!rule) return;
+
+        document.getElementById('editingRuleKey').value = rule.key;
+        document.getElementById('newRuleAction').value = rule.rule_action;
+        document.getElementById('newMaTD').value = rule.ma_loai_td;
+        document.getElementById('newMaLoi').value = rule.ma_loi;
+        document.getElementById('newMatchType').value = rule.match_type;
+        document.getElementById('newMatchValue').value = rule.match_value;
+        document.getElementById('newStandardValue').value = rule.standard_value || '';
+        
+        document.getElementById('standardValueGroup').style.display = rule.rule_action === 'STANDARDIZE' ? 'block' : 'none';
+        document.getElementById('clearRuleFormBtn').style.display = 'inline-block';
+        document.querySelector('#ruleManagementModal .modal-content').scrollTop = 0;
+    }
+
+    // Clears the rule form and resets it to "add new" mode
+    function clearRuleForm() {
+        document.getElementById('editingRuleKey').value = '';
+        document.getElementById('newRuleAction').value = 'INCLUDE';
+        document.getElementById('newMaTD').value = '';
+        document.getElementById('newMaLoi').value = '';
+        document.getElementById('newMatchType').value = 'EXACT';
+        document.getElementById('newMatchValue').value = '';
+        document.getElementById('newStandardValue').value = '';
+        document.getElementById('standardValueGroup').style.display = 'none';
+        document.getElementById('clearRuleFormBtn').style.display = 'none';
+        hideAllMessages();
+    }
+
+    // Deletes a rule from Firebase
+    async function deleteRule(ruleKey) {
+        if (!db || !ruleKey) return;
+        showLoader(true);
+        try {
+            await db.ref('error_definitions/' + ruleKey).remove();
+            showMessage('firebaseMessage', 'Đã xóa quy tắc thành công!', 'success');
+            await fetchFirebaseErrors();
+            displayFirebaseRules();
+        } catch (error) {
+            showMessage('firebaseMessage', `Lỗi khi xóa quy tắc: ${error.message}`, 'error');
+        } finally {
+            showLoader(false);
+        }
+    }
+
+    // Saves a new rule or updates an existing one
+    async function saveRule() {
+        hideAllMessages();
+        const editingKey = document.getElementById('editingRuleKey').value;
+
+        const ruleData = {
+            rule_action: document.getElementById('newRuleAction').value,
+            ma_loai_td: document.getElementById('newMaTD').value.trim(),
+            ma_loi: document.getElementById('newMaLoi').value.trim(),
+            match_type: document.getElementById('newMatchType').value,
+            match_value: document.getElementById('newMatchValue').value.trim(),
+            standard_value: document.getElementById('newRuleAction').value === 'STANDARDIZE' ? document.getElementById('newStandardValue').value.trim() : ''
+        };
+
+        const isFilterAction = ruleData.rule_action === 'INCLUDE' || ruleData.rule_action === 'EXCLUDE';
+        if (!ruleData.ma_loai_td || !ruleData.match_value || (isFilterAction && !ruleData.ma_loi) || (ruleData.rule_action === 'STANDARDIZE' && !ruleData.standard_value)) {
+            showMessage('firebaseMessage', 'Vui lòng điền các trường bắt buộc.', 'error');
+            return;
+        }
+        
+        showLoader(true);
+        try {
+            if (editingKey) {
+                await db.ref('error_definitions/' + editingKey).update(ruleData);
+                showMessage('firebaseMessage', 'Cập nhật quy tắc thành công! Xử lý lại file để áp dụng thay đổi.', 'success');
+            } else {
+                await db.ref('error_definitions').push(ruleData);
+                showMessage('firebaseMessage', 'Lưu quy tắc mới thành công!', 'success');
+            }
+            clearRuleForm();
+            await fetchFirebaseErrors();
+            displayFirebaseRules();
+
+        } catch (error) {
+            showMessage('firebaseMessage', `Lỗi khi lưu: ${error.message}`, 'error');
+        } finally {
+            showLoader(false);
+        }
+    }
+
     function updateChartView() { const selectedModeEl = document.querySelector('input[name="chartViewMode"]:checked'); if (!selectedModeEl) return; renderErrorChart(selectedModeEl.value === 'remaining' ? dataStores.source.data : initialSourceDataForChart); }
-    function renderErrorChart(sourceData) { if (typeof Chart === 'undefined' || sourceData.length === 0) { document.getElementById('errorChartSection').style.display = 'none'; return; } document.getElementById('errorChartSection').style.display = 'block'; const ctx = document.getElementById('errorChart').getContext('2d'); if (myErrorChart) myErrorChart.destroy(); const errorCounts = sourceData.reduce((acc, row) => { const errorCode = row['MÃ LỖI'].trim() || 'Không xác định'; acc[errorCode] = (acc[errorCode] || 0) + 1; return acc; }, {}); const sortedErrors = Object.entries(errorCounts).sort(([, a], [, b]) => b - a).slice(0, 15); const labels = sortedErrors.map(item => `Lỗi ${item[0]}`); const data = sortedErrors.map(item => item[1]); myErrorChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Số lần xuất hiện', data, backgroundColor: 'rgba(0, 123, 255, 0.6)' }] }, options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } }); }
+    function renderErrorChart(sourceData) { if (typeof Chart === 'undefined' || sourceData.length === 0) { document.getElementById('errorChartSection').style.display = 'none'; return; } document.getElementById('errorChartSection').style.display = 'block'; const ctx = document.getElementById('errorChart').getContext('2d'); if (myErrorChart) myErrorChart.destroy(); const errorCounts = sourceData.reduce((acc, row) => { const errorCode = row['MÃ LỖI'].trim() || 'Không xác định'; acc[errorCode] = (acc[errorCode] || 0) + 1; return acc; }, {}); const sortedErrors = Object.entries(errorCounts).sort(([, a], [, b]) => b - a).slice(0, 15); const labels = sortedErrors.map(item => `Lỗi ${item[0]}`); const data = sortedErrors.map(item => item[1]); myErrorChart = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Số lần xuất hiện', data, backgroundColor: 'rgba(0, 123, 255, 0.6)' }] }, options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }, x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() }, grid: { color: 'rgba(255, 255, 255, 0.1)' } } }, plugins: { legend: { display: false } } } }); }
 
     // --- DOMContentLoaded EVENT LISTENERS ---
     document.addEventListener('DOMContentLoaded', () => {
         ['MT', 'LOI'].forEach(type => { const dropZone = document.getElementById(`dropZone${type}`), fileInput = document.getElementById(`file${type}`), fileNameSpan = document.getElementById(`fileName${type}`); if (!dropZone) return; const updateFileDisplay = (files) => { fileNameSpan.textContent = files.length > 0 ? `${files.length} tệp đã được chọn` : 'Chưa có file nào được chọn'; }; dropZone.addEventListener('click', () => fileInput.click()); fileInput.addEventListener('change', () => updateFileDisplay(fileInput.files)); dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); }); dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover')); dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; updateFileDisplay(fileInput.files); } }); });
         document.getElementById('exportTableBody')?.addEventListener('dblclick', (event) => { const cell = event.target.closest('td.editable'); if (cell) makeCellEditable(cell); });
         
-        // NEW: Event listener for collapsible filters
         document.querySelectorAll('.toggle-filter-btn').forEach(button => {
             button.addEventListener('click', function() {
                 this.classList.toggle('active');
@@ -822,11 +1541,46 @@
             document.getElementById(`${prefix}PageInput`).addEventListener('keydown', (e) => { if (e.key === 'Enter') goToPage(prefix); });
         });
         
-        document.getElementById('selectAllSource').addEventListener('change', (e) => { const filteredData = getFilteredSourceData(); if (e.target.checked) filteredData.forEach(row => selectedSourceRowIds.add(row.id)); else { const filteredIds = new Set(filteredData.map(r => r.id)); selectedSourceRowIds.forEach(id => { if (filteredIds.has(id)) selectedSourceRowIds.delete(id); }); } displaySourceData(); });
-        document.getElementById('sourceTableBody').addEventListener('change', (e) => { if (e.target.dataset.table === 'source') { const rowId = e.target.dataset.rowId; if (e.target.checked) selectedSourceRowIds.add(rowId); else selectedSourceRowIds.delete(rowId); } });
+        document.getElementById('sourceTableBody').addEventListener('change', (e) => { 
+            if (e.target.matches('#selectAllSource')) {
+                const isChecked = e.target.checked;
+                const filteredData = getFilteredSourceData();
+                const filteredIds = new Set(filteredData.map(r => r.id));
+                
+                document.querySelectorAll('#sourceTableBody .row-checkbox').forEach(checkbox => {
+                    if (filteredIds.has(checkbox.dataset.rowId)) {
+                        checkbox.checked = isChecked;
+                        if (isChecked) {
+                            selectedSourceRowIds.add(checkbox.dataset.rowId);
+                        } else {
+                            selectedSourceRowIds.delete(checkbox.dataset.rowId);
+                        }
+                    }
+                });
+            } else if (e.target.classList.contains('row-checkbox') && e.target.dataset.table === 'source') {
+                const rowId = e.target.dataset.rowId;
+                if (e.target.checked) selectedSourceRowIds.add(rowId);
+                else selectedSourceRowIds.delete(rowId);
+            }
+        });
 
-        document.getElementById('selectAllExport').addEventListener('change', (e) => { const filteredData = getFilteredExportData(); if (e.target.checked) filteredData.forEach(row => selectedExportRowIds.add(row.id)); else { const filteredIds = new Set(filteredData.map(r => r.id)); selectedExportRowIds.forEach(id => { if (filteredIds.has(id)) selectedExportRowIds.delete(id); }); } displayExportData(); });
-        document.getElementById('exportTableBody').addEventListener('change', (e) => { if (e.target.dataset.table === 'export') { const rowId = e.target.dataset.rowId; if (e.target.checked) selectedExportRowIds.add(rowId); else selectedExportRowIds.delete(rowId); document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0; } });
+        document.getElementById('exportTableBody').addEventListener('change', (e) => {
+            if (e.target.matches('#selectAllExport')) {
+                 const isChecked = e.target.checked;
+                const filteredData = getFilteredExportData();
+                filteredData.forEach(row => {
+                    if(isChecked) selectedExportRowIds.add(row.id);
+                    else selectedExportRowIds.delete(row.id);
+                });
+                displayExportData();
+            } else if (e.target.classList.contains('row-checkbox') && e.target.dataset.table === 'export') {
+                const rowId = e.target.dataset.rowId;
+                if (e.target.checked) selectedExportRowIds.add(rowId);
+                else selectedExportRowIds.delete(rowId);
+                document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
+            }
+        });
+
         document.getElementById('bulkEditBtn').addEventListener('click', () => { if (selectedExportRowIds.size > 0) { document.getElementById('bulkEditTitle').textContent = `Sửa hàng loạt cho ${selectedExportRowIds.size} mục đã chọn`; document.getElementById('bulkEditModal').style.display = 'block'; } });
         document.getElementById('bulkEditCloseBtn').addEventListener('click', () => document.getElementById('bulkEditModal').style.display = 'none');
         document.getElementById('saveBulkEditBtn').addEventListener('click', () => {
@@ -847,10 +1601,17 @@
         });
         document.getElementById('trendChartCloseBtn').addEventListener('click', () => document.getElementById('trendChartModal').style.display = 'none');
         
-        // NEW: Event listeners for Rule Management Modal
-        document.getElementById('openRuleMgmtBtn').addEventListener('click', () => document.getElementById('ruleManagementModal').style.display = 'block');
+        // --- Event listeners for Rule Management Modal ---
+        document.getElementById('openRuleMgmtBtn').addEventListener('click', async () => {
+            showLoader(true);
+            await fetchFirebaseErrors();
+            displayFirebaseRules();
+            showLoader(false);
+            document.getElementById('ruleManagementModal').style.display = 'block';
+        });
         document.getElementById('ruleMgmtCloseBtn').addEventListener('click', () => document.getElementById('ruleManagementModal').style.display = 'none');
-
+        document.getElementById('saveRuleBtn').addEventListener('click', saveRule);
+        document.getElementById('clearRuleFormBtn').addEventListener('click', clearRuleForm);
 
         window.addEventListener('click', (e) => { 
             if (e.target == document.getElementById('bulkEditModal')) document.getElementById('bulkEditModal').style.display = "none";
