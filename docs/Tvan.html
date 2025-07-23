@@ -237,10 +237,6 @@
             font-weight: 500;
             display: none;
         }
-        .message.success-message { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message.error-message { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .message.warning-message { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .message.info-message { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
         #loader { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; }
         .spinner { border: 8px solid rgba(255, 255, 255, 0.3); border-top: 8px solid var(--primary-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -258,7 +254,7 @@
             padding: 30px;
             text-align: center;
             color: var(--secondary-color);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            transition: background-color: 0.3s ease, border-color: 0.3s ease;
             cursor: pointer;
             background-color: var(--background-dark); /* Darker background */
         }
@@ -349,10 +345,9 @@
         .modal-close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
         .modal-close:hover, .modal-close:focus { color: var(--text-light); text-decoration: none; cursor: pointer; }
         
-        /* --- NEW STYLES FOR UI IMPROVEMENTS --- */
         #overviewDashboardSection {
             display: none;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Adjusted minmax for better layout */
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 25px;
         }
         .summary-container {
@@ -366,7 +361,7 @@
             position: relative;
             width: 180px;
             height: 180px;
-            min-width: 180px; /* Ensure it doesn't shrink */
+            min-width: 180px;
         }
         .summary-legend-container {
             display: flex;
@@ -384,7 +379,7 @@
             height: 12px;
             border-radius: 50%;
             margin-right: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2); /* Added border to dots */
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .summary-item .count {
             font-weight: 600;
@@ -394,11 +389,11 @@
         }
         .analysis-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjusted minmax for analysis cards */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
         }
         .analysis-card {
-            background-color: var(--background-dark); /* Darker background for analysis cards */
+            background-color: var(--background-dark);
             padding: 20px;
             border-radius: var(--border-radius);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -416,7 +411,7 @@
             border-radius: 4px;
             font-size: 0.95em;
             border-left: 5px solid;
-            color: var(--dark-color); /* Default text for alerts (light background) */
+            color: var(--dark-color);
         }
         #alertsContainer .alert.alert-spike { border-left-color: var(--warning-color); background-color: #fffaf0; }
         #alertsContainer .alert.alert-new { border-left-color: var(--info-color); background-color: #f1faff; }
@@ -426,7 +421,7 @@
         .toggle-filter-btn {
             width: 100%;
             text-align: left;
-            background-color: rgba(255, 255, 255, 0.1); /* Lighter button for toggle */
+            background-color: rgba(255, 255, 255, 0.1);
             color: var(--text-light);
             margin-bottom: 10px;
             font-weight: 600;
@@ -451,112 +446,96 @@
             background-color: var(--card-dark);
         }
         .collapsible-filters .input-group {
-            background-color: transparent; /* Remove extra background for inner group */
+            background-color: transparent;
             border: none;
             padding: 0;
             margin-top: 0;
         }
-
-        /* Chart container styling for the main error chart */
         #errorChartSection > div {
             background-color: var(--background-dark);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        /* Chart.js specific styling for dark theme */
-        .chartjs-render-monitor {
-            background-color: var(--background-dark); /* Ensure chart background matches card */
-        }
         canvas {
-            max-width: 100%; /* Ensure charts are responsive */
+            max-width: 100%;
             height: auto;
         }
 
+        /* --- NEW TOAST NOTIFICATION STYLES --- */
+        #toastContainer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 10001; /* Higher than modal overlay */
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        .toast {
+            background-color: var(--card-dark);
+            color: var(--text-light);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border-left: 5px solid var(--secondary-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            min-width: 300px;
+            max-width: 450px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .toast.hide {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .toast-icon {
+            font-size: 1.5em;
+        }
+        .toast.success { border-left-color: var(--success-color); }
+        .toast.success .toast-icon { color: var(--success-color); }
+        .toast.error { border-left-color: var(--danger-color); }
+        .toast.error .toast-icon { color: var(--danger-color); }
+        .toast.warning { border-left-color: var(--warning-color); }
+        .toast.warning .toast-icon { color: var(--warning-color); }
+        .toast.info { border-left-color: var(--info-color); }
+        .toast.info .toast-icon { color: var(--info-color); }
+
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-            }
-            .card {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            h2 {
-                font-size: 1.5em;
-            }
-            h3 {
-                font-size: 1.2em;
-            }
-            button {
-                padding: 8px 15px;
-                font-size: 14px;
-            }
-            input, select {
-                margin-bottom: 10px;
-            }
-            .input-group {
-                gap: 10px;
-            }
-            .input-group > * {
-                flex-basis: 100%; /* Stack inputs on small screens */
-            }
-            .drop-zones-container {
-                flex-direction: column; /* Stack drop zones */
-            }
-            .drop-zone {
-                min-width: unset;
-                width: 100%;
-            }
-            .summary-container {
-                flex-direction: column; /* Stack summary items */
-                gap: 20px;
-            }
-            .summary-chart-container {
-                width: 150px;
-                height: 150px;
-            }
-            .analysis-container {
-                grid-template-columns: 1fr; /* Stack analysis cards */
-            }
-            .modal-content {
-                margin: 5% auto;
-                width: 95%;
-            }
-            th, td {
-                padding: 8px 10px;
-                font-size: 0.85em;
-            }
-            td.col-action {
-                flex-direction: column; /* Stack action buttons in column */
-                gap: 2px;
-                min-width: 80px; /* Adjust min-width */
-            }
-            .tab-link {
-                padding: 10px 15px;
-                font-size: 1em;
-            }
-            .pagination-controls {
-                justify-content: center;
-            }
-            .pagination-controls .page-jump-input {
-                width: 45px;
-            }
+            .container { padding: 15px; }
+            .card { padding: 15px; margin-bottom: 15px; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+            button { padding: 8px 15px; font-size: 14px; }
+            input, select { margin-bottom: 10px; }
+            .input-group { gap: 10px; }
+            .input-group > * { flex-basis: 100%; }
+            .drop-zones-container { flex-direction: column; }
+            .drop-zone { min-width: unset; width: 100%; }
+            .summary-container { flex-direction: column; gap: 20px; }
+            .summary-chart-container { width: 150px; height: 150px; }
+            .analysis-container { grid-template-columns: 1fr; }
+            .modal-content { margin: 5% auto; width: 95%; }
+            th, td { padding: 8px 10px; font-size: 0.85em; }
+            td.col-action { flex-direction: column; gap: 2px; min-width: 80px; }
+            .tab-link { padding: 10px 15px; font-size: 1em; }
+            .pagination-controls { justify-content: center; }
+            .pagination-controls .page-jump-input { width: 45px; }
+            #toastContainer { right: 10px; bottom: 10px; width: calc(100% - 20px); }
+            .toast { min-width: unset; width: 100%; }
         }
-
         @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            .tab-container {
-                overflow-x: auto; /* Ensure tabs scrollable on very small screens */
-            }
-            .tab-link {
-                font-size: 0.9em;
-            }
-            .pagination-controls {
-                flex-direction: column; /* Stack pagination controls */
-                gap: 5px;
-            }
+            .container { padding: 10px; }
+            .tab-link { font-size: 0.9em; }
+            .pagination-controls { flex-direction: column; gap: 5px; }
         }
     </style>
 </head>
@@ -578,19 +557,14 @@
         </div>
     </div>
     
-    <!-- ==================================================== -->
-    <!-- MODAL QUẢN LÝ QUY TẮC - ĐÃ ĐƯỢC NÂNG CẤP -->
-    <!-- ==================================================== -->
     <div id="ruleManagementModal" class="modal">
         <div class="modal-content">
             <span class="modal-close" id="ruleMgmtCloseBtn">&times;</span>
             <h3><i class="fas fa-database"></i> Quản lý Quy tắc Đối soát (Nâng cao)</h3>
             
-            <!-- Form Thêm/Sửa Quy tắc -->
             <div class="content" style="display: block; padding: 0; border: none;">
                 <h4>Thêm/Cập nhật quy tắc</h4>
-                <input type="hidden" id="editingRuleKey"> <!-- Input ẩn để lưu key khi sửa -->
-                <div class="input-group">
+                <input type="hidden" id="editingRuleKey"> <div class="input-group">
                     <div><label for="newRuleAction">Hành động của Quy tắc:</label><select id="newRuleAction"><option value="INCLUDE">Bao gồm (Lấy vào bảng kết xuất)</option><option value="EXCLUDE">Loại trừ (Ẩn khỏi bảng thủ công)</option><option value="STANDARDIZE">Chuẩn hóa (Ghi đè Mô tả lỗi)</option></select></div>
                     <div><label for="newMaTD">Mã Loại Thông Điệp:</label><input type="text" id="newMaTD" placeholder="Bắt buộc"></div>
                     <div><label for="newMaLoi">Mã Lỗi:</label><input type="text" id="newMaLoi" placeholder="Bắt buộc cho Lấy/Loại trừ"></div>
@@ -605,10 +579,8 @@
                 </div>
                 <button id="saveRuleBtn"><i class="fas fa-save"></i> Lưu Quy tắc</button>
                 <button id="clearRuleFormBtn" class="btn-secondary" style="display:none;"><i class="fas fa-eraser"></i> Hủy Sửa</button>
-                <div id="firebaseMessage" class="message"></div>
             </div>
 
-            <!-- Bảng hiển thị danh sách quy tắc -->
             <div class="content" style="display: block; padding: 15px 0 0 0; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 20px;">
                 <h4>Danh sách Quy tắc hiện có (<span id="rulesCount">0</span>)</h4>
                 <div class="table-wrapper" style="max-height: 300px;">
@@ -625,8 +597,7 @@
                             </tr>
                         </thead>
                         <tbody id="rulesTableBody">
-                            <!-- Quy tắc sẽ được chèn vào đây bằng JavaScript -->
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -649,8 +620,7 @@
                     <div class="drop-zone" id="dropZoneLOI"><label for="fileLOI"><b><i class="fas fa-file-invoice"></i> Khu vực File LOI</b></label><p>Kéo thả hoặc nhấn để chọn file</p><span class="file-name" id="fileNameLOI">Chưa có file nào được chọn</span><input type="file" id="fileLOI" accept=".xls,.xlsx" style="display:none;" multiple></div>
                 </div>
                 <button onclick="handleFileUpload()" id="processBtn" class="btn-success"><i class="fas fa-cogs"></i>Xử lý & Đối soát</button>
-                <div id="uploadMessage" class="message"></div>
-            </section>
+                </section>
             
             <section id="processingSection" style="display:none;">
                     <div class="card" id="overviewDashboardSection">
@@ -699,15 +669,18 @@
                                     <div><label for="filterMaLoaiTD">Lọc theo Mã Loại TĐ:</label><select id="filterMaLoaiTD"></select></div>
                                     <div><label for="filterMaLoi">Lọc theo Mã Lỗi:</label><select id="filterMaLoi"></select></div>
                                     <div style="flex-grow: 2;"><label for="filterMoTaLoi">Tìm kiếm Mô tả lỗi:</label><input type="text" id="filterMoTaLoi" placeholder="Nhập từ khóa..."></div>
-                                    <button onclick="moveSelectedFromSourceToExport()" class="btn-success"><i class="fas fa-share-square"></i>Chuyển mục đã chọn</button>
+                                </div>
+                                <div class="input-group" style="border: none; padding-top: 15px; padding-bottom: 0;">
+                                     <button onclick="moveSelectedItems('source', 'excluded')" id="moveSourceToExcludedBtn" class="btn-warning" disabled><i class="fas fa-ban"></i>Loại trừ mục đã chọn</button>
+                                     <button onclick="moveSelectedItems('source', 'export')" id="moveSourceToExportBtn" class="btn-success" disabled><i class="fas fa-share-square"></i>Chuyển mục đã chọn sang Bảng 3</button>
                                 </div>
                             </div>
                         </div>
                         <div class="table-wrapper"><table id="sourceDataTable"><thead><tr><th class="col-action">
-  <div style="display: flex; align-items: center; gap: 6px;">
+<div style="display: flex; align-items: center; gap: 6px;">
     <input type="checkbox" id="selectAllSource" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
     <span>Hành động</span>
-  </div>
+</div>
 </th>
 <th class="sortable-header" onclick="handleSort('source', 'sourceFile')">Nguồn<span id="sort-source-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MTĐ')">MTĐ<span id="sort-source-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MST')">MST<span id="sort-source-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-source-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LỖI')">MÃ LỖI<span id="sort-source-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-source-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="sourceTableBody"></tbody></table></div>
                     </div>
@@ -715,17 +688,27 @@
                     <div id="excludedTab" class="tab-content">
                         <div class="pagination-controls" id="excludedPagination"><span id="excludedPaginationInfo"></span><input type="number" class="page-jump-input" id="excludedPageInput" placeholder="Trang"><button class="btn-move" id="excludedGoBtn">Đi</button><button id="excludedPrevPageBtn" class="btn-move"><i class="fas fa-chevron-left"></i></button><button id="excludedNextPageBtn" class="btn-move"><i class="fas fa-chevron-right"></i></button></div>
                         <div class="filter-container">
-                             <button class="toggle-filter-btn"><i class="fas fa-filter"></i> Lọc dữ liệu <i class="fas fa-chevron-down"></i></button>
+                             <button class="toggle-filter-btn"><i class="fas fa-filter"></i> Lọc và Hành động <i class="fas fa-chevron-down"></i></button>
                              <div class="collapsible-filters">
-                                <div class="input-group">
-                                    <div><label for="filterExcludedNguon">Lọc theo Nguồn:</label><select id="filterExcludedNguon"><option value="">Tất cả</option><option value="MT">MT</option><option value="LOI">LOI</option></select></div>
-                                    <div><label for="filterExcludedMaLoaiTD">Lọc theo Mã Loại TĐ:</label><select id="filterExcludedMaLoaiTD"></select></div>
-                                    <div><label for="filterExcludedMaLoi">Lọc theo Mã Lỗi:</label><select id="filterExcludedMaLoi"></select></div>
-                                    <div style="flex-grow: 2;"><label for="filterExcludedMoTaLoi">Tìm kiếm Mô tả lỗi:</label><input type="text" id="filterExcludedMoTaLoi" placeholder="Nhập từ khóa..."></div>
+                                 <div class="input-group">
+                                     <div><label for="filterExcludedNguon">Lọc theo Nguồn:</label><select id="filterExcludedNguon"><option value="">Tất cả</option><option value="MT">MT</option><option value="LOI">LOI</option></select></div>
+                                     <div><label for="filterExcludedMaLoaiTD">Lọc theo Mã Loại TĐ:</label><select id="filterExcludedMaLoaiTD"></select></div>
+                                     <div><label for="filterExcludedMaLoi">Lọc theo Mã Lỗi:</label><select id="filterExcludedMaLoi"></select></div>
+                                     <div style="flex-grow: 2;"><label for="filterExcludedMoTaLoi">Tìm kiếm Mô tả lỗi:</label><input type="text" id="filterExcludedMoTaLoi" placeholder="Nhập từ khóa..."></div>
+                                 </div>
+                                 <div class="input-group" style="border: none; padding-top: 15px; padding-bottom: 0;">
+                                     <button onclick="moveSelectedItems('excluded', 'source')" id="moveExcludedToSourceBtn" class="btn-warning" disabled><i class="fas fa-undo"></i>Hoàn tác về Bảng 1</button>
+                                     <button onclick="moveSelectedItems('excluded', 'export')" id="moveExcludedToExportBtn" class="btn-success" disabled><i class="fas fa-share-square"></i>Chuyển sang Bảng 3</button>
+                                     <button onclick="exportMiniFromExcluded()" id="exportMiniExcludedBtn" class="btn-info" disabled><i class="fas fa-file-excel"></i>Kết xuất Mini (MST)</button>
                                 </div>
                             </div>
                         </div>
-                        <div class="table-wrapper"><table id="excludedDataTable"><thead><tr><th class="col-action">Hành động</th><th class="sortable-header" onclick="handleSort('excluded', 'sourceFile')">Nguồn<span id="sort-excluded-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MTĐ')">MTĐ<span id="sort-excluded-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MST')">MST<span id="sort-excluded-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-excluded-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LỖI')">MÃ LỖI<span id="sort-excluded-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-excluded-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="excludedTableBody"></tbody></table></div>
+                        <div class="table-wrapper"><table id="excludedDataTable"><thead><tr><th class="col-action">
+<div style="display: flex; align-items: center; gap: 6px;">
+    <input type="checkbox" id="selectAllExcluded" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+    <span>Hành động</span>
+</div>
+</th><th class="sortable-header" onclick="handleSort('excluded', 'sourceFile')">Nguồn<span id="sort-excluded-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MTĐ')">MTĐ<span id="sort-excluded-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MST')">MST<span id="sort-excluded-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-excluded-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LỖI')">MÃ LỖI<span id="sort-excluded-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-excluded-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="excludedTableBody"></tbody></table></div>
                     </div>
 
                     <div id="exportTab" class="tab-content">
@@ -734,31 +717,34 @@
                             <button class="toggle-filter-btn"><i class="fas fa-filter"></i> Lọc và Hành động <i class="fas fa-chevron-down"></i></button>
                             <div class="collapsible-filters">
                                 <div class="input-group">
-                                    <button id="bulkEditBtn" class="btn-info" disabled><i class="fas fa-pencil-alt"></i> Sửa hàng loạt</button>
-                                    <div style="flex:1 1 50px"></div> <div><label for="filterExportNguon">Lọc theo Nguồn:</label><select id="filterExportNguon"><option value="">Tất cả</option><option value="MT">MT</option><option value="LOI">LOI</option></select></div>
+                                    <div style="flex-grow: 2;"><label for="filterExportMoTaLoi">Tìm kiếm Mô tả lỗi:</label><input type="text" id="filterExportMoTaLoi" placeholder="Nhập từ khóa..."></div>
+                                    <div><label for="filterExportNguon">Lọc theo Nguồn:</label><select id="filterExportNguon"><option value="">Tất cả</option><option value="MT">MT</option><option value="LOI">LOI</option></select></div>
                                     <div><label for="filterExportMaLoaiTD">Lọc theo Mã Loại TĐ:</label><select id="filterExportMaLoaiTD"></select></div>
                                     <div><label for="filterExportMaLoi">Lọc theo Mã Lỗi:</label><select id="filterExportMaLoi"></select></div>
-                                    <div style="flex-grow: 2;"><label for="filterExportMoTaLoi">Tìm kiếm Mô tả lỗi:</label><input type="text" id="filterExportMoTaLoi" placeholder="Nhập từ khóa..."></div>
+                                </div>
+                                <div class="input-group" style="border: none; padding-top: 15px; padding-bottom: 0;">
+                                     <button id="bulkEditBtn" class="btn-info" disabled><i class="fas fa-pencil-alt"></i> Sửa hàng loạt</button>
+                                     <button onclick="moveSelectedItems('export', 'source')" id="moveExportToSourceBtn" class="btn-warning" disabled><i class="fas fa-undo"></i>Hoàn tác về Bảng 1</button>
+                                     <button onclick="moveSelectedItems('export', 'excluded')" id="moveExportToExcludedBtn" class="btn-secondary" disabled><i class="fas fa-ban"></i>Chuyển sang Bảng 2</button>
                                 </div>
                             </div>
                         </div>
                         <div class="table-wrapper"><table id="exportDataTable"><thead><tr><th class="col-action">
-  <div style="display: flex; align-items: center; gap: 6px;">
+<div style="display: flex; align-items: center; gap: 6px;">
     <input type="checkbox" id="selectAllExport" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
     <span>Hành động</span>
-  </div>
+</div>
 </th>
 <th class="sortable-header" onclick="handleSort('export', 'TVAN')">TVAN<span id="sort-export-TVAN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MTĐ')">MTĐ<span id="sort-export-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-export-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LỖI')">MÃ LỖI<span id="sort-export-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-export-MÔ TẢ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'TIMELOG')">TIMELOG<span id="sort-export-TIMELOG" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'GỬI LẦN')">GỬI LẦN<span id="sort-export-GỬI LẦN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MST')">MST<span id="sort-export-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MẪU SỐ KÝ HIỆU')">MẪU SỐ KÝ HIỆU<span id="sort-export-MẪU SỐ KÝ HIỆU" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'SỐ HĐ')">SỐ HĐ<span id="sort-export-SỐ HĐ" class="sort-indicator"></span></th></tr></thead><tbody id="exportTableBody"></tbody></table></div>
                     </div>
                 </div>
 
                 <div class="card" id="actionsCard">
-                     <h3><i class="fas fa-cogs"></i> Bước 3: Hành động cuối cùng</h3>
-                     <div class="input-group" style="background: none; border: none; padding: 0;">
-                        <button onclick="exportToExcel()" id="exportBtn" class="btn-success"><i class="fas fa-file-excel"></i>Kết xuất Bảng 3 ra Excel</button>
-                        <button id="openRuleMgmtBtn" class="btn-info"><i class="fas fa-database"></i> Mở Trình Quản lý Quy tắc</button>
+                      <h3><i class="fas fa-cogs"></i> Bước 3: Hành động cuối cùng</h3>
+                      <div class="input-group" style="background: none; border: none; padding: 0;">
+                          <button onclick="exportToExcel()" id="exportBtn" class="btn-success"><i class="fas fa-file-excel"></i>Kết xuất Bảng 3 ra Excel</button>
+                          <button id="openRuleMgmtBtn" class="btn-info"><i class="fas fa-database"></i> Mở Trình Quản lý Quy tắc</button>
                     </div>
-                    <div id="exportMessage" class="message"></div>
                 </div>
 
                 <div class="card" id="errorChartSection" style="display:none;">
@@ -772,6 +758,8 @@
             </section>
         </main>
     </div>
+
+    <div id="toastContainer"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -792,13 +780,13 @@
     };
     let db = null;
     try { firebase.initializeApp(cfg); db = firebase.database(); } 
-    catch (error) { console.error("Firebase initialization error:", error); alert("Không thể kết nối tới Firebase."); }
+    catch (error) { console.error("Firebase initialization error:", error); showMessage("Không thể kết nối tới Firebase.", "error"); }
 
     let firebaseRules = []; 
     let myErrorChart = null, summaryChart = null, mstErrorChart = null, errorTrendChart = null;
     let initialSourceDataForChart = [];
     let historicalData = [];
-
+    
     const dataStores = {
         source: { data: [], sortState: { column: null, direction: 'asc' } },
         export: { data: [], sortState: { column: null, direction: 'asc' } },
@@ -807,15 +795,86 @@
     
     const rowsPerPage = 100;
     let sourceCurrentPage = 1, excludedCurrentPage = 1, exportCurrentPage = 1;
-    let selectedSourceRowIds = new Set(), selectedExportRowIds = new Set();
+    let selectedSourceRowIds = new Set(), selectedExportRowIds = new Set(), selectedExcludedRowIds = new Set();
 
     // --- UTILITY FUNCTIONS ---
     function debounce(func, delay) { let timeout; return function(...args) { const context = this; clearTimeout(timeout); timeout = setTimeout(() => func.apply(context, args), delay); }; }
     function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
-    function showMessage(elementId, text, type = 'warning', duration = 4000) { const el = document.getElementById(elementId); if(el) { el.textContent = text; el.className = `message ${type}-message`; el.style.display = 'block'; if (duration > 0) { setTimeout(() => { el.style.display = 'none'; }, duration); } } }
-    function hideAllMessages() { document.querySelectorAll('.message').forEach(msg => msg.style.display = 'none'); }
-    function readExcel(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = (e) => { try { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array', cellDates: true }); const worksheet = workbook.Sheets[workbook.SheetNames[0]]; if (!worksheet) { resolve([]); return; } resolve(XLSX.utils.sheet_to_json(worksheet)); } catch (error) { reject(error); } }; reader.onerror = () => reject(new Error("Lỗi không thể đọc file.")); reader.readAsArrayBuffer(file); }); }
     
+    // REWRITTEN: showMessage function for toast notifications
+    function showMessage(text, type = 'info', duration = 5000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-times-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+        const iconClass = icons[type] || 'fa-info-circle';
+
+        toast.innerHTML = `
+            <i class="fas ${iconClass} toast-icon"></i>
+            <div>${text}</div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, duration);
+        }
+    }
+
+    function hideAllMessages() {
+        const toasts = document.querySelectorAll('#toastContainer .toast');
+        toasts.forEach(toast => toast.remove());
+    }
+    
+    function readExcel(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    if (!worksheet) {
+                        resolve([]);
+                        return;
+                    }
+                    let jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    const cleanedData = jsonData.map(row => {
+                        const newRow = {};
+                        for (const key in row) {
+                            if (Object.prototype.hasOwnProperty.call(row, key)) {
+                                newRow[key.trim()] = row[key];
+                            }
+                        }
+                        return newRow;
+                    });
+                    resolve(cleanedData);
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            reader.onerror = () => reject(new Error("Lỗi không thể đọc file."));
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
     function convertToDate(dateInput) {
         if (!dateInput) return null;
         if (dateInput instanceof Date && !isNaN(dateInput)) return dateInput;
@@ -849,11 +908,10 @@
         return `${yyyy}-${mm}-${dd}`;
     }
     
-    // *** NEW: 1-Click Rule and Move Function ***
     async function addRuleAndMove(rowId, action = 'EXCLUDE') {
         const rowIndex = dataStores.source.data.findIndex(r => r.id === rowId);
         if (rowIndex === -1) {
-            showMessage('uploadMessage', 'Không tìm thấy dòng để xử lý.', 'error');
+            showMessage('Không tìm thấy dòng để xử lý.', 'error');
             return;
         }
         const row = dataStores.source.data[rowIndex];
@@ -862,44 +920,37 @@
             rule_action: action,
             ma_loai_td: row['MÃ LOẠI TĐ'],
             ma_loi: row['MÃ LỖI'],
-            match_type: 'EXACT', // Default to exact match for simplicity
+            match_type: 'EXACT',
             match_value: row['MÔ TẢ LỖI'],
             standard_value: '' 
         };
 
         if (!newRule.ma_loai_td || !newRule.ma_loi || !newRule.match_value) {
-            showMessage('uploadMessage', `Không thể tạo quy tắc cho lỗi: '${row['MÔ TẢ LỖI']}' do thiếu thông tin.`, 'error');
+            showMessage(`Không thể tạo quy tắc cho lỗi: '${row['MÔ TẢ LỖI']}' do thiếu thông tin.`, 'error');
             return;
         }
 
         try {
             await db.ref('error_definitions').push(newRule);
-            
-            // Add rule to local cache
             await fetchFirebaseErrors();
             
-            // Move item locally
             const [movedRow] = dataStores.source.data.splice(rowIndex, 1);
             if (action === 'EXCLUDE') {
                 dataStores.excluded.data.push(movedRow);
             }
             
-            showMessage('uploadMessage', `Đã tạo quy tắc loại trừ và di chuyển lỗi.`, 'success');
-
-            // Refresh UI
+            showMessage(`Đã tạo quy tắc loại trừ và di chuyển lỗi.`, 'success');
             displayAllTables();
             updateChartView();
 
         } catch (error) {
-            showMessage('uploadMessage', `Lỗi khi lưu quy tắc vào Firebase: ${error.message}`, 'error');
+            showMessage(`Lỗi khi lưu quy tắc vào Firebase: ${error.message}`, 'error');
         }
     }
-
 
     // --- CORE RECONCILIATION LOGIC ---
     function isMatch(excelRow, rule) { const maLoaiTDMatch = excelRow['MÃ LOẠI TĐ'].toString().trim() === rule.ma_loai_td.toString().trim(); if (!maLoaiTDMatch) return false; let maLoiMatch = true; if (rule.ma_loi) { maLoiMatch = excelRow['MÃ LỖI'].toString().trim() === rule.ma_loi.toString().trim(); } if (!maLoiMatch) return false; const moTaLoi = excelRow['MÔ TẢ LỖI'].toString(); const matchValue = rule.match_value.toString(); switch (rule.match_type) { case 'EXACT': return moTaLoi.trim() === matchValue.trim(); case 'CONTAINS': return moTaLoi.toLowerCase().includes(matchValue.toLowerCase()); case 'REGEX': try { const regex = new RegExp(matchValue, 'i'); return regex.test(moTaLoi); } catch (e) { console.error(`Regex không hợp lệ: "${matchValue}"`, e); return false; } default: return false; } }
     
-    // UPDATED: fetchFirebaseErrors now stores the key
     async function fetchFirebaseErrors() {
         if (!db) return 0;
         firebaseRules = [];
@@ -908,7 +959,7 @@
             const data = snapshot.val();
             for (const key in data) {
                 const rule = data[key];
-                rule.key = key; // IMPORTANT: Store the key for editing/deleting
+                rule.key = key;
                 rule.rule_action = rule.rule_action || 'INCLUDE';
                 if (!rule.match_type && rule.mo_ta_loi) {
                     rule.match_type = 'EXACT';
@@ -921,18 +972,18 @@
     }
 
     async function handleFileUpload() {
-        hideAllMessages(); showLoader(true); showMessage('uploadMessage', 'Bắt đầu xử lý... Vui lòng đợi.', 'info', 0);
+        hideAllMessages(); showLoader(true); showMessage('Bắt đầu xử lý... Vui lòng đợi.', 'info');
         const mtFiles = document.getElementById('fileMT').files; const loiFiles = document.getElementById('fileLOI').files;
-        if (mtFiles.length === 0 || loiFiles.length === 0) { showMessage('uploadMessage', 'Vui lòng cung cấp ít nhất một file cho mỗi nguồn MT và LOI.', 'error'); showLoader(false); return; }
+        if (mtFiles.length === 0 || loiFiles.length === 0) { showMessage('Vui lòng cung cấp ít nhất một file cho mỗi nguồn MT và LOI.', 'error'); showLoader(false); return; }
         
         try {
             const rulesCount = await fetchFirebaseErrors();
-            showMessage('uploadMessage', `Đã tải ${rulesCount} quy tắc. Bắt đầu đọc file Excel...`, 'info', 0);
+            showMessage(`Đã tải ${rulesCount} quy tắc. Bắt đầu đọc file Excel...`, 'info');
             
             const [mtDataArrays, loiDataArrays] = await Promise.all([ Promise.all(Array.from(mtFiles).map(file => readExcel(file))), Promise.all(Array.from(loiFiles).map(file => readExcel(file))) ]);
             const mtData = mtDataArrays.flat(); const loiData = loiDataArrays.flat();
             
-            showMessage('uploadMessage', `Đọc file thành công. Tổng cộng ${mtData.length + loiData.length} dòng. Đang xử lý dữ liệu...`, 'info', 0);
+            showMessage(`Đọc file thành công. Tổng cộng ${mtData.length + loiData.length} dòng.`, 'info');
 
             setTimeout(async () => {
                 try {
@@ -950,10 +1001,10 @@
                     
                     await runAnalysisWorkflow();
 
-                    showMessage('uploadMessage', `Xử lý hoàn tất!`, 'success');
+                    showMessage(`Xử lý hoàn tất!`, 'success');
                 } catch (error) {
                     console.error("Lỗi trong quá trình xử lý dữ liệu:", error); 
-                    showMessage('uploadMessage', `Lỗi xử lý dữ liệu: ${error.message}`, 'error'); 
+                    showMessage(`Lỗi xử lý dữ liệu: ${error.message}`, 'error'); 
                 } finally {
                     showLoader(false); 
                 }
@@ -961,46 +1012,74 @@
 
         } catch (error) { 
             console.error("Lỗi trong quá trình tải file:", error); 
-            showMessage('uploadMessage', `Lỗi xử lý file: ${error.message}`, 'error'); 
+            showMessage(`Lỗi xử lý file: ${error.message}`, 'error'); 
             showLoader(false); 
         }
     }
 
     function processDataWithRules(mtData, loiData) {
         dataStores.source.data = []; dataStores.export.data = []; dataStores.excluded.data = [];
-        initialSourceDataForChart = []; selectedSourceRowIds.clear(); selectedExportRowIds.clear();
+        initialSourceDataForChart = [];
+        selectedSourceRowIds.clear(); selectedExportRowIds.clear(); selectedExcludedRowIds.clear();
+
         let idCounter = 0; let rawData = [];
-        
-        const mapRawData = (data, sourceIdentifier) => { if (!Array.isArray(data)) return; data.forEach(row => { 
-            const dateObj = convertToDate(row['Ngày tạo'] || row['ngaytao'] || row['TIMELOG'] || row['TimeLog']);
-            if (!dateObj) return; 
-            const moTaLoiGoc = (row['Mô tả lỗi'] || row['MÔ TẢ LỖI'] || '').toString(); 
-            rawData.push({ 
-                id: `row-${idCounter++}`, 
-                TVAN: 'tvan_bkav', 
-                'MTĐ': row['Mã Thông điệp'] || row['MTĐ'] || '', 
-                'MÃ LOẠI TĐ': (row['Mã loại thông điệp'] || row['MÃ LOẠI TĐ'] || '').toString().trim(), 
-                'MÃ LỖI': (row['Mã Lôi'] || row['Mã Lỗi'] || row['MÃ LỖI'] || '').toString().trim(), 
-                sourceFile: sourceIdentifier, 
-                'MÔ TẢ LỖI': moTaLoiGoc, 
-                'DATE_OBJECT': dateObj,
-                TIMELOG: formatDate(dateObj),
-                'GỬI LẦN': 1, 
-                'MST': (row['Mã số thuế'] || row['MST'] || '').toString().trim(), 
-                'MẪU SỐ KÝ HIỆU': (moTaLoiGoc.includes(';') && moTaLoiGoc.split(';')[1]) ? `1${moTaLoiGoc.split(';')[1]}` : '', 
-                'SỐ HĐ': (moTaLoiGoc.includes(';') && moTaLoiGoc.split(';')[2]) ? moTaLoiGoc.split(';')[2] : '' 
-            }); 
-        }); };
-        mapRawData(mtData, 'MT'); mapRawData(loiData, 'LOI');
-        
+
+        const mapRawData = (data, sourceIdentifier) => {
+            if (!Array.isArray(data)) return;
+            data.forEach(row => {
+                const dateObj = convertToDate(row['Ngày tạo'] || row['ngaytao'] || row['TIMELOG'] || row['TimeLog']);
+                if (!dateObj) return;
+                const moTaLoiGoc = (row['Mô tả lỗi'] || row['MÔ TẢ LỖI'] || '').toString();
+                
+                let soHD = row['Số hóa đơn'] || '';
+                let mauSoKyHieu = row['Mẫu số ký hiệu hóa đơn'] || '';
+
+                if (!soHD && !mauSoKyHieu && moTaLoiGoc.includes(';')) {
+                    const parts = moTaLoiGoc.split(';');
+                    if (parts.length > 2) {
+                        mauSoKyHieu = `1${parts[1]}`;
+                        soHD = parts[2];
+                    }
+                }
+                
+                rawData.push({
+                    id: `row-${idCounter++}`,
+                    TVAN: 'tvan_bkav',
+                    'MTĐ': (row['Mã Thông điệp'] || row['MTĐ'] || '').toString().trim(),
+                    'MÃ LOẠI TĐ': (row['Mã loại thông điệp'] || row['MÃ LOẠI TĐ'] || '').toString().trim(),
+                    'MÃ LỖI': (row['Mã Lôi'] || row['Mã Lỗi'] || row['MÃ LỖI'] || '').toString().trim(),
+                    sourceFile: sourceIdentifier,
+                    'MÔ TẢ LỖI': moTaLoiGoc,
+                    'DATE_OBJECT': dateObj,
+                    TIMELOG: formatDate(dateObj),
+                    'GỬI LẦN': 1,
+                    'MST': (row['Mã số thuế'] || row['MST'] || '').toString().trim(),
+                    'MẪU SỐ KÝ HIỆU': mauSoKyHieu,
+                    'SỐ HĐ': soHD
+                });
+            });
+        };
+        mapRawData(mtData, 'MT');
+        mapRawData(loiData, 'LOI');
+
         const standardizeRules = firebaseRules.filter(r => r.rule_action === 'STANDARDIZE');
-        const filterRules = firebaseRules.filter(r => r.rule_action === 'INCLUDE' || r.rule_action === 'EXCLUDE');
-        
         rawData.forEach(row => { const matchingStandardizeRule = standardizeRules.find(rule => isMatch(row, rule)); if (matchingStandardizeRule) { row['MÔ TẢ LỖI'] = matchingStandardizeRule.standard_value; } });
-        
+
         initialSourceDataForChart = [...rawData];
-        
-        rawData.forEach(row => { const matchingFilterRule = filterRules.find(rule => isMatch(row, rule)); if (matchingFilterRule) { if (matchingFilterRule.rule_action === 'INCLUDE') dataStores.export.data.push(row); else dataStores.excluded.data.push(row); } else dataStores.source.data.push(row); });
+
+        const filterRules = firebaseRules.filter(r => r.rule_action === 'INCLUDE' || r.rule_action === 'EXCLUDE');
+        rawData.forEach(row => {
+            const matchingFilterRule = filterRules.find(rule => isMatch(row, rule));
+            if (matchingFilterRule) {
+                if (matchingFilterRule.rule_action === 'INCLUDE') {
+                    dataStores.export.data.push(row);
+                } else {
+                    dataStores.excluded.data.push(row);
+                }
+            } else {
+                dataStores.source.data.push(row);
+            }
+        });
     }
 
     function groupDataByDate(data) {
@@ -1263,62 +1342,90 @@
     function displayAllTables() { sourceCurrentPage = 1; excludedCurrentPage = 1; exportCurrentPage = 1; displaySourceData(); displayExportData(); displayExcludedData(); updateSummaryBar(); }
     function updateTableCount(tableId, count) { document.getElementById(`${tableId}Count`).textContent = count.toLocaleString('vi-VN'); }
     function renderEmptyRow(tableBody, colSpan) { tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colSpan}"><i class="fas fa-info-circle"></i> Không có dữ liệu phù hợp.</td></tr>`; }
-function displaySourceData() {
-    const tableBody = document.getElementById('sourceTableBody');
-    let dataToDisplay = getFilteredSourceData();
-    updateTableCount('source', dataToDisplay.length);
 
-    if (dataToDisplay.length === 0) {
-        renderEmptyRow(tableBody, 7); // Adjusted colspan
-        renderPagination('source', 0, 1);
-        return;
+    function displaySourceData() {
+        const tableBody = document.getElementById('sourceTableBody');
+        let dataToDisplay = getFilteredSourceData();
+        updateTableCount('source', dataToDisplay.length);
+        document.getElementById('moveSourceToExcludedBtn').disabled = selectedSourceRowIds.size === 0;
+        document.getElementById('moveSourceToExportBtn').disabled = selectedSourceRowIds.size === 0;
+
+        if (dataToDisplay.length === 0) {
+            renderEmptyRow(tableBody, 7);
+            renderPagination('source', 0, 1);
+            return;
+        }
+
+        sortData(dataToDisplay, 'source');
+        updateSortIndicators('source');
+
+        const paginatedData = dataToDisplay.slice((sourceCurrentPage - 1) * rowsPerPage, sourceCurrentPage * rowsPerPage);
+        tableBody.innerHTML = '';
+        paginatedData.forEach(row => {
+            const isChecked = selectedSourceRowIds.has(row.id) ? 'checked' : '';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="col-action">
+                    <input type="checkbox" class="row-checkbox" data-table="source" data-row-id="${row.id}" ${isChecked}>
+                    <button class="btn-success btn-move" onclick="moveSingleItem('${row.id}', 'source', 'export')" title="Chuyển sang Bảng 3"><i class="fas fa-arrow-right"></i></button>
+                    <button class="btn-warning btn-move" onclick="addRuleAndMove('${row.id}', 'EXCLUDE')" title="Loại trừ & Tạo quy tắc vĩnh viễn"><i class="fas fa-ban"></i></button>
+                </td>
+                <td>${row.sourceFile.toUpperCase()}</td>
+                <td>${row['MTĐ']}</td>
+                <td>${row.MST}</td>
+                <td>${row['MÃ LOẠI TĐ']}</td>
+                <td>${row['MÃ LỖI']}</td>
+                <td>${row['MÔ TẢ LỖI']}</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+        renderPagination('source', dataToDisplay.length, sourceCurrentPage);
     }
-
-    sortData(dataToDisplay, 'source');
-    updateSortIndicators('source');
-
-    const paginatedData = dataToDisplay.slice(
-        (sourceCurrentPage - 1) * rowsPerPage,
-        sourceCurrentPage * rowsPerPage
-    );
-
-    tableBody.innerHTML = '';
-
-    paginatedData.forEach(row => {
-        const isChecked = selectedSourceRowIds.has(row.id) ? 'checked' : '';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="col-action">
-                <input type="checkbox" class="row-checkbox" data-table="source" data-row-id="${row.id}" ${isChecked}>
-                <button class="btn-success btn-move" onclick="moveSingleItem('${row.id}', 'source', 'export')" title="Chuyển sang Bảng 3"><i class="fas fa-arrow-right"></i></button>
-                <button class="btn-warning btn-move" onclick="addRuleAndMove('${row.id}', 'EXCLUDE')" title="Loại trừ & Tạo quy tắc vĩnh viễn"><i class="fas fa-ban"></i></button>
-            </td>
-            <td>${row.sourceFile.toUpperCase()}</td>
-            <td>${row['MTĐ']}</td>
-            <td>${row.MST}</td>
-            <td>${row['MÃ LOẠI TĐ']}</td>
-            <td>${row['MÃ LỖI']}</td>
-            <td>${row['MÔ TẢ LỖI']}</td>
-        `;
-        tableBody.appendChild(tr);
-    });
-
-    renderPagination('source', dataToDisplay.length, sourceCurrentPage);
-}
-   
+    
     function displayExcludedData() {
-        const tableBody = document.getElementById('excludedTableBody'); let dataToDisplay = getFilteredExcludedData(); updateTableCount('excluded', dataToDisplay.length);
+        const tableBody = document.getElementById('excludedTableBody'); 
+        let dataToDisplay = getFilteredExcludedData(); 
+        updateTableCount('excluded', dataToDisplay.length);
+        document.getElementById('moveExcludedToSourceBtn').disabled = selectedExcludedRowIds.size === 0;
+        document.getElementById('moveExcludedToExportBtn').disabled = selectedExcludedRowIds.size === 0;
+        document.getElementById('exportMiniExcludedBtn').disabled = selectedExcludedRowIds.size === 0;
+
         if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 7); renderPagination('excluded', 0, 1); return; }
-        sortData(dataToDisplay, 'excluded'); updateSortIndicators('excluded'); const paginatedData = dataToDisplay.slice((excludedCurrentPage - 1) * rowsPerPage, excludedCurrentPage * rowsPerPage); tableBody.innerHTML = '';
-        paginatedData.forEach(row => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="col-action"><button class="btn-warning btn-move" onclick="moveSingleItem('${row.id}', 'excluded', 'source')" title="Hoàn tác"><i class="fas fa-undo"></i></button></td><td>${row.sourceFile.toUpperCase()}</td><td>${row['MTĐ']}</td><td>${row.MST}</td><td>${row['MÃ LOẠI TĐ']}</td><td>${row['MÃ LỖI']}</td><td>${row['MÔ TẢ LỖI']}</td>`; tableBody.appendChild(tr); });
+        sortData(dataToDisplay, 'excluded'); updateSortIndicators('excluded'); 
+        const paginatedData = dataToDisplay.slice((excludedCurrentPage - 1) * rowsPerPage, excludedCurrentPage * rowsPerPage); 
+        tableBody.innerHTML = '';
+        paginatedData.forEach(row => { 
+            const isChecked = selectedExcludedRowIds.has(row.id) ? 'checked' : '';
+            const tr = document.createElement('tr'); 
+            tr.innerHTML = `
+                <td class="col-action">
+                    <input type="checkbox" class="row-checkbox" data-table="excluded" data-row-id="${row.id}" ${isChecked}>
+                    <button class="btn-warning btn-move" onclick="moveSingleItem('${row.id}', 'excluded', 'source')" title="Hoàn tác"><i class="fas fa-undo"></i></button>
+                </td>
+                <td>${row.sourceFile.toUpperCase()}</td>
+                <td>${row['MTĐ']}</td>
+                <td>${row.MST}</td>
+                <td>${row['MÃ LOẠI TĐ']}</td>
+                <td>${row['MÃ LỖI']}</td>
+                <td>${row['MÔ TẢ LỖI']}</td>
+            `; 
+            tableBody.appendChild(tr); 
+        });
         renderPagination('excluded', dataToDisplay.length, excludedCurrentPage);
     }
 
     function displayExportData() {
-        const tableBody = document.getElementById('exportTableBody'); let dataToDisplay = getFilteredExportData(); updateTableCount('export', dataToDisplay.length);
+        const tableBody = document.getElementById('exportTableBody'); 
+        let dataToDisplay = getFilteredExportData(); 
+        updateTableCount('export', dataToDisplay.length);
         document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
+        document.getElementById('moveExportToSourceBtn').disabled = selectedExportRowIds.size === 0;
+        document.getElementById('moveExportToExcludedBtn').disabled = selectedExportRowIds.size === 0;
+
         if (dataToDisplay.length === 0) { renderEmptyRow(tableBody, 11); renderPagination('export', 0, 1); return; }
-        sortData(dataToDisplay, 'export'); updateSortIndicators('export'); const paginatedData = dataToDisplay.slice((exportCurrentPage - 1) * rowsPerPage, exportCurrentPage * rowsPerPage); tableBody.innerHTML = '';
+        sortData(dataToDisplay, 'export'); updateSortIndicators('export'); 
+        const paginatedData = dataToDisplay.slice((exportCurrentPage - 1) * rowsPerPage, exportCurrentPage * rowsPerPage); 
+        tableBody.innerHTML = '';
         paginatedData.forEach(row => { 
             const isChecked = selectedExportRowIds.has(row.id) ? 'checked' : ''; 
             const tr = document.createElement('tr'); 
@@ -1363,8 +1470,57 @@ function displaySourceData() {
     }
 
     function changePage(tablePrefix, direction) { if (tablePrefix === 'source') { sourceCurrentPage += direction; displaySourceData(); } else if (tablePrefix === 'excluded') { excludedCurrentPage += direction; displayExcludedData(); } else if (tablePrefix === 'export') { exportCurrentPage += direction; displayExportData(); } }
-    function moveSelectedFromSourceToExport() { if (selectedSourceRowIds.size === 0) { showMessage('uploadMessage', 'Vui lòng chọn ít nhất một dòng.', 'warning'); return; } let movedCount = 0; dataStores.source.data = dataStores.source.data.filter(row => { if (selectedSourceRowIds.has(row.id)) { dataStores.export.data.push(row); movedCount++; return false; } return true; }); if (movedCount > 0) { selectedSourceRowIds.clear(); displayAllTables(); updateChartView(); showMessage('uploadMessage', `Đã chuyển ${movedCount} mục sang bảng kết xuất.`, 'success'); } }
-    function moveSingleItem(rowId, fromTable, toTable) { const fromArray = dataStores[fromTable].data; const toArray = dataStores[toTable].data; const indexToMove = fromArray.findIndex(r => r.id === rowId); if (indexToMove > -1) { const [row] = fromArray.splice(indexToMove, 1); toArray.push(row); if (fromTable === 'source') selectedSourceRowIds.delete(rowId); if (fromTable === 'export') selectedExportRowIds.delete(rowId); if (toTable === 'source') sourceCurrentPage = 1; if (toTable === 'export') exportCurrentPage = 1; if (toTable === 'excluded') excludedCurrentPage = 1; displayAllTables(); updateChartView(); } }
+    
+    function moveSelectedItems(fromTable, toTable) {
+        const selectionSets = {
+            source: selectedSourceRowIds,
+            excluded: selectedExcludedRowIds,
+            export: selectedExportRowIds
+        };
+        const selectionSet = selectionSets[fromTable];
+        if (selectionSet.size === 0) {
+            showMessage('Vui lòng chọn ít nhất một mục để thực hiện hành động.', 'warning');
+            return;
+        }
+
+        let movedCount = 0;
+        const fromData = dataStores[fromTable].data;
+        const toData = dataStores[toTable].data;
+
+        dataStores[fromTable].data = fromData.filter(row => {
+            if (selectionSet.has(row.id)) {
+                toData.push(row);
+                movedCount++;
+                return false;
+            }
+            return true;
+        });
+
+        if (movedCount > 0) {
+            selectionSet.clear();
+            displayAllTables();
+            updateChartView();
+            showMessage(`Đã chuyển ${movedCount} mục từ bảng '${fromTable}' sang bảng '${toTable}'.`, 'success');
+        }
+    }
+
+    function moveSingleItem(rowId, fromTable, toTable) {
+        const fromArray = dataStores[fromTable].data;
+        const toArray = dataStores[toTable].data;
+        const indexToMove = fromArray.findIndex(r => r.id === rowId);
+        if (indexToMove > -1) {
+            const [row] = fromArray.splice(indexToMove, 1);
+            toArray.push(row);
+            selectedSourceRowIds.delete(rowId);
+            selectedExportRowIds.delete(rowId);
+            selectedExcludedRowIds.delete(rowId);
+            if (toTable === 'source') sourceCurrentPage = 1;
+            if (toTable === 'export') exportCurrentPage = 1;
+            if (toTable === 'excluded') excludedCurrentPage = 1;
+            displayAllTables();
+            updateChartView();
+        }
+    }
     function makeCellEditable(cell) { if (cell.querySelector('input')) return; const originalValue = cell.textContent; const rowId = cell.dataset.rowId; const columnKey = cell.dataset.columnKey; cell.innerHTML = `<input type="text" value="${originalValue}" class="edit-in-place">`; const input = cell.querySelector('input'); input.focus(); input.select(); const save = () => { const newValue = input.value; cell.textContent = newValue; const rowIndex = dataStores.export.data.findIndex(r => r.id === rowId); if (rowIndex > -1) { dataStores.export.data[rowIndex][columnKey] = newValue; } }; input.addEventListener('blur', save, { once: true }); input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); else if (e.key === 'Escape') { input.removeEventListener('blur', save); cell.textContent = originalValue; } }); }
     function getFilteredData(dataArray, filterIds) { const nguon = document.getElementById(filterIds.nguon).value; const maLoaiTD = document.getElementById(filterIds.maLoaiTD).value; const maLoi = document.getElementById(filterIds.maLoi).value; const moTaLoiSearch = document.getElementById(filterIds.moTaLoi).value.toLowerCase().trim(); return dataArray.filter(row => { const isMaLoiMatch = () => (maLoi === '') || (maLoi === '_UNDEFINED_' ? row['MÃ LỖI'] === '' : row['MÃ LỖI'] === maLoi); const isMoTaLoiMatch = () => (moTaLoiSearch === '') || row['MÔ TẢ LỖI'].toLowerCase().includes(moTaLoiSearch); return (!nguon || row.sourceFile === nguon) && (!maLoaiTD || row['MÃ LOẠI TĐ'] === maLoaiTD) && isMaLoiMatch() && isMoTaLoiMatch(); }); }
     function getFilteredSourceData() { return getFilteredData(dataStores.source.data, { nguon: 'filterNguon', maLoaiTD: 'filterMaLoaiTD', maLoi: 'filterMaLoi', moTaLoi: 'filterMoTaLoi' }); }
@@ -1374,13 +1530,63 @@ function displaySourceData() {
     function handleSort(tableName, column) { const sortState = dataStores[tableName].sortState; if (!sortState) return; if (sortState.column === column) { sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc'; } else { sortState.column = column; sortState.direction = 'asc'; } if (tableName === 'source') displaySourceData(); else if (tableName === 'excluded') displayExcludedData(); else if (tableName === 'export') displayExportData(); }
     function sortData(dataArray, tableName) { const sortState = dataStores[tableName].sortState; if (!sortState || !sortState.column) return; dataArray.sort((a, b) => { const valA = String(a[sortState.column] || ''); const valB = String(b[sortState.column] || ''); const comparison = valA.localeCompare(valB, 'vi', { numeric: true, sensitivity: 'base' }); return sortState.direction === 'asc' ? comparison : -comparison; }); }
     function updateSortIndicators(tableName) { const sortState = dataStores[tableName].sortState; if (!sortState) { return; } document.querySelectorAll(`#${tableName}DataTable .sort-indicator`).forEach(el => el.textContent = ''); if (sortState.column) { const indicatorEl = document.getElementById(`sort-${tableName}-${sortState.column}`); if (indicatorEl) indicatorEl.textContent = sortState.direction === 'asc' ? '▲' : '▼'; } }
-    function exportToExcel() { hideAllMessages(); if (dataStores.export.data.length === 0) { showMessage('exportMessage', 'Không có dữ liệu để kết xuất.', 'warning'); return; } showMessage('exportMessage', 'Đang tạo file Excel từ toàn bộ ' + dataStores.export.data.length + ' dòng...', 'info'); try { const fileName = `Tvan_Bkav_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '')}.xlsx`; const dataForSheet = dataStores.export.data.map(({ id, sourceFile, DATE_OBJECT, ...rest }) => rest); const headerOrder = ["TVAN", "MTĐ", "MÃ LOẠI TĐ", "MÃ LỖI", "MÔ TẢ LỖI", "TIMELOG", "GỬI LẦN", "MST", "MẪU SỐ KÝ HIỆU", "SỐ HĐ"]; const worksheet = XLSX.utils.json_to_sheet(dataForSheet, { header: headerOrder }); worksheet['!cols'] = [ { wch: 10 }, { wch: 35 }, { wch: 12 }, { wch: 8 }, { wch: 50 }, { wch: 12 }, { wch: 8 }, { wch: 15 }, { wch: 15 }, { wch: 10 } ]; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQuaDoiSoat'); XLSX.writeFile(workbook, fileName); showMessage('exportMessage', `Kết xuất thành công file: ${fileName}`, 'success'); } catch (error) { showMessage('exportMessage', `Lỗi kết xuất Excel: ${error.message}`, 'error'); } }
+    
+    function exportToExcel() { 
+        hideAllMessages(); 
+        if (dataStores.export.data.length === 0) { 
+            showMessage('Không có dữ liệu để kết xuất.', 'warning'); 
+            return; 
+        } 
+        showMessage('Đang tạo file Excel...', 'info'); 
+        try { 
+            const fileName = `Tvan_Bkav_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '')}.xlsx`; 
+            const dataForSheet = dataStores.export.data.map(({ id, sourceFile, DATE_OBJECT, ...rest }) => rest); 
+            const headerOrder = ["TVAN", "MTĐ", "MÃ LOẠI TĐ", "MÃ LỖI", "MÔ TẢ LỖI", "TIMELOG", "GỬI LẦN", "MST", "MẪU SỐ KÝ HIỆU", "SỐ HĐ"]; 
+            const worksheet = XLSX.utils.json_to_sheet(dataForSheet, { header: headerOrder }); 
+            worksheet['!cols'] = [ { wch: 10 }, { wch: 35 }, { wch: 12 }, { wch: 8 }, { wch: 50 }, { wch: 12 }, { wch: 8 }, { wch: 15 }, { wch: 15 }, { wch: 10 } ]; 
+            const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, 'KetQuaDoiSoat'); 
+            XLSX.writeFile(workbook, fileName); 
+            showMessage(`Kết xuất thành công file: ${fileName}`, 'success'); 
+        } catch (error) { 
+            showMessage(`Lỗi kết xuất Excel: ${error.message}`, 'error'); 
+        } 
+    }
+
+    function exportMiniFromExcluded() {
+        hideAllMessages();
+        if (selectedExcludedRowIds.size === 0) {
+            showMessage('Vui lòng chọn ít nhất một dòng để kết xuất.', 'warning');
+            return;
+        }
+        showMessage(`Đang tạo file kết xuất mini...`, 'info');
+        try {
+            const columnsToExport = ['MST']; 
+            
+            const selectedRows = dataStores.excluded.data.filter(row => selectedExcludedRowIds.has(row.id));
+            const dataForSheet = selectedRows.map(row => {
+                let newRow = {};
+                columnsToExport.forEach(col => {
+                    newRow[col] = row[col];
+                });
+                return newRow;
+            });
+            
+            const fileName = `KetXuatMini_MST_${new Date().toLocaleDateString('vi-VN').replace(/\//g, '')}.xlsx`;
+            const worksheet = XLSX.utils.json_to_sheet(dataForSheet, { header: columnsToExport });
+            worksheet['!cols'] = columnsToExport.map(col => ({ wch: 20 }));
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'DanhSachMST');
+            XLSX.writeFile(workbook, fileName);
+            showMessage(`Kết xuất mini thành công file: ${fileName}`, 'success');
+        } catch (error) {
+            showMessage(`Lỗi kết xuất mini: ${error.message}`, 'error');
+        }
+    }
     
     // ====================================================
-    // NEW/UPDATED FUNCTIONS FOR RULE MANAGEMENT
+    // RULE MANAGEMENT FUNCTIONS
     // ====================================================
     
-    // Displays all rules from the `firebaseRules` array in the modal's table
     function displayFirebaseRules() {
         const tableBody = document.getElementById('rulesTableBody');
         const countSpan = document.getElementById('rulesCount');
@@ -1413,7 +1619,6 @@ function displaySourceData() {
             });
     }
 
-    // Fills the form with data from a rule to be edited
     function populateRuleFormForEdit(ruleKey) {
         const rule = firebaseRules.find(r => r.key === ruleKey);
         if (!rule) return;
@@ -1431,7 +1636,6 @@ function displaySourceData() {
         document.querySelector('#ruleManagementModal .modal-content').scrollTop = 0;
     }
 
-    // Clears the rule form and resets it to "add new" mode
     function clearRuleForm() {
         document.getElementById('editingRuleKey').value = '';
         document.getElementById('newRuleAction').value = 'INCLUDE';
@@ -1442,30 +1646,26 @@ function displaySourceData() {
         document.getElementById('newStandardValue').value = '';
         document.getElementById('standardValueGroup').style.display = 'none';
         document.getElementById('clearRuleFormBtn').style.display = 'none';
-        hideAllMessages();
     }
 
-    // Deletes a rule from Firebase
     async function deleteRule(ruleKey) {
         if (!db || !ruleKey) return;
+        if (!confirm('Bạn có chắc chắn muốn xóa quy tắc này không? Hành động này không thể hoàn tác.')) return;
         showLoader(true);
         try {
             await db.ref('error_definitions/' + ruleKey).remove();
-            showMessage('firebaseMessage', 'Đã xóa quy tắc thành công!', 'success');
+            showMessage('Đã xóa quy tắc thành công!', 'success');
             await fetchFirebaseErrors();
             displayFirebaseRules();
         } catch (error) {
-            showMessage('firebaseMessage', `Lỗi khi xóa quy tắc: ${error.message}`, 'error');
+            showMessage(`Lỗi khi xóa quy tắc: ${error.message}`, 'error');
         } finally {
             showLoader(false);
         }
     }
 
-    // Saves a new rule or updates an existing one
     async function saveRule() {
-        hideAllMessages();
         const editingKey = document.getElementById('editingRuleKey').value;
-
         const ruleData = {
             rule_action: document.getElementById('newRuleAction').value,
             ma_loai_td: document.getElementById('newMaTD').value.trim(),
@@ -1477,7 +1677,7 @@ function displaySourceData() {
 
         const isFilterAction = ruleData.rule_action === 'INCLUDE' || ruleData.rule_action === 'EXCLUDE';
         if (!ruleData.ma_loai_td || !ruleData.match_value || (isFilterAction && !ruleData.ma_loi) || (ruleData.rule_action === 'STANDARDIZE' && !ruleData.standard_value)) {
-            showMessage('firebaseMessage', 'Vui lòng điền các trường bắt buộc.', 'error');
+            showMessage('Vui lòng điền các trường bắt buộc.', 'error');
             return;
         }
         
@@ -1485,17 +1685,17 @@ function displaySourceData() {
         try {
             if (editingKey) {
                 await db.ref('error_definitions/' + editingKey).update(ruleData);
-                showMessage('firebaseMessage', 'Cập nhật quy tắc thành công! Xử lý lại file để áp dụng thay đổi.', 'success');
+                showMessage('Cập nhật quy tắc thành công! Xử lý lại file để áp dụng thay đổi.', 'success');
             } else {
                 await db.ref('error_definitions').push(ruleData);
-                showMessage('firebaseMessage', 'Lưu quy tắc mới thành công!', 'success');
+                showMessage('Lưu quy tắc mới thành công!', 'success');
             }
             clearRuleForm();
             await fetchFirebaseErrors();
             displayFirebaseRules();
 
         } catch (error) {
-            showMessage('firebaseMessage', `Lỗi khi lưu: ${error.message}`, 'error');
+            showMessage(`Lỗi khi lưu: ${error.message}`, 'error');
         } finally {
             showLoader(false);
         }
@@ -1513,7 +1713,7 @@ function displaySourceData() {
             button.addEventListener('click', function() {
                 this.classList.toggle('active');
                 const content = this.nextElementSibling;
-                if (content.style.display === "block") {
+                if (content.style.display === "block" || window.getComputedStyle(content).display === 'block') {
                     content.style.display = "none";
                 } else {
                     content.style.display = "block";
@@ -1541,44 +1741,60 @@ function displaySourceData() {
             document.getElementById(`${prefix}PageInput`).addEventListener('keydown', (e) => { if (e.key === 'Enter') goToPage(prefix); });
         });
         
-        document.getElementById('sourceTableBody').addEventListener('change', (e) => { 
+        document.getElementById('sourceDataTable').addEventListener('change', (e) => { 
+            const isChecked = e.target.checked;
             if (e.target.matches('#selectAllSource')) {
-                const isChecked = e.target.checked;
                 const filteredData = getFilteredSourceData();
-                const filteredIds = new Set(filteredData.map(r => r.id));
-                
-                document.querySelectorAll('#sourceTableBody .row-checkbox').forEach(checkbox => {
-                    if (filteredIds.has(checkbox.dataset.rowId)) {
-                        checkbox.checked = isChecked;
-                        if (isChecked) {
-                            selectedSourceRowIds.add(checkbox.dataset.rowId);
-                        } else {
-                            selectedSourceRowIds.delete(checkbox.dataset.rowId);
-                        }
-                    }
+                filteredData.forEach(row => {
+                    if (isChecked) selectedSourceRowIds.add(row.id);
+                    else selectedSourceRowIds.delete(row.id);
                 });
-            } else if (e.target.classList.contains('row-checkbox') && e.target.dataset.table === 'source') {
+                displaySourceData();
+            } else if (e.target.classList.contains('row-checkbox')) {
                 const rowId = e.target.dataset.rowId;
-                if (e.target.checked) selectedSourceRowIds.add(rowId);
+                if (isChecked) selectedSourceRowIds.add(rowId);
                 else selectedSourceRowIds.delete(rowId);
             }
+            document.getElementById('moveSourceToExcludedBtn').disabled = selectedSourceRowIds.size === 0;
+            document.getElementById('moveSourceToExportBtn').disabled = selectedSourceRowIds.size === 0;
         });
 
-        document.getElementById('exportTableBody').addEventListener('change', (e) => {
-            if (e.target.matches('#selectAllExport')) {
-                 const isChecked = e.target.checked;
-                const filteredData = getFilteredExportData();
+        document.getElementById('excludedDataTable').addEventListener('change', (e) => {
+             const isChecked = e.target.checked;
+             if (e.target.matches('#selectAllExcluded')) {
+                const filteredData = getFilteredExcludedData();
                 filteredData.forEach(row => {
-                    if(isChecked) selectedExportRowIds.add(row.id);
-                    else selectedExportRowIds.delete(row.id);
+                    if(isChecked) selectedExcludedRowIds.add(row.id);
+                    else selectedExcludedRowIds.delete(row.id);
                 });
-                displayExportData();
-            } else if (e.target.classList.contains('row-checkbox') && e.target.dataset.table === 'export') {
+                displayExcludedData();
+            } else if (e.target.classList.contains('row-checkbox')) {
                 const rowId = e.target.dataset.rowId;
-                if (e.target.checked) selectedExportRowIds.add(rowId);
-                else selectedExportRowIds.delete(rowId);
-                document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
+                if (isChecked) selectedExcludedRowIds.add(rowId);
+                else selectedExcludedRowIds.delete(rowId);
             }
+            document.getElementById('moveExcludedToSourceBtn').disabled = selectedExcludedRowIds.size === 0;
+            document.getElementById('moveExcludedToExportBtn').disabled = selectedExcludedRowIds.size === 0;
+            document.getElementById('exportMiniExcludedBtn').disabled = selectedExcludedRowIds.size === 0;
+        });
+
+        document.getElementById('exportDataTable').addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            if (e.target.matches('#selectAllExport')) {
+                 const filteredData = getFilteredExportData();
+                 filteredData.forEach(row => {
+                     if(isChecked) selectedExportRowIds.add(row.id);
+                     else selectedExportRowIds.delete(row.id);
+                 });
+                 displayExportData();
+            } else if (e.target.classList.contains('row-checkbox')) {
+                const rowId = e.target.dataset.rowId;
+                if (isChecked) selectedExportRowIds.add(rowId);
+                else selectedExportRowIds.delete(rowId);
+            }
+            document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
+            document.getElementById('moveExportToSourceBtn').disabled = selectedExportRowIds.size === 0;
+            document.getElementById('moveExportToExcludedBtn').disabled = selectedExportRowIds.size === 0;
         });
 
         document.getElementById('bulkEditBtn').addEventListener('click', () => { if (selectedExportRowIds.size > 0) { document.getElementById('bulkEditTitle').textContent = `Sửa hàng loạt cho ${selectedExportRowIds.size} mục đã chọn`; document.getElementById('bulkEditModal').style.display = 'block'; } });
@@ -1590,7 +1806,7 @@ function displaySourceData() {
             document.getElementById('bulkEditModal').style.display = 'none';
             selectedExportRowIds.clear();
             displayExportData();
-            showMessage('uploadMessage', `Đã cập nhật hàng loạt cột "${column}" thành công.`, 'success');
+            showMessage(`Đã cập nhật hàng loạt cột "${column}" thành công.`, 'success');
         });
 
         document.getElementById('alertsContainer').addEventListener('click', (e) => {
@@ -1601,7 +1817,6 @@ function displaySourceData() {
         });
         document.getElementById('trendChartCloseBtn').addEventListener('click', () => document.getElementById('trendChartModal').style.display = 'none');
         
-        // --- Event listeners for Rule Management Modal ---
         document.getElementById('openRuleMgmtBtn').addEventListener('click', async () => {
             showLoader(true);
             await fetchFirebaseErrors();
