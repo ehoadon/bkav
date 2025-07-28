@@ -645,6 +645,11 @@
                                 </div>
                                 <div class="analysis-card">
                                     <h4><i class="fas fa-flag" style="color: var(--danger-color);"></i>Top 5 MST có nhiều lỗi nhất</h4>
+                                    <div class="chart-options" style="justify-content: flex-start; margin-bottom: 10px; gap: 15px;">
+                                        <label><input type="radio" name="mstTimeFrame" value="day" checked> Trong ngày</label>
+                                        <label><input type="radio" name="mstTimeFrame" value="week"> Trong tuần</label>
+                                        <label><input type="radio" name="mstTimeFrame" value="month"> Trong tháng</label>
+                                    </div>
                                     <canvas id="mstErrorChart"></canvas>
                                 </div>
                             </div>
@@ -1154,7 +1159,6 @@
 
         const latestDateKey = datesProcessed[datesProcessed.length - 1];
         const latestDateData = historicalData.find(h => h.date === latestDateKey);
-        const pastData = historicalData.filter(h => h.date !== latestDateKey);
 
         if (!latestDateData) {
             document.getElementById('analysisSection').style.display = 'none';
@@ -1167,8 +1171,9 @@
         let alertsFound = 0;
         const SPIKE_THRESHOLD = 3; 
 
+        const pastDataForAlerts = historicalData.filter(h => h.date !== latestDateKey);
         const pastErrorStats = new Map();
-        pastData.forEach(day => {
+        pastDataForAlerts.forEach(day => {
             for (const errorCode in day.errorCounts) {
                 if (!pastErrorStats.has(errorCode)) {
                     pastErrorStats.set(errorCode, { total: 0, count: 0 });
@@ -1215,22 +1220,69 @@
         if (alertsFound === 0) {
             alertsContainer.innerHTML = `<p style="color: var(--secondary-color);">Không phát hiện tăng đột biến hoặc lỗi mới cho ngày ${latestDateKey}.</p>`;
         }
-        renderMstErrorChart(latestDateData, pastData);
+        updateMstChart();
+    }
+
+    function aggregateMstErrors(timeFrame) {
+        if (historicalData.length === 0) return { aggregatedMstCounts: {}, pastDataForTooltip: [], timeFrameLabel: 'ngày' };
+
+        const sortedHistory = [...historicalData].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const latestDate = new Date(sortedHistory[0].date + "T00:00:00");
+        
+        let startDate;
+        let timeFrameLabel = '';
+
+        switch(timeFrame) {
+            case 'week':
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 6);
+                timeFrameLabel = 'trong tuần qua';
+                break;
+            case 'month':
+                startDate = new Date(latestDate);
+                startDate.setDate(latestDate.getDate() - 29);
+                timeFrameLabel = 'trong tháng qua';
+                break;
+            case 'day':
+            default:
+                startDate = latestDate;
+                timeFrameLabel = `ngày ${formatDate(latestDate)}`;
+                break;
+        }
+        
+        const dataForPeriod = sortedHistory.filter(h => new Date(h.date + "T00:00:00") >= startDate);
+        const pastDataForTooltip = sortedHistory.filter(h => new Date(h.date + "T00:00:00") < startDate);
+        
+        const aggregatedMstCounts = dataForPeriod.reduce((acc, day) => {
+            for (const mst in day.mstErrorCounts) {
+                acc[mst] = (acc[mst] || 0) + day.mstErrorCounts[mst];
+            }
+            return acc;
+        }, {});
+        
+        return { aggregatedMstCounts, pastDataForTooltip, timeFrameLabel };
+    }
+
+    function updateMstChart() {
+        const selectedTimeFrame = document.querySelector('input[name="mstTimeFrame"]:checked').value;
+        const { aggregatedMstCounts, pastDataForTooltip, timeFrameLabel } = aggregateMstErrors(selectedTimeFrame);
+        renderMstErrorChart(aggregatedMstCounts, pastDataForTooltip, timeFrameLabel);
     }
     
-    function renderMstErrorChart(currentDateData, pastHistory) {
+    function renderMstErrorChart(mstData, pastHistory, timeFrameLabel) {
         const ctx = document.getElementById('mstErrorChart').getContext('2d');
+        const chartContainer = document.getElementById('mstErrorChart').parentElement;
         if (mstErrorChart) mstErrorChart.destroy();
 
-        const sortedMst = Object.entries(currentDateData.mstErrorCounts)
+        const sortedMst = Object.entries(mstData)
                                 .sort(([,a],[,b]) => b - a)
                                 .slice(0, 5);
         
         if (sortedMst.length === 0) {
-             document.getElementById('mstErrorChart').parentElement.style.display = 'none';
+             chartContainer.style.display = 'none';
              return;
         }
-        document.getElementById('mstErrorChart').parentElement.style.display = 'block';
+        chartContainer.style.display = 'block';
 
         const labels = sortedMst.map(([mst]) => mst);
         const data = sortedMst.map(([, count]) => count);
@@ -1240,7 +1292,7 @@
             data: { 
                 labels, 
                 datasets: [{ 
-                    label: `Số lỗi ngày ${currentDateData.date}`, 
+                    label: `Số lỗi ${timeFrameLabel}`, 
                     data, 
                     backgroundColor: 'rgba(220, 53, 69, 0.7)',
                     borderColor: 'rgba(220, 53, 69, 1)',
@@ -1252,15 +1304,15 @@
                 responsive: true, 
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: { display: true, labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() } },
                     tooltip: {
                         callbacks: {
                             footer: function(tooltipItems) {
                                 const mst = tooltipItems[0].label;
-                                let totalPastCount = 0; let daysWithErrors = 0;
-                                pastHistory.forEach(day => { if(day.mstErrorCounts && day.mstErrorCounts[mst]) { totalPastCount += day.mstErrorCounts[mst]; daysWithErrors++; } });
-                                if (daysWithErrors > 0) { const avg = (totalPastCount / daysWithErrors).toFixed(1); return `Lịch sử: ${totalPastCount} lỗi trong ${daysWithErrors} ngày (TB: ${avg}/ngày).`; }
-                                return 'Lịch sử: Chưa ghi nhận lỗi cho MST này.';
+                                let totalPastCount = 0; let daysWithErrors = new Set();
+                                pastHistory.forEach(day => { if(day.mstErrorCounts && day.mstErrorCounts[mst]) { totalPastCount += day.mstErrorCounts[mst]; daysWithErrors.add(day.date); } });
+                                if (daysWithErrors.size > 0) { const avg = (totalPastCount / daysWithErrors.size).toFixed(1); return `Lịch sử trước đó: ${totalPastCount} lỗi trong ${daysWithErrors.size} ngày (TB: ${avg}/ngày).`; }
+                                return 'Lịch sử trước đó: Chưa ghi nhận lỗi cho MST này.';
                             }
                         }
                     }
@@ -1269,8 +1321,7 @@
                     x: { 
                         beginAtZero: true,
                         title: { display: true, text: 'Số lượng lỗi', color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
-
-                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() },
+                        ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim(), callback: function(value) { if (Math.floor(value) === value) { return value; } } },
                         grid: { color: 'rgba(255, 255, 255, 0.1)' }
                     },
                     y: {
@@ -1795,6 +1846,10 @@
             document.getElementById('bulkEditBtn').disabled = selectedExportRowIds.size === 0;
             document.getElementById('moveExportToSourceBtn').disabled = selectedExportRowIds.size === 0;
             document.getElementById('moveExportToExcludedBtn').disabled = selectedExportRowIds.size === 0;
+        });
+        
+        document.querySelectorAll('input[name="mstTimeFrame"]').forEach(radio => {
+            radio.addEventListener('change', updateMstChart);
         });
 
         document.getElementById('bulkEditBtn').addEventListener('click', () => { if (selectedExportRowIds.size > 0) { document.getElementById('bulkEditTitle').textContent = `Sửa hàng loạt cho ${selectedExportRowIds.size} mục đã chọn`; document.getElementById('bulkEditModal').style.display = 'block'; } });
