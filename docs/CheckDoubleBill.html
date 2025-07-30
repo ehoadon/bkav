@@ -45,57 +45,111 @@
         </div>
     </div>
 
-    <script>
-        function compareBillcodes() {
-            // Lấy dữ liệu từ textarea
-            const tableAInput = document.getElementById('tableA').value.trim();
-            const tableBInput = document.getElementById('tableB').value.trim();
-
-            // Kiểm tra nếu không nhập dữ liệu
-            if (!tableAInput && !tableBInput) {
-                alert('Vui lòng nhập dữ liệu cho ít nhất một bảng!');
-                return;
+<script>
+    /**
+     * Hàm tìm các billcode bị trùng lặp trong một mảng.
+     * @param {string[]} billcodeArray - Mảng các billcode đầu vào.
+     * @returns {object[]} - Mảng các đối tượng, mỗi đối tượng chứa billcode và số lần lặp.
+     */
+    const findDuplicates = (billcodeArray) => {
+        const counts = {};
+        for (const code of billcodeArray) {
+            if (code) {
+                counts[code] = (counts[code] || 0) + 1;
             }
-
-            // Tách chuỗi thành mảng, xử lý cả phẩy và xuống dòng
-            const extractNumbers = (str) => {
-                if (!str) return [];
-                return str.split(/[,|\n]+/).map(item => item.trim()).filter(item => {
-                    // Lọc ra số nguyên bằng regex
-                    const num = item.match(/^-?\d+$/);
-                    return num ? parseInt(num[0]) : null;
-                }).filter(num => num !== null);
-            };
-
-            const billcodesA = extractNumbers(tableAInput);
-            const billcodesB = extractNumbers(tableBInput);
-
-            // Chuyển mảng thành Set để so sánh
-            const setA = new Set(billcodesA);
-            const setB = new Set(billcodesB);
-
-            // Tìm Billcode khác biệt
-            const diffA = billcodesA.filter(code => !setB.has(code));
-            const diffB = billcodesB.filter(code => !setA.has(code));
-
-            // Hiển thị kết quả
-            const resultDiv = document.getElementById('result');
-            const resultList = document.getElementById('resultList');
-            resultList.innerHTML = '';
-
-            if (diffA.length === 0 && diffB.length === 0) {
-                resultList.innerHTML = '<li>Không có Billcode nào khác biệt giữa Bảng A và Bảng B.</li>';
-            } else {
-                if (diffA.length > 0) {
-                    resultList.innerHTML += `<li>Các Billcode chỉ có ở Bảng A: ${diffA.join(', ')}</li>`;
-                }
-                if (diffB.length > 0) {
-                    resultList.innerHTML += `<li>Các Billcode chỉ có ở Bảng B: ${diffB.join(', ')}</li>`;
-                }
-            }
-
-            resultDiv.style.display = 'block';
         }
-    </script>
+        const duplicates = [];
+        for (const code in counts) {
+            if (counts[code] > 1) {
+                duplicates.push({ code: code, count: counts[code] });
+            }
+        }
+        return duplicates;
+    };
+
+    function compareBillcodes() {
+        // Lấy dữ liệu
+        const tableAInput = document.getElementById('tableA').value;
+        const tableBInput = document.getElementById('tableB').value;
+
+        const extractBillcodes = (inputString) => {
+            if (!inputString.trim()) return [];
+            return inputString
+                .split(/[,|\n]+/)
+                .map(item => item.trim())
+                .filter(item => item);
+        };
+
+        const billcodesA_raw = extractBillcodes(tableAInput);
+        const billcodesB_raw = extractBillcodes(tableBInput);
+
+        if (billcodesA_raw.length === 0 && billcodesB_raw.length === 0) {
+            alert('Vui lòng nhập dữ liệu Billcode hợp lệ!');
+            return;
+        }
+
+        const duplicatesInA = findDuplicates(billcodesA_raw);
+        const duplicatesInB = findDuplicates(billcodesB_raw);
+
+        const setA = new Set(billcodesA_raw);
+        const setB = new Set(billcodesB_raw);
+
+        // --- TÍNH TOÁN ---
+        // **MỚI: Tìm các billcode khớp nhau (có ở cả 2 bảng)**
+        const matchingCodes = [...setA].filter(code => setB.has(code));
+
+        // Tìm các billcode khác biệt
+        const diffA = [...setA].filter(code => !setB.has(code));
+        const diffB = [...setB].filter(code => !setA.has(code));
+
+        // --- HIỂN THỊ KẾT QUẢ ---
+        const resultDiv = document.getElementById('result');
+        const resultList = document.getElementById('resultList');
+        resultList.innerHTML = ''; 
+
+        let hasContent = false;
+
+        // **MỚI: 1. Hiển thị các billcode khớp nhau**
+        if (matchingCodes.length > 0) {
+            resultList.innerHTML += `<li>✅ **Các Billcode khớp nhau** (${matchingCodes.length}): ${matchingCodes.join(', ')}</li>`;
+            hasContent = true;
+        }
+        
+        // 2. Hiển thị kết quả so sánh khác biệt
+        if (diffA.length > 0) {
+            resultList.innerHTML += `<li>🔴 **Các Billcode chỉ có ở Bảng A** (${diffA.length}): ${diffA.join(', ')}</li>`;
+            hasContent = true;
+        }
+        if (diffB.length > 0) {
+            resultList.innerHTML += `<li>🔵 **Các Billcode chỉ có ở Bảng B** (${diffB.length}): ${diffB.join(', ')}</li>`;
+            hasContent = true;
+        }
+        
+        // 3. Hiển thị kết quả phân tích trùng lặp
+        if (duplicatesInA.length > 0 || duplicatesInB.length > 0) {
+            hasContent = true;
+            // Thêm dòng kẻ nếu có các kết quả khác
+            if (matchingCodes.length > 0 || diffA.length > 0 || diffB.length > 0) {
+                 resultList.innerHTML += '<hr style="margin: 10px 0;">';
+            }
+            resultList.innerHTML += '<p style="font-weight: bold; margin-bottom: 5px;">🔎 Phân tích trùng lặp:</p>';
+            if(duplicatesInA.length > 0) {
+                const dupA_str = duplicatesInA.map(item => `${item.code} (lặp ${item.count} lần)`).join('; ');
+                resultList.innerHTML += `<li><strong>Trong Bảng A:</strong> ${dupA_str}</li>`;
+            }
+            if(duplicatesInB.length > 0) {
+                const dupB_str = duplicatesInB.map(item => `${item.code} (lặp ${item.count} lần)`).join('; ');
+                resultList.innerHTML += `<li><strong>Trong Bảng B:</strong> ${dupB_str}</li>`;
+            }
+        }
+        
+        // Nếu không có nội dung nào được tạo ra
+        if (!hasContent) {
+            resultList.innerHTML = '<li>👍 Hoàn hảo! Hai bảng có dữ liệu giống hệt nhau và không có bill nào bị trùng lặp.</li>';
+        }
+
+        resultDiv.style.display = 'block';
+    }
+</script>
 </body>
 </html>
