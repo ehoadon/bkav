@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEBUG MODE - So sánh XML và Excel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1em; background: #f9f9f9; line-height: 1.6; }
+    input, button { font-size: 1em; margin: 0.5em 0; padding: 0.5em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 1em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #eee; font-weight: bold; }
+    .mismatch { background-color: #ffdddd; }
+    .missing-xml { background-color: #fff0b3; }
+    .missing-excel { background-color: #e6f7ff; }
+    h3 { border-bottom: 2px solid #ccc; padding-bottom: 5px; }
+  </style>
+</head>
+<body>
+  <h2>So sánh dữ liệu từ XML và Excel (Chế độ gỡ lỗi)</h2>
+  <p>Vui lòng nhấn F12 để mở Console trước khi chạy.</p>
+  <input type="file" id="xmlFile" accept=".xml" />
+  <input type="file" id="excelFile" accept=".csv,.xlsx,.xls" />
+  <button onclick="compareFiles()">So sánh</button>
+  <div id="result"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script>
+    let xmlData = {};
+    let excelData = [];
+
+    // DEBUG FUNCTION: In ra đối tượng để kiểm tra
+    function debugLog(label, data) {
+        console.log(`%c[DEBUG] ${label}:`, 'color: blue; font-weight: bold;', data);
+    }
+
+    function extractBillCode(order, dateStr, session) {
+      if (!dateStr || !dateStr.includes(".")) return "";
+      const [day, month, year] = dateStr.split(".");
+      return `${order}${year}${month}${day}${session}`;
+    }
+
+    function normalizeName(name) {
+        if (!name) return "";
+        return name.toString().toLowerCase().trim();
+    }
+
+    function parseXML(content) {
+      debugLog("Bắt đầu hàm parseXML", "");
+      debugLog("Nội dung file XML đã đọc", content.substring(0, 500) + '...'); // In ra 500 ký tự đầu
+
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(content, "text/xml");
+      debugLog("Đối tượng XML sau khi parse", xml);
+
+      const parseError = xml.querySelector("parsererror");
+      if (parseError) {
+          console.error("LỖI PHÂN TÍCH CÚ PHÁP XML:", parseError);
+          alert("File XML có lỗi cú pháp hoặc không đúng định dạng! Vui lòng nhấn F12 và xem tab 'Console' để biết chi tiết.");
+          xmlData = {};
+          return;
+      }
+
+      const rows = xml.querySelectorAll("data");
+      debugLog("Kết quả tìm kiếm thẻ <data>", `Tìm thấy ${rows.length} thẻ.`);
+      
+      if (rows.length === 0) {
+          alert("KHÔNG TÌM THẤY thẻ <data> nào trong file XML. Có thể tên thẻ bị sai hoặc file có cấu trúc khác.");
+          xmlData = {};
+          return;
+      }
+      
+      const grouped = {};
+      
+      // DEBUG: Chỉ xử lý 1 dòng đầu tiên để kiểm tra
+      console.log('%c--- Bắt đầu xử lý dòng <data> ĐẦU TIÊN ---', 'color: green; font-style: italic;');
+      const firstRow = rows[0];
+      const order = firstRow.querySelector("OrderNum")?.textContent?.trim();
+      const date = firstRow.querySelector("OpenDate\\.Typed")?.textContent?.trim(); // Thêm \\ để tìm chính xác thẻ có dấu chấm
+      const session = firstRow.querySelector("SessionNum")?.textContent?.trim();
+      
+      debugLog("Kiểm tra thẻ OrderNum", firstRow.querySelector("OrderNum"));
+      debugLog("Giá trị OrderNum", order);
+
+      debugLog("Kiểm tra thẻ OpenDate.Typed", firstRow.querySelector("OpenDate\\.Typed"));
+      debugLog("Giá trị OpenDate.Typed", date);
+
+      debugLog("Kiểm tra thẻ SessionNum", firstRow.querySelector("SessionNum"));
+      debugLog("Giá trị SessionNum", session);
+
+      if (order && date && session) {
+          const billCode = extractBillCode(order, date, session);
+          debugLog("Mã Bill được tạo ra từ dòng đầu tiên", billCode);
+      } else {
+          console.error("LỖI: Không thể trích xuất đủ thông tin (OrderNum, OpenDate.Typed, SessionNum) từ dòng <data> đầu tiên để tạo mã bill.");
+      }
+      console.log('%c--- Kết thúc xử lý dòng <data> ĐẦU TIÊN ---', 'color: green; font-style: italic;');
+
+
+      rows.forEach(row => {
+        const order = row.querySelector("OrderNum")?.textContent?.trim();
+        const date = row.querySelector("OpenDate\\.Typed")?.textContent?.trim();
+        const session = row.querySelector("SessionNum")?.textContent?.trim();
+
+        if (!order || !date || !session) return;
+        const billCode = extractBillCode(order, date, session);
+        const vatPercentText = (row.querySelector("VAT\\.Percent")?.textContent || "0").replace("%", "");
+        const taxRate = parseFloat(vatPercentText) / 100;
+        const name = row.querySelector("DishFullName")?.textContent || row.querySelector("DishName")?.textContent || "";
+        const qty = parseFloat(row.querySelector("DishAmountInt")?.textContent || 0);
+        const sum = parseFloat(row.querySelector("DishSumInt")?.textContent || 0);
+        const discount = parseFloat(row.querySelector("DiscountSum")?.textContent || 0);
+        const increase = parseFloat(row.querySelector("IncreaseSum")?.textContent || 0);
+        const amount = taxRate > -1 ? Math.round(sum / (1 + taxRate)) : sum;
+        const tax = Math.round(sum - amount);
+
+        if (!grouped[billCode]) {
+          grouped[billCode] = { items: [], totalDiscount: 0, totalIncrease: 0, billTaxRate: taxRate };
+        }
+        grouped[billCode].items.push({ name: name.trim(), normalizedName: normalizeName(name), qty, amount, tax });
+        grouped[billCode].totalDiscount += discount;
+        grouped[billCode].totalIncrease += increase;
+        if (grouped[billCode].items.length === 1) {
+            grouped[billCode].billTaxRate = taxRate;
+        }
+      });
+      
+      for (const billCode in grouped) {
+        const bill = grouped[billCode];
+        const billTaxRate = bill.billTaxRate;
+        if (bill.totalDiscount > 0) {
+            const discountAmount = billTaxRate > -1 ? Math.round(bill.totalDiscount / (1 + billTaxRate)) : bill.totalDiscount;
+            const discountTax = Math.round(bill.totalDiscount - discountAmount);
+            bill.items.push({ name: "Chiết khấu", normalizedName: normalizeName("Chiết khấu"), qty: 1, amount: -discountAmount, tax: -discountTax });
+        }
+        if (bill.totalIncrease > 0) {
+            const increaseAmount = billTaxRate > -1 ? Math.round(bill.totalIncrease / (1 + billTaxRate)) : bill.totalIncrease;
+            const increaseTax = Math.round(bill.totalIncrease - increaseAmount);
+            bill.items.push({ name: "Phí phục vụ", normalizedName: normalizeName("Phí phục vụ"), qty: 1, amount: increaseAmount, tax: increaseTax });
+        }
+      }
+      debugLog("Hoàn tất xử lý, đối tượng `grouped` cuối cùng", grouped);
+      xmlData = grouped;
+    }
+
+    // Các hàm còn lại giữ nguyên
+    function parseExcel(file, callback) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet);
+        excelData = json.map(row => ({
+          bill: String(row["Mã bill"] || "").trim(),
+          name: (row["Tên hàng"] || "").toString().trim(),
+          normalizedName: normalizeName(row["Tên hàng"]),
+          qty: parseFloat(row["Số lượng"] || 0),
+          sum: parseFloat(row["Thành tiền"] || 0),
+          tax: parseFloat(row["Tiền thuế"] || 0),
+          matched: false
+        }));
+        callback();
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function compareFiles() {
+        const xmlInput = document.getElementById("xmlFile").files[0];
+        const excelInput = document.getElementById("excelFile").files[0];
+        if (!xmlInput || !excelInput) {
+            alert("Vui lòng chọn cả 2 file XML và Excel/CSV");
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function () {
+            parseXML(reader.result);
+            // Chỉ chạy so sánh nếu XML được parse thành công
+            if (Object.keys(xmlData).length > 0) {
+                parseExcel(excelInput, displayComparison);
+            } else {
+                document.getElementById("result").innerHTML = '<h3>Xử lý XML thất bại. Vui lòng kiểm tra Console (F12) để xem lỗi.</h3>';
+            }
+        };
+        reader.readAsText(xmlInput);
+    }
+
+    function displayComparison() {
+      let html = '';
+      document.getElementById("result").innerHTML = '<h3>Đang tạo bảng so sánh...</h3>';
+      const allBillCodes = new Set([...Object.keys(xmlData), ...excelData.map(e => e.bill)]);
+      allBillCodes.forEach(billCode => {
+        if (!billCode) return;
+        const xmlBill = xmlData[billCode];
+        const excelItems = excelData.filter(e => e.bill === billCode);
+        html += `<h3>Mã bill: ${billCode}</h3>`;
+        if (!xmlBill) { html += `<p class="mismatch">Lỗi: Không tìm thấy bill này trong file XML.</p>`; }
+        if (excelItems.length === 0) { html += `<p class="mismatch">Lỗi: Không tìm thấy bill này trong file Excel.</p>`; }
+        html += '<table><thead><tr><th>Tên hàng</th><th>Số lượng (XML / Excel)</th><th>Thành tiền (XML / Excel)</th><th>Tiền thuế (XML / Excel)</th><th>Ghi chú</th></tr></thead><tbody>';
+        if (xmlBill) {
+            xmlBill.items.forEach(x => {
+                const e = excelItems.find(item => item.normalizedName === x.normalizedName && !item.matched);
+                if (!e) {
+                    html += `<tr class="missing-excel"><td>${x.name}</td><td>${x.qty}</td><td>${x.amount}</td><td>${x.tax}</td><td>Không tìm thấy trong Excel</td></tr>`;
+                } else {
+                    e.matched = true;
+                    const mismatchQty = Math.abs(x.qty - e.qty) > 0.01;
+                    const mismatchSum = Math.abs(x.amount - e.sum) > 10;
+                    const mismatchTax = Math.abs(x.tax - e.tax) > 10;
+                    const anyMismatch = mismatchQty || mismatchSum || mismatchTax;
+                    html += `<tr class="${anyMismatch ? 'mismatch' : ''}"><td>${x.name}</td><td>${x.qty} / ${e.qty}</td><td>${x.amount} / ${e.sum}</td><td>${x.tax} / ${e.tax}</td><td style="font-weight: bold; color: ${anyMismatch ? 'red' : 'green'};">${anyMismatch ? 'Chênh lệch' : 'OK'}</td></tr>`;
+                }
+            });
+        }
+        excelItems.filter(e => !e.matched).forEach(e => {
+            html += `<tr class="missing-xml"><td>${e.name}</td><td>? / ${e.qty}</td><td>? / ${e.sum}</td><td>? / ${e.tax}</td><td>Không tìm thấy trong XML</td></tr>`;
+        });
+        html += '</tbody></table>';
+      });
+      document.getElementById("result").innerHTML = html;
+    }
+  </script>
+</body>
+</html>
