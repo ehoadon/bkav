@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Kiểm Tra Giấy Tờ NDDPL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-check {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-check:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-clear {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-clear:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result.valid {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .result.invalid {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            color: white;
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.2);
+        }
+
+        .info-box {
+            background: linear-gradient(45deg, #17a2b8, #6f42c1);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-box li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .batch-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e1e8ed;
+        }
+
+        .batch-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 14px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .batch-results {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .batch-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .batch-item.valid {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .batch-item.invalid {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .batch-status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .batch-status.valid {
+            background: #28a745;
+            color: white;
+        }
+
+        .batch-status.invalid {
+            background: #dc3545;
+            color: white;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .file-upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .upload-content {
+            pointer-events: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .upload-content p {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .upload-content small {
+            color: #666;
+        }
+
+        .column-config {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .column-config h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .column-config label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .column-config select, .column-config input {
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .upload-section, .manual-section {
+            padding: 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .upload-section h3, .manual-section h3 {
+            color: #333;
+            border-bottom: 2px solid #e1e8ed;
+            padding-bottom: 10px;
+        }
+
+        .file-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .file-info h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+            .container {
+            padding: 20px;
+            /* margin: 10px; */  /* XÓA HOẶC COMMENT DÒNG NÀY */
+        }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🆔 Tool Kiểm Tra Giấy Tờ NDDPL</h1>
+        
+        <div class="form-group">
+            <label for="documentType">Cột E - Loại giấy tờ NDDPL:</label>
+            <select id="documentType">
+                <option value="">-- Chọn loại giấy tờ --</option>
+                <option value="CMND">CMND (Chứng minh nhân dân)</option>
+                <option value="CCCD">CCCD (Căn cước công dân)</option>
+                <option value="HC">Hộ chiếu</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="documentNumber">Cột F - Số giấy tờ NDDPL:</label>
+            <input type="text" id="documentNumber" placeholder="Nhập số giấy tờ...">
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-check" onclick="validateDocument()">
+                🔍 Kiểm Tra
+            </button>
+            <button class="btn-clear" onclick="clearForm()">
+                🗑️ Xóa
+            </button>
+        </div>
+
+        <div id="result" class="result"></div>
+
+        <div class="info-box">
+            <h3>📋 Quy tắc kiểm tra:</h3>
+            <ul>
+                <li><strong>CMND:</strong> Phải có đúng 9 chữ số</li>
+                <li><strong>CCCD:</strong> Phải có đúng 12 chữ số</li>
+                <li><strong>Hộ chiếu:</strong> Có thể chứa cả chữ và số</li>
+            </ul>
+        </div>
+
+        <div class="batch-section">
+            <h2 class="batch-title">📊 Kiểm tra hàng loạt</h2>
+            
+            <!-- File Upload Section -->
+            <div class="upload-section">
+                <h3 style="margin-bottom: 15px; color: #333;">📁 Upload file Excel</h3>
+                <div class="file-upload-area" id="fileUploadArea">
+                    <input type="file" id="excelFile" accept=".xlsx,.xls" style="display: none;">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <p>Kéo thả file Excel vào đây hoặc click để chọn file</p>
+                        <small>Hỗ trợ định dạng .xlsx, .xls</small>
+                    </div>
+                </div>
+                <div class="column-config" id="columnConfig" style="display: none;">
+                    <h4>Cấu hình cột dữ liệu:</h4>
+                    <div style="display: flex; gap: 20px; margin: 15px 0;">
+                        <div>
+                            <label>Cột loại giấy tờ (E):</label>
+                            <select id="typeColumn">
+                                <option value="E">Cột E</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Cột số giấy tờ (F):</label>
+                            <select id="numberColumn">
+                                <option value="F">Cột F</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Dòng bắt đầu:</label>
+                            <input type="number" id="startRow" value="2" min="1" style="width: 80px;">
+                        </div>
+                    </div>
+                    <button class="btn-check" onclick="processExcelFile()">
+                        🔍 Kiểm Tra File Excel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Manual Input Section -->
+            <div class="manual-section" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px; color: #333;">✏️ Nhập thủ công</h3>
+                <div class="form-group">
+                    <label for="batchData">Nhập dữ liệu (mỗi dòng: Loại giấy tờ|Số giấy tờ):</label>
+                    <textarea id="batchData" placeholder="Ví dụ:
+CMND|123456789
+CCCD|123456789012
+HC|A1234567"></textarea>
+                </div>
+                <button class="btn-check" onclick="validateBatch()">
+                    🔍 Kiểm Tra Hàng Loạt
+                </button>
+            </div>
+
+            <div id="batchResults" class="batch-results" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let excelData = null;
+        let excelColumns = [];
+
+        function validateDocument() {
+            const documentType = document.getElementById('documentType').value;
+            const documentNumber = document.getElementById('documentNumber').value.trim();
+            const resultDiv = document.getElementById('result');
+
+            if (!documentType) {
+                showResult('Vui lòng chọn loại giấy tờ!', false);
+                return;
+            }
+
+            if (!documentNumber) {
+                showResult('Vui lòng nhập số giấy tờ!', false);
+                return;
+            }
+
+            const isValid = checkDocumentValidity(documentType, documentNumber);
+            const message = getValidationMessage(documentType, documentNumber, isValid);
+            
+            showResult(message, isValid);
+        }
+
+        function checkDocumentValidity(type, number) {
+            switch(type) {
+                case 'CMND':
+                    // CMND phải có đúng 9 chữ số
+                    return /^\d{9}$/.test(number);
+                
+                case 'CCCD':
+                    // CCCD phải có đúng 12 chữ số
+                    return /^\d{12}$/.test(number);
+                
+                case 'HC':
+                    // Hộ chiếu có thể chứa cả chữ và số, ít nhất 6 ký tự
+                    return /^[A-Za-z0-9]{6,}$/.test(number);
+                
+                default:
+                    return false;
+            }
+        }
+
+        function getValidationMessage(type, number, isValid) {
+            if (isValid) {
+                return `✅ HỢP LỆ: ${type} "${number}" đúng định dạng!`;
+            } else {
+                let expectedFormat = '';
+                switch(type) {
+                    case 'CMND':
+                        expectedFormat = '9 chữ số';
+                        break;
+                    case 'CCCD':
+                        expectedFormat = '12 chữ số';
+                        break;
+                    case 'HC':
+                        expectedFormat = 'chữ và số (ít nhất 6 ký tự)';
+                        break;
+                }
+                return `❌ KHÔNG HỢP LỆ: ${type} "${number}" không đúng định dạng. Cần: ${expectedFormat}`;
+            }
+        }
+
+        function showResult(message, isValid) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${isValid ? 'valid' : 'invalid'} show`;
+        }
+
+        function clearForm() {
+            document.getElementById('documentType').value = '';
+            document.getElementById('documentNumber').value = '';
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result';
+            resultDiv.textContent = '';
+        }
+
+        function validateBatch() {
+            const batchData = document.getElementById('batchData').value.trim();
+            const resultsDiv = document.getElementById('batchResults');
+            
+            if (!batchData) {
+                alert('Vui lòng nhập dữ liệu để kiểm tra!');
+                return;
+            }
+
+            const lines = batchData.split('\n').filter(line => line.trim());
+            const results = [];
+
+            lines.forEach((line, index) => {
+                const parts = line.split('|');
+                if (parts.length !== 2) {
+                    results.push({
+                        line: index + 1,
+                        original: line,
+                        valid: false,
+                        message: 'Định dạng không đúng (cần: Loại|Số)'
+                    });
+                    return;
+                }
+
+                const type = parts[0].trim();
+                const number = parts[1].trim();
+                const isValid = checkDocumentValidity(type, number);
+                
+                results.push({
+                    line: index + 1,
+                    original: line,
+                    type: type,
+                    number: number,
+                    valid: isValid,
+                    message: getValidationMessage(type, number, isValid)
+                });
+            });
+
+            displayBatchResults(results);
+        }
+
+        function displayBatchResults(results) {
+            const resultsDiv = document.getElementById('batchResults');
+            const validCount = results.filter(r => r.valid).length;
+            const totalCount = results.length;
+
+            let html = `<div style="text-align: center; margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 8px;">
+                <strong>Kết quả: ${validCount}/${totalCount} hợp lệ</strong>
+            </div>`;
+
+            results.forEach(result => {
+                html += `<div class="batch-item ${result.valid ? 'valid' : 'invalid'}">
+                    <div>
+                        <strong>Dòng ${result.line}:</strong> ${result.original}
+                        <br><small>${result.message}</small>
+                    </div>
+                    <span class="batch-status ${result.valid ? 'valid' : 'invalid'}">
+                        ${result.valid ? 'HỢP LỆ' : 'KHÔNG HỢP LỆ'}
+                    </span>
+                </div>`;
+            });
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // Auto-format input
+        document.getElementById('documentNumber').addEventListener('input', function(e) {
+            // Remove any non-alphanumeric characters for basic cleanup
+            let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+            e.target.value = value;
+        });
+
+        // File upload handling
+        function handleFileUpload(file) {
+            console.log('File selected:', file.name);
+            
+            if (!file.name.match(/\.(xlsx|xls)$/i)) {
+                alert('Vui lòng chọn file Excel (.xlsx hoặc .xls)');
+                return;
+            }
+
+            // Show loading indicator
+            const uploadArea = document.getElementById('fileUploadArea');
+            const originalContent = uploadArea.innerHTML;
+            uploadArea.innerHTML = `
+                <div class="upload-content">
+                    <div class="upload-icon">⏳</div>
+                    <p>Đang xử lý file...</p>
+                    <small>Vui lòng đợi</small>
+                </div>
+            `;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convert to JSON
+                    excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+                    
+                    if (excelData.length === 0) {
+                        alert('File Excel trống hoặc không có dữ liệu');
+                        uploadArea.innerHTML = originalContent;
+                        return;
+                    }
+
+                    // Get column headers
+                    excelColumns = excelData[0] || [];
+                    
+                    // Show success
+                    uploadArea.innerHTML = `
+                        <div class="upload-content">
+                            <div class="upload-icon">✅</div>
+                            <p><strong>File đã tải thành công!</strong></p>
+                            <small>${file.name} (${excelData.length - 1} dòng dữ liệu)</small>
+                        </div>
+                    `;
+                    
+                    // Show file info and configuration
+                    showFileInfo(file.name, excelData.length - 1);
+                    setupColumnConfiguration();
+                    
+                } catch (error) {
+                    console.error('Excel processing error:', error);
+                    alert('Lỗi khi đọc file Excel: ' + error.message);
+                    uploadArea.innerHTML = originalContent;
+                }
+            };
+
+            reader.onerror = function() {
+                alert('Lỗi khi đọc file');
+                uploadArea.innerHTML = originalContent;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showFileInfo(fileName, rowCount) {
+            let configDiv = document.getElementById('columnConfig');
+            
+            // Remove existing file info if any
+            const existingInfo = configDiv.querySelector('.file-info');
+            if (existingInfo) {
+                existingInfo.remove();
+            }
+            
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+            fileInfo.innerHTML = `
+                <h4>✅ File đã được tải lên thành công!</h4>
+                <p><strong>Tên file:</strong> ${fileName}</p>
+                <p><strong>Số dòng dữ liệu:</strong> ${rowCount} dòng (không tính header)</p>
+            `;
+            
+            configDiv.insertBefore(fileInfo, configDiv.firstChild);
+            configDiv.style.display = 'block';
+        }
+
+        function setupColumnConfiguration() {
+            const typeSelect = document.getElementById('typeColumn');
+            const numberSelect = document.getElementById('numberColumn');
+            
+            // Clear existing options
+            typeSelect.innerHTML = '';
+            numberSelect.innerHTML = '';
+            
+            // Add column options
+            const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P'];
+            
+            columns.forEach((col, index) => {
+                if (index < excelColumns.length) {
+                    const headerText = excelColumns[index] ? ` (${excelColumns[index]})` : '';
+                    typeSelect.innerHTML += `<option value="${index}">Cột ${col}${headerText}</option>`;
+                    numberSelect.innerHTML += `<option value="${index}">Cột ${col}${headerText}</option>`;
+                }
+            });
+            
+            // Set default values (E = index 4, F = index 5)
+            if (typeSelect.options.length > 4) typeSelect.selectedIndex = 4;
+            if (numberSelect.options.length > 5) numberSelect.selectedIndex = 5;
+        }
+
+        function processExcelFile() {
+            if (!excelData) {
+                alert('Vui lòng upload file Excel trước!');
+                return;
+            }
+
+            const typeColumnIndex = parseInt(document.getElementById('typeColumn').value);
+            const numberColumnIndex = parseInt(document.getElementById('numberColumn').value);
+            const startRow = parseInt(document.getElementById('startRow').value) - 1; // Convert to 0-based index
+
+            const results = [];
+
+            for (let i = startRow; i < excelData.length; i++) {
+                const row = excelData[i];
+                const type = row[typeColumnIndex] ? String(row[typeColumnIndex]).trim() : '';
+                const number = row[numberColumnIndex] ? String(row[numberColumnIndex]).trim() : '';
+                
+                if (!type || !number) {
+                    continue; // Skip empty rows
+                }
+
+                // Normalize document type
+                let normalizedType = normalizeDocumentType(type);
+                
+                const isValid = checkDocumentValidity(normalizedType, number);
+                
+                results.push({
+                    line: i + 1,
+                    original: `${type}|${number}`,
+                    type: normalizedType,
+                    number: number,
+                    valid: isValid,
+                    message: getValidationMessage(normalizedType, number, isValid)
+                });
+            }
+
+            if (results.length === 0) {
+                alert('Không tìm thấy dữ liệu để kiểm tra. Vui lòng kiểm tra cấu hình cột và dòng bắt đầu.');
+                return;
+            }
+
+            displayBatchResults(results);
+        }
+
+        function normalizeDocumentType(type) {
+            const lowerType = type.toLowerCase().trim();
+            
+            // Handle common variations - more flexible
+            if (lowerType.includes('cmnd') || lowerType.includes('chứng minh')) {
+                return 'CMND';
+            } else if (lowerType.includes('cccd') || lowerType.includes('căn cước') || lowerType.includes('can cuoc')) {
+                return 'CCCD';
+            } else if (lowerType.includes('hộ chiếu') || lowerType.includes('ho chieu') || 
+                       lowerType.includes('passport') || lowerType.includes('số hộ chiếu') ||
+                       lowerType === 'hc' || lowerType.includes('passport')) {
+                return 'HC';
+            }
+            
+            // If no match found, try to guess based on original input
+            return type.trim();
+        }
+
+        function validateBatch() {
+            const batchData = document.getElementById('batchData').value.trim();
+            const resultsDiv = document.getElementById('batchResults');
+            
+            if (!batchData) {
+                alert('Vui lòng nhập dữ liệu để kiểm tra!');
+                return;
+            }
+
+            const lines = batchData.split('\n').filter(line => line.trim());
+            const results = [];
+
+            lines.forEach((line, index) => {
+                // More flexible parsing - support both | and tab separation
+                let parts;
+                if (line.includes('|')) {
+                    parts = line.split('|');
+                } else if (line.includes('\t')) {
+                    parts = line.split('\t');
+                } else {
+                    // Try to split by multiple spaces
+                    parts = line.split(/\s{2,}/);
+                    if (parts.length === 1) {
+                        // Try single space as last resort
+                        parts = line.split(' ');
+                        if (parts.length > 2) {
+                            // Merge all but last as type, last as number
+                            const number = parts.pop();
+                            const type = parts.join(' ');
+                            parts = [type, number];
+                        }
+                    }
+                }
+
+                if (parts.length !== 2) {
+                    results.push({
+                        line: index + 1,
+                        original: line,
+                        valid: false,
+                        message: 'Định dạng không đúng (cần: Loại giấy tờ | Số giấy tờ)'
+                    });
+                    return;
+                }
+
+                const type = parts[0].trim();
+                const number = parts[1].trim();
+                
+                if (!type || !number) {
+                    results.push({
+                        line: index + 1,
+                        original: line,
+                        valid: false,
+                        message: 'Loại giấy tờ hoặc số giấy tờ không được để trống'
+                    });
+                    return;
+                }
+
+                // Normalize document type
+                let normalizedType = normalizeDocumentType(type);
+                
+                // If still not recognized, try to guess from number format
+                if (!['CMND', 'CCCD', 'HC'].includes(normalizedType)) {
+                    if (/^\d{9}$/.test(number)) {
+                        normalizedType = 'CMND';
+                    } else if (/^\d{12}$/.test(number)) {
+                        normalizedType = 'CCCD';
+                    } else if (/^[A-Za-z0-9]{6,}$/.test(number)) {
+                        normalizedType = 'HC';
+                    }
+                }
+                
+                const isValid = checkDocumentValidity(normalizedType, number);
+                
+                results.push({
+                    line: index + 1,
+                    original: line,
+                    type: normalizedType,
+                    number: number,
+                    valid: isValid,
+                    message: getValidationMessage(normalizedType, number, isValid)
+                });
+            });
+
+            displayBatchResults(results);
+        }
+
+        // Initialize file upload functionality when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFileUpload();
+        });
+
+        function initializeFileUpload() {
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('excelFile');
+
+            if (!fileUploadArea || !fileInput) {
+                console.error('File upload elements not found');
+                return;
+            }
+
+            // Click to select file
+            fileUploadArea.addEventListener('click', function(e) {
+                e.preventDefault();
+                fileInput.click();
+            });
+
+            // Drag and drop events
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileUploadArea.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileUpload(files[0]);
+                }
+            });
+
+            // File input change event
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+
+        // Call initialize function immediately as well
+        initializeFileUpload();
+
+        // Enter key support
+        document.getElementById('documentNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateDocument();
+            }
+        });
+    </script>
+</body>
+</html>
