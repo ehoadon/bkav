@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy vấn dữ liệu Google Docs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 2px solid #e1e8ff;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .results-header {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95em;
+        }
+
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-cccd {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-cmnd {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-passport {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .summary {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .summary-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .summary-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            table {
+                font-size: 0.85em;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Truy vấn dữ liệu</h1>
+            <p>Hệ thống trích xuất và xử lý dữ liệu từ Google Docs</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="docsUrl">
+                        📄 Link Google Docs:
+                    </label>
+                    <input 
+                        type="url" 
+                        id="docsUrl" 
+                        placeholder="https://docs.google.com/document/d/your-document-id/edit"
+                        value=""
+                    >
+                </div>
+                <div class="input-group">
+                    <label for="apiUrl">
+                        🔗 Google Apps Script Web App URL:
+                    </label>
+                    <input 
+                        type="url" 
+                        id="apiUrl" 
+                        placeholder="https://script.google.com/macros/s/your-script-id/exec"
+                        value=""
+                    >
+                </div>
+
+                <button class="btn" onclick="fetchData()" id="fetchBtn">
+                    📊 Lấy dữ liệu
+                </button>
+                <button class="btn" onclick="exportToExcel()" id="exportBtn" style="margin-top: 15px;">
+                    📥 Xuất Excel
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Đang truy vấn dữ liệu, vui lòng đợi...</p>
+            </div>
+
+            <div class="error" id="error" style="display: none;"></div>
+
+            <div class="results-section" id="results">
+                <div class="results-header">
+                    <h2>📋 Kết quả truy vấn</h2>
+                </div>
+                
+                <div class="summary" id="summary" style="display: none;">
+                    <div class="summary-item">
+                        <span class="summary-number" id="totalRecords">0</span>
+                        <div class="summary-label">Tổng số bản ghi</div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-number" id="cccdCount">0</span>
+                        <div class="summary-label">CCCD</div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-number" id="cmndCount">0</span>
+                        <div class="summary-label">CMND</div>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-number" id="passportCount">0</span>
+                        <div class="summary-label">Hộ chiếu</div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>MST của DN</th>
+                                <th>Tên Doanh nghiệp</th>
+                                <th>Tên người đại diện theo pháp luật</th>
+                                <th>Loại giấy tờ NDDPL</th>
+                                <th>Số giấy tờ NDDPL</th>
+                                <th>Ngày sinh NDDPL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hàm xác định loại giấy tờ
+        function determineDocumentType(documentNumber) {
+            if (!documentNumber) return 'Không xác định';
+            
+            const cleanNumber = documentNumber.toString().replace(/\s/g, '');
+            
+            // CCCD: 12 số
+            if (/^\d{12}$/.test(cleanNumber)) {
+                return 'CCCD';
+            }
+            
+            // CMND: 9 số
+            if (/^\d{9}$/.test(cleanNumber)) {
+                return 'CMND';
+            }
+            
+            // Hộ chiếu: có chữ và số
+            if (/^[A-Za-z0-9]+$/.test(cleanNumber) && /[A-Za-z]/.test(cleanNumber) && /\d/.test(cleanNumber)) {
+                return 'Số hộ chiếu';
+            }
+            
+            return 'Không xác định';
+        }
+
+        // Hàm format ngày
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                
+                return date.toLocaleDateString('vi-VN');
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Hàm lấy class cho status badge
+        function getStatusClass(docType) {
+            switch (docType) {
+                case 'CCCD': return 'status-cccd';
+                case 'CMND': return 'status-cmnd';
+                case 'Số hộ chiếu': return 'status-passport';
+                default: return '';
+            }
+        }
+
+        // Hàm hiển thị lỗi
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Hàm cập nhật thống kê
+        function updateSummary(data) {
+            const summary = document.getElementById('summary');
+            const totalRecords = document.getElementById('totalRecords');
+            const cccdCount = document.getElementById('cccdCount');
+            const cmndCount = document.getElementById('cmndCount');
+            const passportCount = document.getElementById('passportCount');
+
+            const stats = data.reduce((acc, item) => {
+                const docType = item.documentType || determineDocumentType(item.documentNumber);
+                acc.total++;
+                
+                switch (docType) {
+                    case 'CCCD': acc.cccd++; break;
+                    case 'CMND': acc.cmnd++; break;
+                    case 'Số hộ chiếu': acc.passport++; break;
+                }
+                
+                return acc;
+            }, { total: 0, cccd: 0, cmnd: 0, passport: 0 });
+
+            totalRecords.textContent = stats.total;
+            cccdCount.textContent = stats.cccd;
+            cmndCount.textContent = stats.cmnd;
+            passportCount.textContent = stats.passport;
+            
+            summary.style.display = 'flex';
+        }
+
+        // Hàm truy vấn dữ liệu (phiên bản cho Google Sheets Backend)
+        async function fetchData() {
+            // Không cần 'docsUrl' nữa, chỉ cần URL của Web App
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const fetchBtn = document.getElementById('fetchBtn');
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const error = document.getElementById('error');
+
+            if (!apiUrl) {
+                showError('Vui lòng nhập URL Web App của Google Apps Script!');
+                return;
+            }
+
+            fetchBtn.disabled = true;
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            try {
+                // Gửi yêu cầu POST tới Web App. Không cần gửi body vì script sẽ tự đọc sheet nó được gắn vào.
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    mode: 'cors' 
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message || 'Lỗi không xác định từ server');
+                }
+
+                displayResults(result.data);
+                
+            } catch (err) {
+                console.error('Error fetching data:', err);
+                showError('Không thể kết nối tới Google Apps Script. Lỗi: ' + err.message);
+            } finally {
+                fetchBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        // Hàm hiển thị kết quả
+        function displayResults(data) {
+            const tableBody = document.getElementById('tableBody');
+            const results = document.getElementById('results');
+            
+            // Clear previous results
+            tableBody.innerHTML = '';
+            
+            // Update summary
+            updateSummary(data);
+            
+            // Populate table
+            data.forEach((item) => {
+                const docType = item.documentType || determineDocumentType(item.documentNumber);
+                const statusClass = getStatusClass(docType);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${item.stt || ''}</strong></td>
+                    <td><strong>${item.mst || ''}</strong></td>
+                    <td><em>${item.companyName || 'Chưa có dữ liệu'}</em></td>
+                    <td><em>${item.representativeName || 'Chưa có dữ liệu'}</em></td>
+                    <td><span class="status-badge ${statusClass}">${docType}</span></td>
+                    <td>${item.documentNumber || ''}</td>
+                    <td>${formatDate(item.birthDate)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Show results
+            results.style.display = 'block';
+            
+            // Smooth scroll to results
+            results.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Initialize with sample URLs for demo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('docsUrl').value = 'https://docs.google.com/spreadsheets/d/1y-4LCGs3IiPcRtZaKcgu2bEICgq2jZtvn_jCg3Qa5lg/edit?gid=0#gid=0';
+            document.getElementById('apiUrl').value = 'https://script.google.com/macros/s/AKfycbyYzGBYQozdzuKqoRwx2qbiujJGD1TzAL7NJxREQxkpvUP_VFpKr6HwXC_Dh4gvgw7Vfg/exec';
+        });
+
+        // Add Enter key support
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'docsUrl' || activeElement.id === 'apiUrl') {
+                    fetchData();
+                }
+            }
+        });
+        function exportToExcel() {
+            const table = document.getElementById("dataTable");
+            const wb = XLSX.utils.book_new();
+
+            // Lọc dữ liệu từ những hàng đang hiển thị
+            const visibleRows = Array.from(table.querySelectorAll("tbody tr"))
+                .filter(row => row.style.display !== "none")
+                .map(row => Array.from(row.cells).map(cell => cell.textContent.trim()));
+
+            // Lấy tiêu đề từ <thead>
+            const headers = Array.from(table.querySelectorAll("thead th")).map(th => th.textContent.trim());
+
+            const ws_data = [headers, ...visibleRows];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+            XLSX.utils.book_append_sheet(wb, ws, "Kết quả lọc");
+
+            XLSX.writeFile(wb, "Thong tin NDDPL.xlsx");
+        }
+
+    </script>
+</body>
+</html>
