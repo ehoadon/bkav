@@ -1048,6 +1048,10 @@
                         <i class="fas fa-rules"></i>
                         Quản lý quy tắc
                     </button>
+                    <button class="btn btn-warning" onclick="loadFirebaseRules()">
+                        <i class="fas fa-sync"></i>
+                        Kiểm tra Firebase
+                    </button>
                 </div>
             </div>
         </div>
@@ -1664,7 +1668,6 @@
     <!-- Load JavaScript Libraries -->
     <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1928,11 +1931,50 @@
             }
         }
 
+        // Test Firebase connectivity
+        async function testFirebaseConnection() {
+            if (!db) {
+                showMessage('Firebase chưa được khởi tạo', 'error');
+                return false;
+            }
+            
+            try {
+                showMessage('Đang kiểm tra kết nối Firebase...', 'info');
+                const testRef = db.ref('.info/connected');
+                const snapshot = await testRef.once('value');
+                const connected = snapshot.val();
+                
+                if (connected) {
+                    showMessage('Kết nối Firebase thành công!', 'success');
+                    // Try to load rules
+                    await fetchFirebaseErrors();
+                    return true;
+                } else {
+                    showMessage('Không thể kết nối Firebase', 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Firebase connection test failed:', error);
+                showMessage(`Lỗi kết nối Firebase: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Manual rule loading function for testing
+        window.loadFirebaseRules = async function() {
+            await testFirebaseConnection();
+        };
+
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
             initializeTheme();
             initializeEventListeners();
             updatePerformanceInfo();
+            
+            // Test Firebase connection after page load
+            setTimeout(() => {
+                testFirebaseConnection();
+            }, 2000);
         });
 
         // Initialize all event listeners
@@ -3023,12 +3065,16 @@
         // Enhanced data initialization with rules
         async function initializeDataWithRules(allData) {
             const startTime = performance.now();
+            console.log('Starting data initialization with rules...', allData.length, 'rows');
             
             initialSourceDataForChart = [...allData];
             
-            // Apply Firebase rules if available
+            // Fetch Firebase rules if not already loaded
             if (firebaseRules.length === 0) {
+                console.log('No rules cached, fetching from Firebase...');
                 await fetchFirebaseErrors();
+            } else {
+                console.log('Using cached rules:', firebaseRules.length, 'rules');
             }
 
             // Initialize data stores
@@ -3036,24 +3082,34 @@
             dataStores.excluded.data = [];
             dataStores.export.data = [];
 
+            let processedByRules = 0;
+            let readyForExport = 0;
+            let remainingInSource = 0;
+
             // Process each row with rules
-            allData.forEach(row => {
+            allData.forEach((row, index) => {
                 let processed = false;
                 
                 // Apply Firebase rules
                 for (const rule of firebaseRules) {
                     if (matchesRule(row, rule)) {
+                        console.log(`Row ${index} matched rule:`, rule.rule_action, rule.match_value);
+                        
                         if (rule.rule_action === 'EXCLUDE') {
                             dataStores.excluded.data.push(row);
                             processed = true;
+                            processedByRules++;
                             break;
                         } else if (rule.rule_action === 'STANDARDIZE') {
                             // Apply standardization
                             if (rule.standard_value) {
-                                row[getStandardizationField(rule)] = rule.standard_value;
+                                const fieldToStandardize = getStandardizationField(rule);
+                                console.log(`Standardizing ${fieldToStandardize} from "${row[fieldToStandardize]}" to "${rule.standard_value}"`);
+                                row[fieldToStandardize] = rule.standard_value;
                             }
                             dataStores.export.data.push(enhanceForExport(row));
                             processed = true;
+                            processedByRules++;
                             break;
                         }
                     }
@@ -3063,8 +3119,10 @@
                     // Check if it's ready for export based on data completeness
                     if (isReadyForExport(row)) {
                         dataStores.export.data.push(enhanceForExport(row));
+                        readyForExport++;
                     } else {
                         dataStores.source.data.push(row);
+                        remainingInSource++;
                     }
                 }
             });
@@ -3074,23 +3132,51 @@
 
             const processingTime = performance.now() - startTime;
             console.log(`Data processing completed in ${processingTime.toFixed(2)}ms`);
+            console.log(`Results: ${processedByRules} processed by rules, ${readyForExport} ready for export, ${remainingInSource} remaining in source`);
+            console.log(`Final counts - Source: ${dataStores.source.data.length}, Excluded: ${dataStores.excluded.data.length}, Export: ${dataStores.export.data.length}`);
+            
+            showMessage(`Phân loại dữ liệu: ${processedByRules} áp dụng quy tắc, ${readyForExport} sẵn sàng xuất, ${remainingInSource} cần xử lý`, 'info');
         }
 
         // Rule matching logic
         function matchesRule(row, rule) {
-            // Check if ma_loai_td matches
-            if (rule.ma_loai_td && row['MÃ LOẠI TĐ'] !== rule.ma_loai_td) {
+            try {
+                // Debug logging
+                const debugInfo = {
+                    rule: rule.match_value,
+                    ruleAction: rule.rule_action,
+                    rowMaLoaiTD: row['MÃ LOẠI TĐ'],
+                    rowMaLoi: row['MÃ LỖI'],
+                    rowMoTaLoi: row['MÔ TẢ LỖI']
+                };
+                
+                // Check if ma_loai_td matches (if specified in rule)
+                if (rule.ma_loai_td && rule.ma_loai_td.trim() !== '') {
+                    if (row['MÃ LOẠI TĐ'] !== rule.ma_loai_td) {
+                        return false;
+                    }
+                }
+
+                // Check if ma_loi matches (for INCLUDE/EXCLUDE rules, if specified)
+                if (rule.rule_action !== 'STANDARDIZE' && rule.ma_loi && rule.ma_loi.trim() !== '') {
+                    if (row['MÃ LỖI'] !== rule.ma_loi) {
+                        return false;
+                    }
+                }
+
+                // Check match value based on match type
+                const targetValue = getTargetValueForRule(row, rule);
+                const matches = checkMatchType(targetValue, rule.match_value, rule.match_type);
+                
+                if (matches) {
+                    console.log('Rule matched:', debugInfo);
+                }
+                
+                return matches;
+            } catch (error) {
+                console.error('Error in matchesRule:', error, rule, row);
                 return false;
             }
-
-            // Check if ma_loi matches (for INCLUDE/EXCLUDE rules)
-            if (rule.rule_action !== 'STANDARDIZE' && rule.ma_loi && row['MÃ LỖI'] !== rule.ma_loi) {
-                return false;
-            }
-
-            // Check match value based on match type
-            const targetValue = getTargetValueForRule(row, rule);
-            return checkMatchType(targetValue, rule.match_value, rule.match_type);
         }
 
         function getTargetValueForRule(row, rule) {
@@ -3102,10 +3188,19 @@
         }
 
         function checkMatchType(value, pattern, matchType) {
+            // Handle empty or null values
+            if (!value && !pattern) return true;
             if (!value || !pattern) return false;
             
-            const lowerValue = value.toLowerCase();
-            const lowerPattern = pattern.toLowerCase();
+            // Convert to strings and normalize
+            const strValue = String(value).trim();
+            const strPattern = String(pattern).trim();
+            
+            if (strValue === '' && strPattern === '') return true;
+            if (strValue === '' || strPattern === '') return false;
+            
+            const lowerValue = strValue.toLowerCase();
+            const lowerPattern = strPattern.toLowerCase();
             
             switch (matchType) {
                 case 'EXACT':
@@ -3117,7 +3212,8 @@
                 case 'ENDS_WITH':
                     return lowerValue.endsWith(lowerPattern);
                 default:
-                    return false;
+                    // Default to CONTAINS if match type is not recognized
+                    return lowerValue.includes(lowerPattern);
             }
         }
 
@@ -3160,25 +3256,32 @@
         // Firebase error handling and rule management
         async function fetchFirebaseErrors() {
             if (!db) {
-                showMessage('Firebase không khả dụng.', 'warning');
+                console.warn('Firebase database not available');
                 return;
             }
 
             try {
+                showMessage('Đang tải quy tắc từ Firebase...', 'info');
                 const snapshot = await db.ref('error_definitions').once('value');
                 firebaseRules = [];
                 
                 if (snapshot.exists()) {
                     snapshot.forEach(childSnapshot => {
-                        firebaseRules.push({
+                        const rule = {
                             key: childSnapshot.key,
                             ...childSnapshot.val()
-                        });
+                        };
+                        firebaseRules.push(rule);
+                        console.log('Loaded rule:', rule);
                     });
+                    showMessage(`Đã tải ${firebaseRules.length} quy tắc từ Firebase`, 'success');
+                } else {
+                    console.log('No rules found in Firebase');
+                    showMessage('Không tìm thấy quy tắc nào trong Firebase', 'info');
                 }
             } catch (error) {
                 console.error('Error fetching Firebase rules:', error);
-                showMessage('Không thể tải quy tắc từ Firebase.', 'error');
+                showMessage(`Lỗi khi tải quy tắc: ${error.message}`, 'error');
             }
         }
 
