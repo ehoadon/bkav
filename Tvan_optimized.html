@@ -7,14 +7,11 @@
     
     <!-- External Libraries with performance optimizations -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://www.gstatic.com">
     
     <!-- CSS Libraries - Optimized loading -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous">
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js" as="script">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
 
     <style>
         /* CSS Custom Properties for Theme Support */
@@ -1665,13 +1662,16 @@
     </div>
 
     <!-- Load JavaScript Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js" integrity="sha512-r22gChDnGvBylk90+2e/ycr3RVrDi8DIOkIGNhJlKfuyQM4tIRAI062MaV8sfjQKYVGjOBaZBOA87z+IhZE9DA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- Additional optimized functionality -->
+    <script src="./tvan-optimized.js"></script>
 
     <script>
         // Performance monitoring
@@ -2108,8 +2108,597 @@
             });
         }
 
-        // Add remaining essential functions here...
-        // This is a condensed version showing the key improvements
+        // Complete the remaining core functions
+        
+        // Data display functions
+        function displayAllTables() {
+            sourceCurrentPage = 1;
+            excludedCurrentPage = 1;
+            exportCurrentPage = 1;
+            displaySourceData();
+            displayExportData();
+            displayExcludedData();
+            updateSummaryBar();
+        }
+
+        function updateTableCount(tableId, count) {
+            const element = document.getElementById(`${tableId}Count`);
+            if (element) element.textContent = count.toLocaleString('vi-VN');
+        }
+
+        function renderEmptyRow(tableBody, colSpan) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="${colSpan}"><i class="fas fa-info-circle"></i> Không có dữ liệu phù hợp.</td></tr>`;
+        }
+
+        function displaySourceData() {
+            const tableBody = document.getElementById('sourceTableBody');
+            if (!tableBody) return;
+
+            let dataToDisplay = getFilteredSourceData();
+            updateTableCount('source', dataToDisplay.length);
+            
+            const moveToExportBtn = document.getElementById('moveSourceToExportBtn');
+            const moveToExcludedBtn = document.getElementById('moveSourceToExcludedBtn');
+            if (moveToExportBtn) moveToExportBtn.disabled = selectedSourceRowIds.size === 0;
+            if (moveToExcludedBtn) moveToExcludedBtn.disabled = selectedSourceRowIds.size === 0;
+
+            if (dataToDisplay.length === 0) {
+                renderEmptyRow(tableBody, 7);
+                renderPagination('source', 0, 1);
+                return;
+            }
+
+            sortData(dataToDisplay, 'source');
+            updateSortIndicators('source');
+
+            const paginatedData = dataToDisplay.slice((sourceCurrentPage - 1) * rowsPerPage, sourceCurrentPage * rowsPerPage);
+            tableBody.innerHTML = '';
+            
+            paginatedData.forEach(row => {
+                const isChecked = selectedSourceRowIds.has(row.id) ? 'checked' : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-action">
+                        <input type="checkbox" class="row-checkbox" data-table="source" data-row-id="${row.id}" ${isChecked}>
+                        <button class="btn-success btn-move" onclick="moveSingleItem('${row.id}', 'source', 'export')" title="Chuyển sang Bảng 3">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn-warning btn-move" onclick="addRuleAndMove('${row.id}', 'EXCLUDE')" title="Loại trừ & Tạo quy tắc vĩnh viễn">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                    </td>
+                    <td>${(row.sourceFile || '').toUpperCase()}</td>
+                    <td>${row['MTĐ'] || ''}</td>
+                    <td>${row.MST || ''}</td>
+                    <td>${row['MÃ LOẠI TĐ'] || ''}</td>
+                    <td>${row['MÃ LỖI'] || ''}</td>
+                    <td>${row['MÔ TẢ LỖI'] || ''}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            renderPagination('source', dataToDisplay.length, sourceCurrentPage);
+        }
+
+        function displayExcludedData() {
+            const tableBody = document.getElementById('excludedTableBody');
+            if (!tableBody) return;
+
+            let dataToDisplay = getFilteredExcludedData();
+            updateTableCount('excluded', dataToDisplay.length);
+            
+            const moveToSourceBtn = document.getElementById('moveExcludedToSourceBtn');
+            const moveToExportBtn = document.getElementById('moveExcludedToExportBtn');
+            const exportMiniBtn = document.getElementById('exportMiniExcludedBtn');
+            if (moveToSourceBtn) moveToSourceBtn.disabled = selectedExcludedRowIds.size === 0;
+            if (moveToExportBtn) moveToExportBtn.disabled = selectedExcludedRowIds.size === 0;
+            if (exportMiniBtn) exportMiniBtn.disabled = selectedExcludedRowIds.size === 0;
+
+            if (dataToDisplay.length === 0) {
+                renderEmptyRow(tableBody, 7);
+                renderPagination('excluded', 0, 1);
+                return;
+            }
+
+            sortData(dataToDisplay, 'excluded');
+            updateSortIndicators('excluded');
+
+            const paginatedData = dataToDisplay.slice((excludedCurrentPage - 1) * rowsPerPage, excludedCurrentPage * rowsPerPage);
+            tableBody.innerHTML = '';
+            
+            paginatedData.forEach(row => {
+                const isChecked = selectedExcludedRowIds.has(row.id) ? 'checked' : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-action">
+                        <input type="checkbox" class="row-checkbox" data-table="excluded" data-row-id="${row.id}" ${isChecked}>
+                        <button class="btn-warning btn-move" onclick="moveSingleItem('${row.id}', 'excluded', 'source')" title="Hoàn tác">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </td>
+                    <td>${(row.sourceFile || '').toUpperCase()}</td>
+                    <td>${row['MTĐ'] || ''}</td>
+                    <td>${row.MST || ''}</td>
+                    <td>${row['MÃ LOẠI TĐ'] || ''}</td>
+                    <td>${row['MÃ LỖI'] || ''}</td>
+                    <td>${row['MÔ TẢ LỖI'] || ''}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            renderPagination('excluded', dataToDisplay.length, excludedCurrentPage);
+        }
+
+        function displayExportData() {
+            const tableBody = document.getElementById('exportTableBody');
+            if (!tableBody) return;
+
+            let dataToDisplay = getFilteredExportData();
+            updateTableCount('export', dataToDisplay.length);
+            
+            const bulkEditBtn = document.getElementById('bulkEditBtn');
+            const moveToSourceBtn = document.getElementById('moveExportToSourceBtn');
+            const moveToExcludedBtn = document.getElementById('moveExportToExcludedBtn');
+            if (bulkEditBtn) bulkEditBtn.disabled = selectedExportRowIds.size === 0;
+            if (moveToSourceBtn) moveToSourceBtn.disabled = selectedExportRowIds.size === 0;
+            if (moveToExcludedBtn) moveToExcludedBtn.disabled = selectedExportRowIds.size === 0;
+
+            if (dataToDisplay.length === 0) {
+                renderEmptyRow(tableBody, 11);
+                renderPagination('export', 0, 1);
+                return;
+            }
+
+            sortData(dataToDisplay, 'export');
+            updateSortIndicators('export');
+
+            const paginatedData = dataToDisplay.slice((exportCurrentPage - 1) * rowsPerPage, exportCurrentPage * rowsPerPage);
+            tableBody.innerHTML = '';
+            
+            paginatedData.forEach(row => {
+                const isChecked = selectedExportRowIds.has(row.id) ? 'checked' : '';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="col-action">
+                        <input type="checkbox" class="row-checkbox" data-table="export" data-row-id="${row.id}" ${isChecked}>
+                        <button class="btn-danger" onclick="moveSingleItem('${row.id}', 'export', 'source')" title="Hoàn tác">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                    </td>
+                    <td>${row.TVAN || ''}</td>
+                    <td>${row['MTĐ'] || ''}</td>
+                    <td>${row['MÃ LOẠI TĐ'] || ''}</td>
+                    <td>${row['MÃ LỖI'] || ''}</td>
+                    <td class="editable" data-row-id="${row.id}" data-column-key="MÔ TẢ LỖI">${row['MÔ TẢ LỖI'] || ''}</td>
+                    <td>${row.TIMELOG || ''}</td>
+                    <td>${row['GỬI LẦN'] || ''}</td>
+                    <td class="editable" data-row-id="${row.id}" data-column-key="MST">${row.MST || ''}</td>
+                    <td class="editable" data-row-id="${row.id}" data-column-key="MẪU SỐ KÝ HIỆU">${row['MẪU SỐ KÝ HIỆU'] || ''}</td>
+                    <td class="editable" data-row-id="${row.id}" data-column-key="SỐ HĐ">${row['SỐ HĐ'] || ''}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            renderPagination('export', dataToDisplay.length, exportCurrentPage);
+        }
+
+        function renderPagination(tablePrefix, totalRows, currentPage) {
+            const paginationControls = document.getElementById(`${tablePrefix}Pagination`);
+            if (!paginationControls) return;
+            
+            if (totalRows <= rowsPerPage) {
+                paginationControls.style.display = 'none';
+                return;
+            }
+            
+            const pageInfo = document.getElementById(`${tablePrefix}PaginationInfo`);
+            const prevBtn = document.getElementById(`${tablePrefix}PrevPageBtn`);
+            const nextBtn = document.getElementById(`${tablePrefix}NextPageBtn`);
+            const pageInput = document.getElementById(`${tablePrefix}PageInput`);
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+            
+            paginationControls.style.display = 'flex';
+            if (pageInfo) pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+            if (pageInput) pageInput.max = totalPages;
+            if (prevBtn) prevBtn.disabled = currentPage === 1;
+            if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+        }
+
+        function goToPage(tablePrefix) {
+            const pageInput = document.getElementById(`${tablePrefix}PageInput`);
+            if (!pageInput) return;
+            
+            const dataArray = (tablePrefix === 'source') ? getFilteredSourceData() : 
+                             (tablePrefix === 'excluded') ? getFilteredExcludedData() : getFilteredExportData();
+            const totalPages = Math.ceil(dataArray.length / rowsPerPage);
+            let targetPage = parseInt(pageInput.value, 10);
+            
+            if (isNaN(targetPage) || targetPage < 1) targetPage = 1;
+            else if (targetPage > totalPages) targetPage = totalPages;
+            
+            if (tablePrefix === 'source') {
+                sourceCurrentPage = targetPage;
+                displaySourceData();
+            } else if (tablePrefix === 'excluded') {
+                excludedCurrentPage = targetPage;
+                displayExcludedData();
+            } else if (tablePrefix === 'export') {
+                exportCurrentPage = targetPage;
+                displayExportData();
+            }
+            
+            pageInput.value = '';
+        }
+
+        function changePage(tablePrefix, direction) {
+            if (tablePrefix === 'source') {
+                sourceCurrentPage += direction;
+                displaySourceData();
+            } else if (tablePrefix === 'excluded') {
+                excludedCurrentPage += direction;
+                displayExcludedData();
+            } else if (tablePrefix === 'export') {
+                exportCurrentPage += direction;
+                displayExportData();
+            }
+        }
+
+        function moveSelectedItems(fromTable, toTable) {
+            const selectionSets = {
+                source: selectedSourceRowIds,
+                excluded: selectedExcludedRowIds,
+                export: selectedExportRowIds
+            };
+            
+            const selectionSet = selectionSets[fromTable];
+            if (selectionSet.size === 0) {
+                showMessage('Vui lòng chọn ít nhất một mục để thực hiện hành động.', 'warning');
+                return;
+            }
+
+            let movedCount = 0;
+            const fromData = dataStores[fromTable].data;
+            const toData = dataStores[toTable].data;
+
+            dataStores[fromTable].data = fromData.filter(row => {
+                if (selectionSet.has(row.id)) {
+                    toData.push(row);
+                    movedCount++;
+                    return false;
+                }
+                return true;
+            });
+
+            if (movedCount > 0) {
+                selectionSet.clear();
+                displayAllTables();
+                updateChartView();
+                showMessage(`Đã chuyển ${movedCount} mục từ bảng '${fromTable}' sang bảng '${toTable}'.`, 'success');
+            }
+        }
+
+        function moveSingleItem(rowId, fromTable, toTable) {
+            const fromArray = dataStores[fromTable].data;
+            const toArray = dataStores[toTable].data;
+            const indexToMove = fromArray.findIndex(r => r.id === rowId);
+            
+            if (indexToMove > -1) {
+                const [row] = fromArray.splice(indexToMove, 1);
+                toArray.push(row);
+                
+                selectedSourceRowIds.delete(rowId);
+                selectedExportRowIds.delete(rowId);
+                selectedExcludedRowIds.delete(rowId);
+                
+                if (toTable === 'source') sourceCurrentPage = 1;
+                if (toTable === 'export') exportCurrentPage = 1;
+                if (toTable === 'excluded') excludedCurrentPage = 1;
+                
+                displayAllTables();
+                updateChartView();
+            }
+        }
+
+        function makeCellEditable(cell) {
+            if (cell.querySelector('input')) return;
+            
+            const originalValue = cell.textContent;
+            const rowId = cell.dataset.rowId;
+            const columnKey = cell.dataset.columnKey;
+            
+            cell.innerHTML = `<input type="text" value="${originalValue}" class="edit-in-place">`;
+            const input = cell.querySelector('input');
+            input.focus();
+            input.select();
+            
+            const save = () => {
+                const newValue = input.value;
+                cell.textContent = newValue;
+                const rowIndex = dataStores.export.data.findIndex(r => r.id === rowId);
+                if (rowIndex > -1) {
+                    dataStores.export.data[rowIndex][columnKey] = newValue;
+                }
+            };
+            
+            input.addEventListener('blur', save, { once: true });
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') input.blur();
+                else if (e.key === 'Escape') {
+                    input.removeEventListener('blur', save);
+                    cell.textContent = originalValue;
+                }
+            });
+        }
+
+        function getFilteredData(dataArray, filterIds) {
+            const nguon = document.getElementById(filterIds.nguon)?.value || '';
+            const maLoaiTD = document.getElementById(filterIds.maLoaiTD)?.value || '';
+            const maLoi = document.getElementById(filterIds.maLoi)?.value || '';
+            const moTaLoiSearch = (document.getElementById(filterIds.moTaLoi)?.value || '').toLowerCase().trim();
+            
+            return dataArray.filter(row => {
+                const isMaLoiMatch = () => {
+                    if (maLoi === '') return true;
+                    if (maLoi === '_UNDEFINED_') return !row['MÃ LỖI'];
+                    return row['MÃ LỖI'] === maLoi;
+                };
+                
+                const isMoTaLoiMatch = () => {
+                    if (moTaLoiSearch === '') return true;
+                    return (row['MÔ TẢ LỖI'] || '').toLowerCase().includes(moTaLoiSearch);
+                };
+                
+                return (!nguon || row.sourceFile === nguon) &&
+                       (!maLoaiTD || row['MÃ LOẠI TĐ'] === maLoaiTD) &&
+                       isMaLoiMatch() &&
+                       isMoTaLoiMatch();
+            });
+        }
+
+        function getFilteredSourceData() {
+            return getFilteredData(dataStores.source.data, {
+                nguon: 'filterNguon',
+                maLoaiTD: 'filterMaLoaiTD',
+                maLoi: 'filterMaLoi',
+                moTaLoi: 'filterMoTaLoi'
+            });
+        }
+
+        function getFilteredExcludedData() {
+            return getFilteredData(dataStores.excluded.data, {
+                nguon: 'filterExcludedNguon',
+                maLoaiTD: 'filterExcludedMaLoaiTD',
+                maLoi: 'filterExcludedMaLoi',
+                moTaLoi: 'filterExcludedMoTaLoi'
+            });
+        }
+
+        function getFilteredExportData() {
+            return getFilteredData(dataStores.export.data, {
+                nguon: 'filterExportNguon',
+                maLoaiTD: 'filterExportMaLoaiTD',
+                maLoi: 'filterExportMaLoi',
+                moTaLoi: 'filterExportMoTaLoi'
+            });
+        }
+
+        function populateFilters() {
+            const allData = initialSourceDataForChart;
+            const sourceFiles = new Set(allData.map(row => row.sourceFile).filter(Boolean));
+            const maLoaiTDOptions = new Set(allData.map(row => row['MÃ LOẠI TĐ']).filter(Boolean));
+            const maLoiOptions = new Set(allData.map(row => row['MÃ LỖI']).filter(Boolean));
+            const hasUndefinedErrors = allData.some(row => !row['MÃ LỖI']);
+
+            let sourceFile_html = '<option value="">Tất cả</option>' +
+                [...sourceFiles].sort().map(val => `<option value="${val}">${val.toUpperCase()}</option>`).join('');
+
+            let maLoaiTD_html = '<option value="">Tất cả</option>' +
+                [...maLoaiTDOptions].sort((a,b) => a.localeCompare(b,'vi')).map(val => `<option value="${val}">${val}</option>`).join('');
+
+            let maLoi_html = '<option value="">Tất cả</option>';
+            if (hasUndefinedErrors) {
+                maLoi_html += '<option value="_UNDEFINED_">Lỗi không xác định</option>';
+            }
+            maLoi_html += [...maLoiOptions].sort((a,b) => a.localeCompare(b,'vi')).map(val => `<option value="${val}">${val}</option>`).join('');
+
+            ['filterNguon', 'filterExcludedNguon', 'filterExportNguon'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.innerHTML = sourceFile_html;
+            });
+
+            ['filterMaLoaiTD', 'filterExcludedMaLoaiTD', 'filterExportMaLoaiTD'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.innerHTML = maLoaiTD_html;
+            });
+
+            ['filterMaLoi', 'filterExcludedMaLoi', 'filterExportMaLoi'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.innerHTML = maLoi_html;
+            });
+        }
+
+        function handleSort(tableName, column) {
+            const sortState = dataStores[tableName].sortState;
+            if (!sortState) return;
+            
+            if (sortState.column === column) {
+                sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState.column = column;
+                sortState.direction = 'asc';
+            }
+            
+            if (tableName === 'source') displaySourceData();
+            else if (tableName === 'excluded') displayExcludedData();
+            else if (tableName === 'export') displayExportData();
+        }
+
+        function sortData(dataArray, tableName) {
+            const sortState = dataStores[tableName].sortState;
+            if (!sortState || !sortState.column) return;
+            
+            dataArray.sort((a, b) => {
+                const valA = String(a[sortState.column] || '');
+                const valB = String(b[sortState.column] || '');
+                const comparison = valA.localeCompare(valB, 'vi', { numeric: true, sensitivity: 'base' });
+                return sortState.direction === 'asc' ? comparison : -comparison;
+            });
+        }
+
+        function updateSortIndicators(tableName) {
+            const sortState = dataStores[tableName].sortState;
+            if (!sortState) return;
+            
+            document.querySelectorAll(`#${tableName}DataTable .sort-indicator`).forEach(el => el.textContent = '');
+            
+            if (sortState.column) {
+                const indicatorEl = document.getElementById(`sort-${tableName}-${sortState.column}`);
+                if (indicatorEl) {
+                    indicatorEl.textContent = sortState.direction === 'asc' ? '▲' : '▼';
+                }
+            }
+        }
+
+        function updateSummaryBar() {
+            const sourceCount = dataStores.source.data.length;
+            const excludedCount = dataStores.excluded.data.length;
+            const exportCount = dataStores.export.data.length;
+            
+            const totalElement = document.getElementById('totalCount');
+            const sourceElement = document.getElementById('sourceSummaryCount');
+            const excludedElement = document.getElementById('excludedSummaryCount');
+            const exportElement = document.getElementById('exportSummaryCount');
+            
+            if (totalElement) totalElement.textContent = (sourceCount + excludedCount + exportCount).toLocaleString('vi-VN');
+            if (sourceElement) sourceElement.textContent = sourceCount.toLocaleString('vi-VN');
+            if (excludedElement) excludedElement.textContent = excludedCount.toLocaleString('vi-VN');
+            if (exportElement) exportElement.textContent = exportCount.toLocaleString('vi-VN');
+            
+            renderSummaryChart(sourceCount, excludedCount, exportCount);
+        }
+
+        function renderSummaryChart(source, excluded, exported) {
+            const ctx = document.getElementById('summaryDonutChart');
+            if (!ctx) return;
+            
+            if (summaryChart) summaryChart.destroy();
+            
+            if (source === 0 && excluded === 0 && exported === 0) return;
+            
+            summaryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Cần xử lý', 'Đã loại trừ', 'Để kết xuất'],
+                    datasets: [{
+                        data: [source, excluded, exported],
+                        backgroundColor: ['#ffc107', '#6c757d', '#28a745'],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) {
+                                        label += context.parsed.toLocaleString('vi-VN');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChartView() {
+            const selectedModeEl = document.querySelector('input[name="chartViewMode"]:checked');
+            if (!selectedModeEl) return;
+            
+            const dataToUse = selectedModeEl.value === 'remaining' ? dataStores.source.data : initialSourceDataForChart;
+            renderErrorChart(dataToUse);
+        }
+
+        function renderErrorChart(sourceData) {
+            if (typeof Chart === 'undefined' || sourceData.length === 0) {
+                const chartSection = document.getElementById('errorChartSection');
+                if (chartSection) chartSection.style.display = 'none';
+                return;
+            }
+            
+            const chartSection = document.getElementById('errorChartSection');
+            if (chartSection) chartSection.style.display = 'block';
+            
+            const ctx = document.getElementById('errorChart');
+            if (!ctx) return;
+            
+            if (myErrorChart) myErrorChart.destroy();
+            
+            const errorCounts = sourceData.reduce((acc, row) => {
+                const errorCode = (row['MÃ LỖI'] || '').trim() || 'Không xác định';
+                acc[errorCode] = (acc[errorCode] || 0) + 1;
+                return acc;
+            }, {});
+            
+            const sortedErrors = Object.entries(errorCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 15);
+            
+            const labels = sortedErrors.map(item => `Lỗi ${item[0]}`);
+            const data = sortedErrors.map(item => item[1]);
+            
+            myErrorChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Số lần xuất hiện',
+                        data,
+                        backgroundColor: 'rgba(0, 123, 255, 0.6)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (Math.floor(value) === value) return value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Stub functions for missing functionality
+        function updateMstChart() {
+            console.log('MST chart update - functionality to be implemented');
+        }
+
+        function runAnalysisWorkflow() {
+            console.log('Analysis workflow - functionality to be implemented');
+            return Promise.resolve();
+        }
+
+        function displayTrendChart(errorCode) {
+            console.log('Trend chart for error:', errorCode);
+        }
         
     </script>
 </body>
