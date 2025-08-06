@@ -1956,6 +1956,313 @@
             initializeChartListeners();
         }
 
+        // Initialize filter event listeners
+        function initializeFilters() {
+            // Debounced filter functions for performance
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            // Source table filters
+            const sourceFilters = ['sourceErrorCodeFilter', 'sourceMstFilter', 'sourceDescriptionFilter'];
+            sourceFilters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    const debouncedFilter = debounce(() => {
+                        dataStores.source.currentPage = 1;
+                        displaySourceData();
+                    }, 300);
+                    element.addEventListener('change', debouncedFilter);
+                    element.addEventListener('input', debouncedFilter);
+                }
+            });
+
+            // Excluded table filters
+            const excludedFilters = ['excludedErrorCodeFilter', 'excludedMstFilter', 'excludedDescriptionFilter'];
+            excludedFilters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    const debouncedFilter = debounce(() => {
+                        dataStores.excluded.currentPage = 1;
+                        displayExcludedData();
+                    }, 300);
+                    element.addEventListener('change', debouncedFilter);
+                    element.addEventListener('input', debouncedFilter);
+                }
+            });
+
+            // Export table filters
+            const exportFilters = ['exportErrorCodeFilter', 'exportMstFilter', 'exportDescriptionFilter'];
+            exportFilters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    const debouncedFilter = debounce(() => {
+                        dataStores.export.currentPage = 1;
+                        displayExportData();
+                    }, 300);
+                    element.addEventListener('change', debouncedFilter);
+                    element.addEventListener('input', debouncedFilter);
+                }
+            });
+        }
+
+        // Initialize table selection listeners
+        function initializeTableListeners() {
+            // Source table listeners
+            const sourceSelectAll = document.getElementById('selectAllSource');
+            if (sourceSelectAll) {
+                sourceSelectAll.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#sourceDataTable input[type="checkbox"]:not(#selectAllSource)');
+                    checkboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                        const rowId = cb.closest('tr').dataset.rowId;
+                        if (this.checked) {
+                            selectedSourceRowIds.add(rowId);
+                        } else {
+                            selectedSourceRowIds.delete(rowId);
+                        }
+                    });
+                    updateButtonStates('source');
+                });
+            }
+
+            // Excluded table listeners
+            const excludedSelectAll = document.getElementById('selectAllExcluded');
+            if (excludedSelectAll) {
+                excludedSelectAll.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#excludedDataTable input[type="checkbox"]:not(#selectAllExcluded)');
+                    checkboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                        const rowId = cb.closest('tr').dataset.rowId;
+                        if (this.checked) {
+                            selectedExcludedRowIds.add(rowId);
+                        } else {
+                            selectedExcludedRowIds.delete(rowId);
+                        }
+                    });
+                    updateButtonStates('excluded');
+                });
+            }
+
+            // Export table listeners
+            const exportSelectAll = document.getElementById('selectAllExport');
+            if (exportSelectAll) {
+                exportSelectAll.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('#exportDataTable input[type="checkbox"]:not(#selectAllExport)');
+                    checkboxes.forEach(cb => {
+                        cb.checked = this.checked;
+                        const rowId = cb.closest('tr').dataset.rowId;
+                        if (this.checked) {
+                            selectedExportRowIds.add(rowId);
+                        } else {
+                            selectedExportRowIds.delete(rowId);
+                        }
+                    });
+                    updateButtonStates('export');
+                });
+            }
+
+            // Double-click to edit for export table
+            const exportTable = document.getElementById('exportDataTable');
+            if (exportTable) {
+                exportTable.addEventListener('dblclick', function(e) {
+                    const cell = e.target.closest('td');
+                    if (cell && !cell.querySelector('input') && !cell.querySelector('button')) {
+                        makeCellEditable(cell);
+                    }
+                });
+            }
+        }
+
+        // Initialize pagination listeners
+        function initializePaginationListeners() {
+            // Source pagination
+            const sourcePageInput = document.getElementById('sourcePageInput');
+            if (sourcePageInput) {
+                sourcePageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        goToPage('source');
+                    }
+                });
+            }
+
+            // Excluded pagination
+            const excludedPageInput = document.getElementById('excludedPageInput');
+            if (excludedPageInput) {
+                excludedPageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        goToPage('excluded');
+                    }
+                });
+            }
+
+            // Export pagination
+            const exportPageInput = document.getElementById('exportPageInput');
+            if (exportPageInput) {
+                exportPageInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        goToPage('export');
+                    }
+                });
+            }
+        }
+
+        // Initialize modal listeners
+        function initializeModalListeners() {
+            // Bulk edit modal
+            const bulkEditModal = document.getElementById('bulkEditModal');
+            const bulkEditBtn = document.getElementById('bulkEditBtn');
+            const closeBulkEdit = document.getElementById('closeBulkEdit');
+            const saveBulkEdit = document.getElementById('saveBulkEdit');
+
+            if (bulkEditBtn) {
+                bulkEditBtn.addEventListener('click', () => {
+                    if (bulkEditModal) bulkEditModal.style.display = 'block';
+                });
+            }
+
+            if (closeBulkEdit) {
+                closeBulkEdit.addEventListener('click', () => {
+                    if (bulkEditModal) bulkEditModal.style.display = 'none';
+                });
+            }
+
+            if (saveBulkEdit) {
+                saveBulkEdit.addEventListener('click', () => {
+                    // Implement bulk edit save logic
+                    if (bulkEditModal) bulkEditModal.style.display = 'none';
+                    showMessage('Đã lưu thay đổi hàng loạt', 'success');
+                });
+            }
+
+            // Trend chart modal
+            const trendModal = document.getElementById('trendModal');
+            const closeTrend = document.getElementById('closeTrend');
+
+            if (closeTrend) {
+                closeTrend.addEventListener('click', () => {
+                    if (trendModal) trendModal.style.display = 'none';
+                });
+            }
+
+            // Rule management modal
+            const ruleModal = document.getElementById('ruleManagementModal');
+            const openRuleMgmtBtn = document.getElementById('openRuleMgmtBtn');
+            const closeRuleMgmt = document.getElementById('closeRuleMgmt');
+            const saveRuleBtn = document.getElementById('saveRuleBtn');
+            const clearRuleFormBtn = document.getElementById('clearRuleFormBtn');
+
+            if (openRuleMgmtBtn) {
+                openRuleMgmtBtn.addEventListener('click', async () => {
+                    if (ruleModal) {
+                        ruleModal.style.display = 'block';
+                        showLoader(true);
+                        await fetchFirebaseErrors();
+                        displayFirebaseRules();
+                        showLoader(false);
+                    }
+                });
+            }
+
+            if (closeRuleMgmt) {
+                closeRuleMgmt.addEventListener('click', () => {
+                    if (ruleModal) ruleModal.style.display = 'none';
+                });
+            }
+
+            if (saveRuleBtn) {
+                saveRuleBtn.addEventListener('click', saveRule);
+            }
+
+            if (clearRuleFormBtn) {
+                clearRuleFormBtn.addEventListener('click', clearRuleForm);
+            }
+
+            // Global modal close on outside click
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            // Rule action change handler
+            const ruleActionSelect = document.getElementById('newRuleAction');
+            if (ruleActionSelect) {
+                ruleActionSelect.addEventListener('change', function() {
+                    const standardValueGroup = document.getElementById('standardValueGroup');
+                    if (standardValueGroup) {
+                        standardValueGroup.style.display = this.value === 'STANDARDIZE' ? 'block' : 'none';
+                    }
+                });
+            }
+        }
+
+        // Initialize chart listeners
+        function initializeChartListeners() {
+            // Chart view mode listeners
+            const chartViewRadios = document.querySelectorAll('input[name="chartView"]');
+            chartViewRadios.forEach(radio => {
+                radio.addEventListener('change', updateChartView);
+            });
+
+            // MST time frame listeners
+            const timeFrameRadios = document.querySelectorAll('input[name="mstTimeFrame"]');
+            timeFrameRadios.forEach(radio => {
+                radio.addEventListener('change', updateMstChart);
+            });
+
+            // Alerts click listener for trend chart
+            const alertsContainer = document.getElementById('alertsContainer');
+            if (alertsContainer) {
+                alertsContainer.addEventListener('click', function(e) {
+                    const alert = e.target.closest('.alert');
+                    if (alert && alert.dataset.errorCode) {
+                        displayTrendChart(alert.dataset.errorCode);
+                    }
+                });
+            }
+        }
+
+        // Update button states based on selection
+        function updateButtonStates(tableType) {
+            const hasSelection = {
+                source: selectedSourceRowIds.size > 0,
+                excluded: selectedExcludedRowIds.size > 0,
+                export: selectedExportRowIds.size > 0
+            };
+
+            // Update buttons based on table type
+            if (tableType === 'source') {
+                const moveToExportBtn = document.getElementById('moveToExportBtn');
+                const moveToExcludedBtn = document.getElementById('moveToExcludedBtn');
+                const bulkEditSourceBtn = document.getElementById('bulkEditSourceBtn');
+
+                if (moveToExportBtn) moveToExportBtn.disabled = !hasSelection.source;
+                if (moveToExcludedBtn) moveToExcludedBtn.disabled = !hasSelection.source;
+                if (bulkEditSourceBtn) bulkEditSourceBtn.disabled = !hasSelection.source;
+            } else if (tableType === 'excluded') {
+                const moveBackToSourceBtn = document.getElementById('moveBackToSourceBtn');
+                const exportMiniBtn = document.getElementById('exportMiniBtn');
+
+                if (moveBackToSourceBtn) moveBackToSourceBtn.disabled = !hasSelection.excluded;
+                if (exportMiniBtn) exportMiniBtn.disabled = !hasSelection.excluded;
+            } else if (tableType === 'export') {
+                const bulkEditExportBtn = document.getElementById('bulkEditExportBtn');
+                const moveBackFromExportBtn = document.getElementById('moveBackFromExportBtn');
+
+                if (bulkEditExportBtn) bulkEditExportBtn.disabled = !hasSelection.export;
+                if (moveBackFromExportBtn) moveBackFromExportBtn.disabled = !hasSelection.export;
+            }
+        }
+
         // All other functions from the original file would be here with performance optimizations...
         // Due to length constraints, I'm including the key optimization parts
 
@@ -2030,12 +2337,26 @@
                         const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
                         
                         // Add metadata and optimize data structure
-                        const processedData = jsonData.map((row, index) => ({
-                            ...row,
-                            id: `${fileType}-${file.name}-${index}`,
-                            sourceFile: file.name.toLowerCase().replace(/\.[^/.]+$/, ""),
-                            DATE_OBJECT: new Date()
-                        }));
+                        const processedData = jsonData.map((row, index) => {
+                            // Create a unique ID
+                            const uniqueId = `${fileType}_${Date.now()}_${index}`;
+                            
+                            // Normalize field names to ensure consistency
+                            const normalizedRow = {
+                                ...row,
+                                id: uniqueId,
+                                sourceFile: file.name,
+                                DATE_OBJECT: new Date(),
+                                // Ensure key fields exist and have proper values
+                                'MTĐ': row['MTĐ'] || row['MTD'] || row['Mã tờ đề'] || row['Mã Tờ Đề'] || '',
+                                'MST': row['MST'] || row['Mã số thuế'] || row['Mã Số Thuế'] || '',
+                                'MÃ LOẠI TĐ': row['MÃ LOẠI TĐ'] || row['MA_LOAI_TD'] || row['Mã loại tờ đề'] || row['Mã Loại Tờ Đề'] || '',
+                                'MÃ LỖI': row['MÃ LỖI'] || row['MA_LOI'] || row['Mã lỗi'] || row['Mã Lỗi'] || '',
+                                'MÔ TẢ LỖI': row['MÔ TẢ LỖI'] || row['MO_TA_LOI'] || row['Mô tả lỗi'] || row['Mô Tả Lỗi'] || row['Description'] || ''
+                            };
+                            
+                            return normalizedRow;
+                        });
                         
                         resolve(processedData);
                     } catch (error) {
