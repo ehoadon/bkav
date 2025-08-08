@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ Đối soát lỗi TVAN v3.0 (Quản lý Quy tắc)</title>
+    <title>Công cụ Đối soát lỗi TVAN v3.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
     :root {
-        /* --- Bảng màu nâng cao với độ tương phản tốt hơn --- */
         --primary-color: #0d6efd;      /* Màu xanh dương hiện đại, sống động hơn */
         --secondary-color: #6c757d;    /* Màu xám phụ */
         --success-color: #198754;      /* Màu xanh lá cây đậm hơn */
@@ -24,7 +23,6 @@
         --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08); /* Bóng đổ rõ hơn */
         --border-radius: 8px;
 
-        /* Các biến cũ được ánh xạ lại để tương thích */
         --background-dark: var(--page-bg); 
         --card-dark: var(--card-bg);
         --text-light: var(--text-dark); 
@@ -712,12 +710,12 @@
                             </div>
                         </div>
                         <div class="table-wrapper"><table id="sourceDataTable"><thead><tr><th class="col-action">
-<div style="display: flex; align-items: center; gap: 6px;">
-    <input type="checkbox" id="selectAllSource" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
-    <span>Hành động</span>
-</div>
-</th>
-<th class="sortable-header" onclick="handleSort('source', 'sourceFile')">Nguồn<span id="sort-source-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MTĐ')">MTĐ<span id="sort-source-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MST')">MST<span id="sort-source-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-source-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LỖI')">MÃ LỖI<span id="sort-source-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-source-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="sourceTableBody"></tbody></table></div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" id="selectAllSource" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+                        <span>Hành động</span>
+                    </div>
+                    </th>
+                    <th class="sortable-header" onclick="handleSort('source', 'sourceFile')">Nguồn<span id="sort-source-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MTĐ')">MTĐ<span id="sort-source-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MST')">MST<span id="sort-source-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-source-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÃ LỖI')">MÃ LỖI<span id="sort-source-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('source', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-source-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="sourceTableBody"></tbody></table></div>
                     </div>
 
                     <div id="excludedTab" class="tab-content">
@@ -739,12 +737,12 @@
                             </div>
                         </div>
                         <div class="table-wrapper"><table id="excludedDataTable"><thead><tr><th class="col-action">
-<div style="display: flex; align-items: center; gap: 6px;">
-    <input type="checkbox" id="selectAllExcluded" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
-    <span>Hành động</span>
-</div>
-</th><th class="sortable-header" onclick="handleSort('excluded', 'sourceFile')">Nguồn<span id="sort-excluded-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MTĐ')">MTĐ<span id="sort-excluded-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MST')">MST<span id="sort-excluded-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-excluded-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LỖI')">MÃ LỖI<span id="sort-excluded-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-excluded-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="excludedTableBody"></tbody></table></div>
-                    </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="selectAllExcluded" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+                            <span>Hành động</span>
+                        </div>
+                        </th><th class="sortable-header" onclick="handleSort('excluded', 'sourceFile')">Nguồn<span id="sort-excluded-sourceFile" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MTĐ')">MTĐ<span id="sort-excluded-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MST')">MST<span id="sort-excluded-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-excluded-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÃ LỖI')">MÃ LỖI<span id="sort-excluded-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('excluded', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-excluded-MÔ TẢ LỖI" class="sort-indicator"></span></th></tr></thead><tbody id="excludedTableBody"></tbody></table></div>
+                        </div>
 
                     <div id="exportTab" class="tab-content">
                         <div class="pagination-controls" id="exportPagination"><span id="exportPaginationInfo"></span><input type="number" class="page-jump-input" id="exportPageInput" placeholder="Trang"><button class="btn-move" id="exportGoBtn">Đi</button><button id="exportPrevPageBtn" class="btn-move"><i class="fas fa-chevron-left"></i></button><button id="exportNextPageBtn" class="btn-move"><i class="fas fa-chevron-right"></i></button></div>
@@ -765,13 +763,13 @@
                             </div>
                         </div>
                         <div class="table-wrapper"><table id="exportDataTable"><thead><tr><th class="col-action">
-<div style="display: flex; align-items: center; gap: 6px;">
-    <input type="checkbox" id="selectAllExport" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
-    <span>Hành động</span>
-</div>
-</th>
-<th class="sortable-header" onclick="handleSort('export', 'TVAN')">TVAN<span id="sort-export-TVAN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MTĐ')">MTĐ<span id="sort-export-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-export-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LỖI')">MÃ LỖI<span id="sort-export-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-export-MÔ TẢ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'TIMELOG')">TIMELOG<span id="sort-export-TIMELOG" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'GỬI LẦN')">GỬI LẦN<span id="sort-export-GỬI LẦN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MST')">MST<span id="sort-export-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MẪU SỐ KÝ HIỆU')">MẪU SỐ KÝ HIỆU<span id="sort-export-MẪU SỐ KÝ HIỆU" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'SỐ HĐ')">SỐ HĐ<span id="sort-export-SỐ HĐ" class="sort-indicator"></span></th></tr></thead><tbody id="exportTableBody"></tbody></table></div>
-                    </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <input type="checkbox" id="selectAllExport" title="Chọn/Bỏ chọn tất cả các mục đã lọc">
+                            <span>Hành động</span>
+                        </div>
+                        </th>
+                        <th class="sortable-header" onclick="handleSort('export', 'TVAN')">TVAN<span id="sort-export-TVAN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MTĐ')">MTĐ<span id="sort-export-MTĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LOẠI TĐ')">MÃ LOẠI TĐ<span id="sort-export-MÃ LOẠI TĐ" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÃ LỖI')">MÃ LỖI<span id="sort-export-MÃ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MÔ TẢ LỖI')">MÔ TẢ LỖI<span id="sort-export-MÔ TẢ LỖI" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'TIMELOG')">TIMELOG<span id="sort-export-TIMELOG" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'GỬI LẦN')">GỬI LẦN<span id="sort-export-GỬI LẦN" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MST')">MST<span id="sort-export-MST" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'MẪU SỐ KÝ HIỆU')">MẪU SỐ KÝ HIỆU<span id="sort-export-MẪU SỐ KÝ HIỆU" class="sort-indicator"></span></th><th class="sortable-header" onclick="handleSort('export', 'SỐ HĐ')">SỐ HĐ<span id="sort-export-SỐ HĐ" class="sort-indicator"></span></th></tr></thead><tbody id="exportTableBody"></tbody></table></div>
+                        </div>
                 </div>
 
                 <div class="card" id="actionsCard">
